@@ -1,0 +1,31 @@
+<Solution>
+  <Folder Name="/analyzers/">
+    <File Path="analyzers/code.style.editorconfig" />
+    <File Path="analyzers/disabled.editorconfig" />
+    <File Path="analyzers/roslynator.editorconfig" />
+    <File Path="analyzers/sonar.editorconfig" />
+    <File Path="analyzers/underscore.editorconfig" />
+    <File Path="analyzers/vsthrd.editorconfig" />
+  </Folder>
+  <Folder Name="/build/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+  </Folder>
+  <Folder Name="/runtimes/">
+    <File Path="runtimes/auto-update.cs" />
+    <File Path="runtimes/package.nuspec" />
+  </Folder>
+  <Folder Name="/runtimes/scripts/">
+    <File Path="runtimes/scripts/build-linux.sh" />
+    <File Path="runtimes/scripts/build-windows.sh" />
+    <File Path="runtimes/scripts/dependencies.sh" />
+  </Folder>
+  <Folder Name="/workflows/">
+    <File Path=".github/workflows/runtimes.yml" />
+    <File Path=".github/workflows/update-sdl.yml" />
+  </Folder>
+</Solution>

@@ -1,0 +1,71 @@
+is_global = true
+
+# CA1008: Enums should have zero value
+# Some enum doesn't need a zero value
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1008
+dotnet_diagnostic.CA1008.severity = none
+
+# CA1033: Interface methods should be callable by child types
+# Some childs should not have the parent methods
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1033
+dotnet_diagnostic.CA1033.severity = none
+
+# CA1028: Enum storage should be Int32
+# Some enum are used for interop and need to respect the underlying type.
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1028
+dotnet_diagnostic.CA1028.severity = none
+
+# CA1030: Use events where appropriate
+# The warning is a false positive because the method is just named Raise
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1030
+dotnet_diagnostic.CA1030.severity = none
+
+# CA1031: Do not catch general exception types
+# Sometimes we don't know the exception.
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1031
+dotnet_diagnostic.CA1031.severity = none
+
+# CA1040: Avoid empty interfaces
+# It is fine when used for compile time
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1040
+dotnet_diagnostic.CA1040.severity = none
+
+# CA1062: An externally visible method dereferences one of its reference arguments without verifying whether that argument is null
+# We enforce nullable reference
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1062
+dotnet_diagnostic.CA1062.severity = none
+
+# CA1303: Do not pass literals as localized parameters
+# Some string does not need to be localized
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1303
+dotnet_diagnostic.CA1303.severity = none
+
+# CA1305: The behavior of 'ToString()' could vary based on the current user's locale settings.
+# Some string does not need to be localized
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1305
+dotnet_diagnostic.CA1305.severity = none
+
+# CA1307: A string comparison operation uses a method overload that does not set a StringComparison parameter.
+# Some operation does not need to set a StringComparison parameter
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1307
+dotnet_diagnostic.CA1307.severity = none
+
+# CA1716: Identifiers should not match keywords
+# Can use keywords as identifiers like event
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1716
+dotnet_diagnostic.CA1716.severity = none
+
+# CA1724: A type name matches a referenced namespace name that has one or more externally visible types. The name comparison is case-insensitive.
+# Some names are needed even there is a matches with a referenced namespace.
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1724
+dotnet_diagnostic.CA1724.severity = none
+
+# CA1815: A value type does not override Equals or does not implement the equality operator (==).
+# Some value type does not need to override Equals
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1815
+dotnet_diagnostic.CA1815.severity = none
+
+# CA2225: An operator overload was detected and the expected named alternative method was not found.
+# it is not necessary to have a named alternative method
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca2225
+dotnet_diagnostic.CA2225.severity = none
