@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kappaduck/khaos/main/assets/logo/khaos-logo-256.png" alt="Khaos logo" width="128" height="128">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kappaduck/khaos/main/assets/logo/khaos-logo-dark-256.png">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kappaduck/khaos/main/assets/logo/khaos-logo-light-256.png">
+    <img src="https://raw.githubusercontent.com/kappaduck/khaos/main/assets/logo/khaos-logo-256.png" alt="Khaos logo" width="128" height="128">
+  </picture>
 </p>
 
 <h1 align="center">Khaos</h1>
