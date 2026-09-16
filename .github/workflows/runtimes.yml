@@ -85,4 +85,4 @@ jobs:
           user: ${{ secrets.USER }}
 
       - name: Publish to NuGet
-        run: dotnet nuget push KappaDuck.Quack.Runtimes*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget.outputs.NUGET_API_KEY }} --skip-duplicate
+        run: dotnet nuget push KappaDuck.Khaos.Runtimes*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget.outputs.NUGET_API_KEY }} --skip-duplicate
