@@ -1,0 +1,34 @@
+# All
+* text=auto
+
+# Exclude files form exporting
+.gitattributes export-ignore
+.gitignore     export-ignore
+
+# .NET
+*.cs     text diff=csharp
+*.csproj text eol=crlf
+*.slnx   text eol=crlf
+
+# Graphics
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+
+# Verify snapshot files
+*.verified.txt text  eol=lf
+*.verified.cs  text  eol=lf
+*.received.txt text  eol=lf
+*.received.cs  text  eol=lf
+
+# Others
+*.cmake    text eol=lf
+*.env      text eol=lf
+*.md       text diff=markdown linguist-detectable
+codeowners text
+*.sh       text eol=lf
+*.json     text
+*.xml      text eol=crlf
+*.yaml     text eol=crlf
+*.yml      text eol=crlf
