@@ -29,6 +29,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      - name: Load versions
+        run: grep -v '^#' utils/sdl.env >> $GITHUB_ENV
+
       - name: Install dependencies
         run: |
           chmod +x scripts/dependencies.sh
