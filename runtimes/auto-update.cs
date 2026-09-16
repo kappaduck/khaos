@@ -95,7 +95,7 @@ static HttpClient CreateGitHubClient()
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
     http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
-    http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("quack-sdl-updater", "1.0"));
+    http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("khaos-sdl-updater", "1.0"));
     http.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2026-03-10");
 
     return http;
@@ -155,7 +155,7 @@ static string BuildTable(IEnumerable<UpdatedRelease> updates, string heading, bo
             ? $"[{update.Latest}](https://github.com/libsdl-org/{update.Repository}/releases/tag/release-{update.Latest})"
             : update.Latest.ToString();
 
-        builder.AppendLine(CultureInfo.InvariantCulture, $"| `{update.Key}` | {update.Current} | {latest} |");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"| `{update.Key}` | `{update.Current}` | `{latest}` |");
     }
 
     return builder.ToString();
