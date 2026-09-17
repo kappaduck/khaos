@@ -1,11 +1,9 @@
 <Solution>
   <Folder Name="/analyzers/">
-    <File Path="analyzers/code.style.editorconfig" />
-    <File Path="analyzers/disabled.editorconfig" />
-    <File Path="analyzers/roslynator.editorconfig" />
-    <File Path="analyzers/sonar.editorconfig" />
-    <File Path="analyzers/underscore.editorconfig" />
-    <File Path="analyzers/vsthrd.editorconfig" />
+    <File Path="analyzers/.editorconfig" />
+    <File Path="analyzers/Directory.Build.props" />
+    <Project Path="analyzers/Khaos.Analyzers/Khaos.Analyzers.csproj" />
+    <Project Path="analyzers/Khaos.Internal.Analyzers/Khaos.Internal.Analyzers.csproj" />
   </Folder>
   <Folder Name="/build/">
     <File Path=".editorconfig" />
@@ -32,8 +30,18 @@
     <File Path="runtimes/scripts/build-windows.sh" />
     <File Path="runtimes/scripts/dependencies.sh" />
   </Folder>
+  <Folder Name="/tests/">
+    <File Path="tests/.editorconfig" />
+    <File Path="tests/Directory.Build.props" />
+    <File Path="tests/Directory.Packages.props" />
+    <Project Path="tests/Khaos.Analyzers.Tests/Khaos.Analyzers.Tests.csproj" />
+    <Project Path="tests/Khaos.Internal.Analyzers.Tests/Khaos.Internal.Analyzers.Tests.csproj" />
+    <Project Path="tests/Khaos.Tests/Khaos.Tests.csproj" />
+  </Folder>
   <Folder Name="/workflows/">
     <File Path=".github/workflows/runtimes.yml" />
     <File Path=".github/workflows/update-sdl.yml" />
   </Folder>
+  <Project Path="src/Khaos.Sandbox/Khaos.Sandbox.csproj" />
+  <Project Path="src/Khaos/Khaos.csproj" />
 </Solution>
