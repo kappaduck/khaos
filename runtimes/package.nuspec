@@ -15,7 +15,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
   </metadata>
   <files>
-    <file src="../readme.md" target="" />
+    <file src="../assets/nuget/readme.md" target="" />
     <file src="../license.txt" target="" />
     <file src="../assets/logo/icon.png" target="" />
 

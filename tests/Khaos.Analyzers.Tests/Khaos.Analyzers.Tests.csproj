@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../../analyzers/Khaos.Analyzers/Khaos.Analyzers.csproj" />
+  </ItemGroup>
+</Project>

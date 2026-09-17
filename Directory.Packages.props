@@ -11,7 +11,22 @@
     <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="10.34.0.3385" />
   </ItemGroup>
 
-  <ItemGroup Label="Source generators">
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" PrivateAssets="all" />
+  <ItemGroup Label="Build">
+    <PackageVersion Include="DotNet.ReproducibleBuilds" Version="2.0.5" />
+    <PackageVersion Include="PolySharp" Version="1.16.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Runtimes">
+    <PackageVersion Include="KappaDuck.Khaos.Runtimes" Version="1.0.0" />
+  </ItemGroup>
+
+  <!--
+    Roslyn: shared by the analyzer projects and tests/Khaos.Analyzers.Tests.
+    Do not bump past the compiler shipped with the minimum supported SDK (.NET 11.0.100),
+    otherwise the packaged analyzers fail to load for users (CS8032).
+  -->
+  <ItemGroup Label="Roslyn">
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
   </ItemGroup>
 </Project>

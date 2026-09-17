@@ -4,6 +4,10 @@ is_global = true
 # Some types are named in all upper case like SDL
 dotnet_diagnostic.S101.severity = none
 
+# S1135: Complete the task associated to this 'TODO' comment.
+# Uses as suggestion instead of warning
+dotnet_diagnostic.S1135.severity = suggestion
+
 # S4200: Make this wrapper for native method less trivial
 # Some method are trivial and should be kept as is
 dotnet_diagnostic.S4200.severity = none

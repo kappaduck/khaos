@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup Label="Assembly">
+    <IsAotCompatible>true</IsAotCompatible>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Experimental feature: https://github.com/dotnet/core/blob/main/release-notes/11.0/preview/preview1/runtime.md#runtime-async -->
+    <Features>$(Features);runtime-async=on</Features>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Configure nupkg generation" Condition="$(Configuration) == 'Debug'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package">
+    <IsPackable>true</IsPackable>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Title>Khaos</Title>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <Authors>KappaDuck</Authors>
+    <FileVersion>$(VersionPrefix)</FileVersion>
+    <Company>$(Authors)</Company>
+    <Copyright>Copyright © KappaDuck</Copyright>
+    <Description>A modern, fast and flexible .NET game framework using SDL3</Description>
+    <PackageTags>NET SDL SDL3 GameEngine Engine CSharp Game Multimedia GameFramework</PackageTags>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <PackageLicenseFile>license.txt</PackageLicenseFile>
+    <PackageReleaseNotes>https://github.com/kappaduck/khaos/blob/main/changelog.md</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup Label="Common files to include">
+    <None Include="$(KhaosRoot)assets/nuget/$(PackageReadmeFile)" Pack="true" PackagePath="" Visible="false" />
+    <None Include="$(KhaosRoot)$(PackageLicenseFile)" Pack="true" PackagePath="" Visible="false" />
+    <None Include="$(KhaosRoot)/assets/logo/$(PackageIcon)" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup Label="Make internals visible to test projects">
+    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+  </ItemGroup>
+
+  <ItemGroup Label="Configure default search paths for DLL import">
+    <AssemblyAttribute Include="System.Runtime.InteropServices.DefaultDllImportSearchPathsAttribute">
+      <_Parameter1>SafeDirectories</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup Label="Packages">
+    <PackageReference Include="DotNet.ReproducibleBuilds" PrivateAssets="all" IncludeAssets="$(DevAssets)" />
+    <PackageReference Include="KappaDuck.Khaos.Runtimes" />
+  </ItemGroup>
+
+  <ItemGroup Label="Analyzers and source generators">
+    <ProjectReference Include="..\..\analyzers\Khaos.Analyzers\Khaos.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
+    <ProjectReference Include="..\..\analyzers\Khaos.Internal.Analyzers\Khaos.Internal.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
+  </ItemGroup>
+
+  <Target Name="PackAnalyzers" DependsOnTargets="ResolveReferences" BeforeTargets="_GetPackageFiles">
+    <ItemGroup>
+      <None Include="@(Analyzer)" Condition="'%(Filename)' == 'KappaDuck.Khaos.Analyzers'" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
+  </Target>
+</Project>

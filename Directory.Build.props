@@ -5,8 +5,11 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AnalysisLevel>preview-all</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <UseArtifactsOutput>true</UseArtifactsOutput>
+    <AssemblyName>KappaDuck.$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>$(AssemblyName)</RootNamespace>
 
     <!-- Configure packages which are only Development dependency -->
     <!-- https://github.com/NuGet/Home/wiki/DevelopmentDependency-support-for-PackageReference -->
@@ -18,6 +21,6 @@
   </PropertyGroup>
 
   <ItemGroup Label="Configure analyzer rules">
-    <GlobalAnalyzerConfigFiles Include="$(KhaosRoot)\analyzers\*.editorconfig" />
+    <GlobalAnalyzerConfigFiles Include="$(KhaosRoot)rules/*.editorconfig" />
   </ItemGroup>
 </Project>

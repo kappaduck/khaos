@@ -1,3 +1,5 @@
+root = true
+
 [*]
 charset = utf-8
 indent_style = space
@@ -10,7 +12,6 @@ trim_trailing_whitespace = true
 indent_size = 2
 
 [*.cs]
-dotnet_analyzer_diagnostic.severity = warning
 dotnet_sort_system_directives_first = false
 file_header_template = Copyright (c) KappaDuck.\nLicensed under the MIT license.
 

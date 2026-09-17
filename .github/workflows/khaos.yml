@@ -1,0 +1,61 @@
+name: Khaos
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish ${{ github.event_name == 'release' && 'production' || 'beta' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      Channel: ${{ github.event_name == 'release' && 'production' || 'beta' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: ./global.json
+
+      - name: Read version
+        id: versions
+        run: echo "Khaos=$(dotnet msbuild src/Khaos/Khaos.csproj -getProperty:VersionPrefix)" >> $GITHUB_OUTPUT
+
+      - name: Resolve version
+        id: package
+        run: |
+          chmod +x utils/resolve-version.sh
+          utils/resolve-version.sh KappaDuck.Khaos ${{ steps.versions.outputs.Khaos }} ${{ env.Channel }}
+
+      - name: Build
+        run: dotnet build --configuration Release -p:Version=${{ steps.package.outputs.Version }}
+
+      - name: Test
+        run: dotnet test --no-build --configuration Release
+
+      - name: Package
+        run: dotnet pack src/Khaos --no-build --configuration Release --output . -p:Version=${{ steps.package.outputs.Version }}
+
+      - name: Generate key
+        id: nuget
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841
+        with:
+          user: ${{ secrets.USER }}
+
+      - name: Publish to NuGet
+        run: dotnet nuget push KappaDuck.Khaos.*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget.outputs.NUGET_API_KEY }} --skip-duplicate

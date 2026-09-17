@@ -1,5 +1,10 @@
 is_global = true
 
+# EnableGenerateDocumentationFile: Set GenerateDocumentationFile to true to enable IDE0005 on build
+# Only Khaos generates XML docs; sandbox, analyzers and tests keep IDE0005 in the IDE only
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0005
+dotnet_diagnostic.EnableGenerateDocumentationFile.severity = none
+
 # CA1008: Enums should have zero value
 # Some enum doesn't need a zero value
 # https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1008

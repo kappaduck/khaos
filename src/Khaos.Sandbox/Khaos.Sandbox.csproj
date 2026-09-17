@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup Label="Assembly">
+    <OutputType>Exe</OutputType>
+    <PublishAot>true</PublishAot>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>$(AssemblyName)</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Khaos/Khaos.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildProjectDirectory)/Program.cs.template" Visible="false" />
+  </ItemGroup>
+
+  <Target Name="CreateEntryPoint" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <SandboxSource Include="$(MSBuildProjectDirectory)/**/*.cs" />
+    </ItemGroup>
+
+    <Copy Condition="'@(SandboxSource)' == ''"
+      SourceFiles="$(MSBuildProjectDirectory)/Program.cs.template"
+      DestinationFiles="$(MSBuildProjectDirectory)/Program.cs" />
+
+    <ItemGroup Condition="'@(SandboxSource)' == ''">
+      <Compile Include="$(MSBuildProjectDirectory)/Program.cs" />
+    </ItemGroup>
+  </Target>
+</Project>
