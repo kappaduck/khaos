@@ -95,11 +95,8 @@ features surfaces a compiler warning indicating the code may not be portable acr
 
 ## SDL compatibility
 
-SDL3 native libraries are bundled via `KappaDuck.Khaos.Runtimes`.
-
-|  Khaos   | Runtimes |   SDL3   | SDL_image | SDL_ttf | SDL_mixer |
-| :------: | :------: | :------: | :-------: | :-----: | :-------: |
-| `source` | `1.0.0`  | `3.4.16` |  `3.4.6`  | `3.2.2` |  `3.2.4`  |
+SDL3 native libraries are bundled via [KappaDuck.Khaos.Runtimes](https://www.nuget.org/packages/KappaDuck.Khaos.Runtimes/).
+See the [SDL compatibility table](https://github.com/kappaduck/khaos#sdl-compatibility) for the SDL versions used by each release.
 
 ## License
 

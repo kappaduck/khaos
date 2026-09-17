@@ -39,7 +39,11 @@ jobs:
         with:
           branch: dependencies/sdl
           delete-branch: true
-          add-paths: runtimes/utils/sdl.env
+          add-paths: |
+            runtimes/utils/sdl.env
+            runtimes/package.nuspec
+            runtimes/readme.md
+            readme.md
           commit-message: 'SDL: update runtime dependencies'
           title: 'SDL: update runtime dependencies'
           body-path: pr-body.md

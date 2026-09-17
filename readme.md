@@ -121,10 +121,11 @@ The framework may have platform-specific implementations or limitations dependin
 ## SDL compatibility
 
 SDL3 native libraries are bundled via `KappaDuck.Khaos.Runtimes`. The table below shows the SDL versions included in each release of both packages.
+The `source` row tracks the main branch; every other row lists the runtimes version that Khaos release depends on.
 
 |  Khaos   | Runtimes |   SDL3   | SDL_image | SDL_ttf | SDL_mixer |
 | :------: | :------: | :------: | :-------: | :-----: | :-------: |
-| `source` | `1.0.0`  | `3.4.16` |  `3.4.6`  | `3.2.2` |  `3.2.4`  |
+| `source` | `1.0.2`  | `3.4.16` |  `3.4.6`  | `3.2.2` |  `3.2.4`  |
 
 ## Development & Sandbox
 
