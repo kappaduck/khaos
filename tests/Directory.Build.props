@@ -9,10 +9,6 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage" />
-  </ItemGroup>
-
   <ItemGroup Label="Common test NuGets">
     <PackageReference Include="TUnit" />
     <PackageReference Include="TUnit.Mocks" />

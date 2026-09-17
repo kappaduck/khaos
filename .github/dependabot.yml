@@ -1,0 +1,66 @@
+version: 2
+
+updates:
+  - package-ecosystem: dotnet-sdk
+    directory: /
+    schedule:
+      interval: weekly
+      day: thursday
+      time: '11:30'
+      timezone: America/Toronto
+    labels: [dependencies]
+    assignees: [beauchama]
+    commit-message:
+      prefix: 'SDK:'
+
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+      day: thursday
+      time: '11:30'
+      timezone: America/Toronto
+    labels: [dependencies]
+    assignees: [beauchama]
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: 'NuGet:'
+    ignore:
+      # Pinned to the compiler shipped with the minimum supported SDK (.NET 11.0.100),
+      # otherwise the packaged analyzers fail to load for users (CS8032).
+      # See Directory.Packages.props.
+      - dependency-name: 'Microsoft.CodeAnalysis.*'
+    groups:
+      analyzers:
+        patterns:
+          - 'AsyncFixer'
+          - 'Microsoft.VisualStudio.Threading.Analyzers'
+          - 'Roslynator.*'
+          - 'SonarAnalyzer.*'
+      build:
+        patterns:
+          - 'DotNet.ReproducibleBuilds'
+          - 'PolySharp'
+      runtimes:
+        patterns:
+          - 'KappaDuck.Khaos.Runtimes'
+      tests:
+        patterns:
+          - 'TUnit*'
+          - 'Verify.*'
+          - 'Basic.Reference.Assemblies.*'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: thursday
+      time: '11:30'
+      timezone: America/Toronto
+    labels: [dependencies]
+    assignees: [beauchama]
+    commit-message:
+      prefix: 'Actions:'
+    groups:
+      actions:
+        patterns: ['*']

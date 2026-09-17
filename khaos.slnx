@@ -39,6 +39,10 @@
     <Project Path="tests/Khaos.Tests/Khaos.Tests.csproj" />
   </Folder>
   <Folder Name="/workflows/">
+    <File Path=".github/dependabot.yml" />
+    <File Path=".github/workflows/codeql.yml" />
+    <File Path=".github/workflows/khaos.yml" />
+    <File Path=".github/workflows/pull-request.yml" />
     <File Path=".github/workflows/runtimes.yml" />
     <File Path=".github/workflows/update-sdl.yml" />
   </Folder>
