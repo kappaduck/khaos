@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>KappaDuck.Khaos.Runtimes</id>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <authors>KappaDuck</authors>
     <copyright>Copyright © KappaDuck</copyright>
     <description>SDL3 runtimes for KappaDuck.Khaos</description>
