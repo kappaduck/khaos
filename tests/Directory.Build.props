@@ -1,0 +1,59 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup Label="Configure test projects">
+    <OutputType>Exe</OutputType>
+    <IsAotCompatible>true</IsAotCompatible>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <IsTestProject>true</IsTestProject>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage" />
+  </ItemGroup>
+
+  <ItemGroup Label="Common test NuGets">
+    <PackageReference Include="TUnit" />
+    <PackageReference Include="TUnit.Mocks" />
+    <PackageReference Include="TUnit.Mocks.Assertions" />
+    <PackageReference Include="TUnit.Assertions.Should" />
+  </ItemGroup>
+
+  <!--
+    Verify (v33+) runs SponsorCheck at build time and fails with SC021 without a declaration.
+    Khaos is a non-revenue open source project, which the Verify maintenance fee exempts:
+    https://github.com/VerifyTests/Verify/blob/main/docs/maintenance-fee.md
+    The end month is capped at 12 months ahead: renew it before it expires (SC047).
+  -->
+  <PropertyGroup Label="Verify sponsorship exemption">
+    <Verify_SponsorshipExemption>OpenSource</Verify_SponsorshipExemption>
+    <Verify_SponsorshipExemptionUntil>2027-08</Verify_SponsorshipExemptionUntil>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Analyzer test projects">
+    <IsKhaosAnalyzerTests>$(MSBuildProjectName.EndsWith('.Analyzers.Tests'))</IsKhaosAnalyzerTests>
+  </PropertyGroup>
+
+  <ItemGroup Label="Analyzer test NuGets" Condition="'$(IsKhaosAnalyzerTests)' == 'true'">
+    <PackageReference Include="Basic.Reference.Assemblies.Net110" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Verify.SourceGenerators" />
+    <PackageReference Include="Verify.TUnit" />
+  </ItemGroup>
+
+  <!-- Generator harness shared by every analyzer test project, compiled into each assembly -->
+  <ItemGroup Label="Analyzer test harness" Condition="'$(IsKhaosAnalyzerTests)' == 'true'">
+    <Compile Include="$(MSBuildThisFileDirectory)Shared/Harness/**/*.cs" LinkBase="Harness" />
+    <Using Include="KappaDuck.Khaos.Testing.Harness" />
+  </ItemGroup>
+
+  <ItemGroup Label="Global usings">
+    <Using Include="TUnit" />
+    <Using Include="TUnit.Mocks" />
+    <Using Include="TUnit.Assertions" />
+    <Using Include="TUnit.Assertions.Should" />
+    <Using Include="TUnit.Assertions.Should.Extensions" />
+    <Using Include="TUnit.Core" />
+  </ItemGroup>
+</Project>
