@@ -56,10 +56,13 @@ public sealed class UntypedPointerAnalyzer : DiagnosticAnalyzer
 
     private static bool IsUntyped(ITypeSymbol type)
     {
-        while (type is IPointerTypeSymbol pointer)
-            type = pointer.PointedAtType;
+        if (type is not IPointerTypeSymbol pointer)
+            return false;
 
-        return type.SpecialType is SpecialType.System_Void;
+        while (pointer.PointedAtType is IPointerTypeSymbol inner)
+            pointer = inner;
+
+        return pointer.PointedAtType.SpecialType is SpecialType.System_Void;
     }
 
     private static bool Explained(ImmutableArray<AttributeData> attributes, ImmutableArray<INamedTypeSymbol> untyped)

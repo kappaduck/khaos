@@ -57,7 +57,7 @@ public sealed class EntryPointAnalyzer : DiagnosticAnalyzer
         foreach (KeyValuePair<string, TypedConstant> argument in attribute.NamedArguments)
         {
             if (argument.Key == EntryPoint)
-                return argument.Value.Value is string entryPoint && !string.IsNullOrEmpty(entryPoint);
+                return argument.Value.Value is string entryPoint && !string.IsNullOrWhiteSpace(entryPoint);
         }
 
         return false;
