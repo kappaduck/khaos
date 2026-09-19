@@ -14,6 +14,9 @@ internal static class InteropAreas
     private const string Sdl = "SDL";
     private const string Win32 = "Win32";
 
+    private static readonly string[] _sdlLibraries = ["SDL3", "SDL3_image", "SDL3_ttf", "SDL3_mixer"];
+    private static readonly string[] _win32Libraries = ["user32", "kernel32", "gdi32"];
+
     internal static InteropArea? Resolve(ISymbol symbol)
     {
         INamespaceSymbol? current = symbol.ContainingNamespace;
@@ -27,6 +30,17 @@ internal static class InteropAreas
             area = current.Name;
             current = current.ContainingNamespace;
         }
+
+        return null;
+    }
+
+    internal static InteropArea? ResolveLibrary(string library)
+    {
+        if (Declares(_sdlLibraries, library))
+            return InteropArea.Sdl;
+
+        if (Declares(_win32Libraries, library))
+            return InteropArea.Win32;
 
         return null;
     }
@@ -77,6 +91,9 @@ internal static class InteropAreas
             _ => throw new ArgumentOutOfRangeException(nameof(area))
         };
     }
+
+    private static bool Declares(string[] libraries, string library)
+        => Array.Exists(libraries, name => string.Equals(name, library, StringComparison.OrdinalIgnoreCase));
 
     private static InteropArea? Area(string? name) => name switch
     {

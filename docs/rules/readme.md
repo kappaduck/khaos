@@ -20,7 +20,7 @@ numbered independently: `KHI001` and `KHAOS001` are unrelated.
 | `KHI003`              | `[LibraryImport]` without an explicit `EntryPoint`                                | Planned     |
 | `KHI004`              | `void*` without a comment saying why it cannot be typed                           | Planned     |
 | `KHI005`              | Type in an interop area that is not internal                                      | Planned     |
-| `KHI006`              | Native library that does not match its interop area                               | Planned     |
+| [`KHI006`](khi006.md) | Native library that does not match its interop area                               | Implemented |
 | [`KHI007`](khi007.md) | `bool` in an interop struct                                                       | Implemented |
 | `KHI008`              | Raw pointer on the public surface                                                 | Planned     |
 

@@ -30,6 +30,16 @@ internal static class Descriptors
         "nint and System.IntPtr are the same type, and an nint compiles wherever any other handle is expected: the compiler cannot tell a window from a texture, so passing the wrong one is a native crash rather than a build error. Inside an interop area a native handle is a pointer to its own opaque struct in Primitives, and genuinely untyped memory is void*. nuint is not covered by this rule: it is the correct mapping for size_t. A handle deliberately exposed on the public surface lives outside Interop and is not reported here.",
         Documentation + "khi002.md");
 
+    internal static readonly DiagnosticDescriptor NativeLibrary = new(
+        "KHI006",
+        "native library does not match its interop area",
+        "'{0}' does not belong to {1}; {2}",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        "The interop area decides which conventions KHI001 and KHI002 apply, so a binding that sits in the wrong area gets the wrong one applied to it in silence: a Win32 BOOL read one byte at a time, on a green build. A library that no area declares is reported for the same reason, which makes adding a native dependency a deliberate edit of InteropAreas rather than a binding that lands wherever a file happened to be open.",
+        Documentation + "khi006.md");
+
     internal static readonly DiagnosticDescriptor BooleanField = new(
         "KHI007",
         "bool in an interop struct",
