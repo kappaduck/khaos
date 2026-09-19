@@ -13,16 +13,16 @@ numbered independently: `KHI001` and `KHAOS001` are unrelated.
 
 ## Internal rules `KHIXXX`
 
-| ID                    | Rule                                                                              | State       |
-| :-------------------- | :-------------------------------------------------------------------------------- | :---------- |
-| [`KHI001`](khi001.md) | bool return value or parameter does not follow the convention of its interop area | Implemented |
-| [`KHI002`](khi002.md) | `nint` or `IntPtr` in an interop declaration                                      | Implemented |
-| [`KHI003`](khi003.md) | `[LibraryImport]` without an explicit `EntryPoint`                                | Implemented |
-| [`KHI004`](khi004.md) | `void*` without a stated reason                                                  | Implemented |
-| [`KHI005`](khi005.md) | Type in an interop area that is not internal                                      | Implemented |
-| [`KHI006`](khi006.md) | Native library that does not match its interop area                               | Implemented |
-| [`KHI007`](khi007.md) | `bool` in an interop struct                                                       | Implemented |
-| [`KHI008`](khi008.md) | Raw pointer on the public surface                                                 | Implemented |
+| ID                    | Rule                                                                              |
+| :-------------------- | :-------------------------------------------------------------------------------- |
+| [`KHI001`](khi001.md) | bool return value or parameter does not follow the convention of its interop area |
+| [`KHI002`](khi002.md) | `nint` or `IntPtr` in an interop declaration                                      |
+| [`KHI003`](khi003.md) | `[LibraryImport]` without an explicit `EntryPoint`                                |
+| [`KHI004`](khi004.md) | `void*` without a stated reason                                                   |
+| [`KHI005`](khi005.md) | Type in an interop area that is not internal                                      |
+| [`KHI006`](khi006.md) | Native library that does not match its interop area                               |
+| [`KHI007`](khi007.md) | `bool` in an interop struct                                                       |
+| [`KHI008`](khi008.md) | Raw pointer on the public surface                                                 |
 
 ## Shipped rules `KHAOSXXX`
 
