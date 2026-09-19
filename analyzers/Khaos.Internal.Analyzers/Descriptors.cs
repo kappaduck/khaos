@@ -70,6 +70,16 @@ internal static class Descriptors
         "The interop area decides which conventions KHI001 and KHI002 apply, so a binding that sits in the wrong area gets the wrong one applied to it in silence: a Win32 BOOL read one byte at a time, on a green build. A library that no area declares is reported for the same reason, which makes adding a native dependency a deliberate edit of InteropAreas rather than a binding that lands wherever a file happened to be open.",
         Documentation + "khi006.md");
 
+    internal static readonly DiagnosticDescriptor PublicPointer = new(
+        "KHI008",
+        "raw pointer on the public surface",
+        "'{0}' exposes a raw pointer; the pointer stays behind the wrapper",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        "KHI005 keeps interop types internal, which the compiler then enforces across every public signature. Two shapes slip through it: void* and a function pointer, whose parts are all public types. This rule closes them. nint is not a pointer and is not reported, which is what lets a native handle be exposed on purpose.",
+        Documentation + "khi008.md");
+
     internal static readonly DiagnosticDescriptor BooleanField = new(
         "KHI007",
         "bool in an interop struct",

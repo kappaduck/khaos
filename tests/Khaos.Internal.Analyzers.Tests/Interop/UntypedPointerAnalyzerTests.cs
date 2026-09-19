@@ -7,7 +7,6 @@ namespace KappaDuck.Khaos.Internal.Analyzers.Tests.Interop;
 
 public sealed class UntypedPointerAnalyzerTests
 {
-    // The test compilation does not reference Khaos, so the attribute travels with the source under test.
     private const string Attribute = """
         namespace KappaDuck.Khaos.Interop;
 

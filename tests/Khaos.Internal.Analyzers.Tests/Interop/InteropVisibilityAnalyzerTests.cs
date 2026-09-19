@@ -42,7 +42,6 @@ public sealed class InteropVisibilityAnalyzerTests
     [Test]
     public async Task PublicTypeNestedInInternalTypeReportsNothing()
     {
-        // A public type inside an internal one never leaves the assembly.
         const string source = """
             namespace KappaDuck.Khaos.Interop.SDL.Primitives;
 

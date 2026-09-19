@@ -22,7 +22,7 @@ numbered independently: `KHI001` and `KHAOS001` are unrelated.
 | [`KHI005`](khi005.md) | Type in an interop area that is not internal                                      | Implemented |
 | [`KHI006`](khi006.md) | Native library that does not match its interop area                               | Implemented |
 | [`KHI007`](khi007.md) | `bool` in an interop struct                                                       | Implemented |
-| `KHI008`              | Raw pointer on the public surface                                                 | Planned     |
+| [`KHI008`](khi008.md) | Raw pointer on the public surface                                                 | Implemented |
 
 ## Shipped rules `KHAOSXXX`
 
