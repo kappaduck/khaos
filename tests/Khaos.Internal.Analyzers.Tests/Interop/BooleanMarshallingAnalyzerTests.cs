@@ -191,7 +191,7 @@ public sealed class BooleanMarshallingAnalyzerTests
     }
 
     [Test]
-    public async Task BoolFieldInSDLStructReportsKHI009()
+    public async Task BoolFieldInSDLStructReportsKHI007()
     {
         const string source = """
             namespace KappaDuck.Khaos.Interop.SDL.Primitives;
@@ -205,12 +205,12 @@ public sealed class BooleanMarshallingAnalyzerTests
         AnalyzerResult result = await AnalyzerRunner<BooleanMarshallingAnalyzer>.RunAsync(source);
 
         await result.CompilationErrors.Should().BeEmpty();
-        await result.Ids.Should().BeEqualTo("KHI009");
-        await result.Reported.Should().BeEqualTo("Source0.cs(5,14): error KHI009: Field 'SDL_KeyboardEvent.down' is declared as bool; in SDL a native boolean is stored as byte");
+        await result.Ids.Should().BeEqualTo("KHI007");
+        await result.Reported.Should().BeEqualTo("Source0.cs(5,14): error KHI007: Field 'SDL_KeyboardEvent.down' is declared as bool; in SDL a native boolean is stored as byte");
     }
 
     [Test]
-    public async Task AnnotatedBoolFieldInWin32StructStillReportsKHI009()
+    public async Task AnnotatedBoolFieldInWin32StructStillReportsKHI007()
     {
         const string source = """
             using System.Runtime.InteropServices;
@@ -227,8 +227,8 @@ public sealed class BooleanMarshallingAnalyzerTests
         AnalyzerResult result = await AnalyzerRunner<BooleanMarshallingAnalyzer>.RunAsync(source);
 
         await result.CompilationErrors.Should().BeEmpty();
-        await result.Ids.Should().BeEqualTo("KHI009");
-        await result.Reported.Should().BeEqualTo("Source0.cs(8,14): error KHI009: Field 'PAINTSTRUCT.fErase' is declared as bool; in Win32 a native boolean is stored as int");
+        await result.Ids.Should().BeEqualTo("KHI007");
+        await result.Reported.Should().BeEqualTo("Source0.cs(8,14): error KHI007: Field 'PAINTSTRUCT.fErase' is declared as bool; in Win32 a native boolean is stored as int");
     }
 
     [Test]

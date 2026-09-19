@@ -31,12 +31,12 @@ internal static class Descriptors
         Documentation + "khi002.md");
 
     internal static readonly DiagnosticDescriptor BooleanField = new(
-        "KHI009",
+        "KHI007",
         "bool in an interop struct",
         "{0} is declared as bool; in {1} a native boolean is stored as {2}",
         Interop,
         DiagnosticSeverity.Error,
         true,
         "bool is not blittable, so a struct that holds one requires marshalling: the LibraryImport generator refuses to pass it by value, and [MarshalAs] on the field does not change that. On a struct that is only reinterpreted through a pointer the attribute does nothing at all. Storing the field at its native width keeps the struct blittable and the layout honest.",
-        Documentation + "khi009.md");
+        Documentation + "khi007.md");
 }

@@ -18,12 +18,11 @@ numbered independently: `KHI001` and `KHAOS001` are unrelated.
 | [`KHI001`](khi001.md) | bool return value or parameter does not follow the convention of its interop area | Implemented |
 | [`KHI002`](khi002.md) | `nint` or `IntPtr` in an interop declaration                                      | Implemented |
 | `KHI003`              | `[LibraryImport]` without an explicit `EntryPoint`                                | Planned     |
-| `KHI004`              | `[LibraryImport]` method that is not `static partial`                             | Planned     |
-| `KHI005`              | `void*` without a comment saying why it cannot be typed                           | Planned     |
-| `KHI006`              | Raw pointer in a public signature                                                 | Planned     |
-| `KHI007`              | Binding in the wrong file for the header that declares it                         | Planned     |
-| `KHI008`              | Native library that does not match its interop area                               | Planned     |
-| [`KHI009`](khi009.md) | `bool` in an interop struct                                                       | Implemented |
+| `KHI004`              | `void*` without a comment saying why it cannot be typed                           | Planned     |
+| `KHI005`              | Type in an interop area that is not internal                                      | Planned     |
+| `KHI006`              | Native library that does not match its interop area                               | Planned     |
+| [`KHI007`](khi007.md) | `bool` in an interop struct                                                       | Implemented |
+| `KHI008`              | Raw pointer on the public surface                                                 | Planned     |
 
 ## Shipped rules `KHAOSXXX`
 
