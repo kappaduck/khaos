@@ -50,6 +50,16 @@ internal static class Descriptors
         "void* is the fallback when the native side is genuinely untyped, not when the real type is unknown. Requiring a written reason on the declaration separates the two: a userdata pointer SDL hands back untouched has one, a handle nobody looked up does not. The reason is an attribute rather than a comment so that it survives a reformat and can be found by searching.",
         Documentation + "khi004.md");
 
+    internal static readonly DiagnosticDescriptor InteropVisibility = new(
+        "KHI005",
+        "type in an interop area is not internal",
+        "'{0}' is visible outside the assembly; every type in an interop area is internal",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        "Once every interop type is internal the compiler enforces the rest of the boundary by itself: a public signature that mentions one fails with an accessibility error before any analyzer runs. That is why this rule guards the declaration rather than the signatures. A native handle deliberately exposed to third-party interop lives outside Interop and is not reported here.",
+        Documentation + "khi005.md");
+
     internal static readonly DiagnosticDescriptor NativeLibrary = new(
         "KHI006",
         "native library does not match its interop area",
