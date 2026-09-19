@@ -16,6 +16,6 @@ internal static class TestCompilation
             assemblyName: "KappaDuck.Khaos.Testing.Compilation",
             syntaxTrees: trees,
             references: References.All,
-            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
+            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true, nullableContextOptions: NullableContextOptions.Enable));
     }
 }
