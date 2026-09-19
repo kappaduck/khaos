@@ -40,6 +40,16 @@ internal static class Descriptors
         "The managed name drops the library prefix, so nothing in the declaration says which native symbol is being bound. EntryPoint is that link, and it is what makes a binding searchable against the wiki page it came from. It is written even when it would match the managed name, because a name that happens to match today stops matching the moment the method is renamed.",
         Documentation + "khi003.md");
 
+    internal static readonly DiagnosticDescriptor UntypedPointer = new(
+        "KHI004",
+        "void* without a stated reason",
+        "'{0}' takes or returns void* without [UntypedPointer]; say why it cannot be typed",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        "void* is the fallback when the native side is genuinely untyped, not when the real type is unknown. Requiring a written reason on the declaration separates the two: a userdata pointer SDL hands back untouched has one, a handle nobody looked up does not. The reason is an attribute rather than a comment so that it survives a reformat and can be found by searching.",
+        Documentation + "khi004.md");
+
     internal static readonly DiagnosticDescriptor NativeLibrary = new(
         "KHI006",
         "native library does not match its interop area",
