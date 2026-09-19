@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Runtimes">
-    <PackageVersion Include="KappaDuck.Khaos.Runtimes" Version="1.0.0" />
+    <PackageVersion Include="KappaDuck.Khaos.Runtimes" Version="1.0.2" />
   </ItemGroup>
 
   <!--
