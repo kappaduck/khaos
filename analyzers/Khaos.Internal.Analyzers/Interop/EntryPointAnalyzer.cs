@@ -10,16 +10,16 @@ using System.Collections.Immutable;
 namespace KappaDuck.Khaos.Internal.Analyzers.Interop;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public sealed class NativeLibraryAnalyzer : DiagnosticAnalyzer
+public sealed class EntryPointAnalyzer : DiagnosticAnalyzer
 {
+    private const string EntryPoint = "EntryPoint";
     private const string LibraryImport = "System.Runtime.InteropServices.LibraryImportAttribute";
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Descriptors.NativeLibrary];
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Descriptors.EntryPoint];
 
     public override void Initialize(AnalysisContext context)
     {
         context.EnableConcurrentExecution();
-
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
 
         context.RegisterCompilationStartAction(static start =>
@@ -40,32 +40,26 @@ public sealed class NativeLibraryAnalyzer : DiagnosticAnalyzer
         if (method.PartialDefinitionPart is not null)
             return;
 
-        if (InteropAreas.Resolve(method) is not InteropArea area)
+        if (InteropAreas.Resolve(method) is null)
             return;
 
         if (Attributes.Find(method.GetAttributes(), libraryImport) is not AttributeData attribute)
             return;
 
-        if (attribute.ConstructorArguments is not [{ Value: string library }, ..])
+        if (Names(attribute))
             return;
 
-        InteropArea? owner = InteropAreas.ResolveLibrary(library);
-
-        if (owner == area)
-            return;
-
-        string reason = owner is not null ? $"it belongs to {owner.Value.Name}" : "no interop area declares it";
-
-        context.ReportDiagnostic(Diagnostic.Create(Descriptors.NativeLibrary, LibraryLocation(attribute, declaration, context.CancellationToken), library, area.Name, reason));
+        context.ReportDiagnostic(Diagnostic.Create(Descriptors.EntryPoint, Attributes.Location(attribute, declaration, context.CancellationToken), method.Name));
     }
 
-    private static Location LibraryLocation(AttributeData attribute, SyntaxNode fallback, CancellationToken cancellationToken)
+    private static bool Names(AttributeData attribute)
     {
-        if (attribute.ApplicationSyntaxReference?.GetSyntax(cancellationToken) is AttributeSyntax syntax && syntax.ArgumentList?.Arguments is [AttributeArgumentSyntax argument, ..])
+        foreach (KeyValuePair<string, TypedConstant> argument in attribute.NamedArguments)
         {
-            return argument.Expression.GetLocation();
+            if (argument.Key == EntryPoint)
+                return argument.Value.Value is string entryPoint && !string.IsNullOrEmpty(entryPoint);
         }
 
-        return fallback.GetLocation();
+        return false;
     }
 }

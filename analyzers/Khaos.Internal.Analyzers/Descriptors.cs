@@ -30,6 +30,16 @@ internal static class Descriptors
         "nint and System.IntPtr are the same type, and an nint compiles wherever any other handle is expected: the compiler cannot tell a window from a texture, so passing the wrong one is a native crash rather than a build error. Inside an interop area a native handle is a pointer to its own opaque struct in Primitives, and genuinely untyped memory is void*. nuint is not covered by this rule: it is the correct mapping for size_t. A handle deliberately exposed on the public surface lives outside Interop and is not reported here.",
         Documentation + "khi002.md");
 
+    internal static readonly DiagnosticDescriptor EntryPoint = new(
+        "KHI003",
+        "LibraryImport without an explicit EntryPoint",
+        "'{0}' does not set EntryPoint; name the native symbol it binds",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        "The managed name drops the library prefix, so nothing in the declaration says which native symbol is being bound. EntryPoint is that link, and it is what makes a binding searchable against the wiki page it came from. It is written even when it would match the managed name, because a name that happens to match today stops matching the moment the method is renamed.",
+        Documentation + "khi003.md");
+
     internal static readonly DiagnosticDescriptor NativeLibrary = new(
         "KHI006",
         "native library does not match its interop area",
