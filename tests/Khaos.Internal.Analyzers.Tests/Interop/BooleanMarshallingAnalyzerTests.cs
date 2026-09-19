@@ -99,7 +99,7 @@ public sealed class BooleanMarshallingAnalyzerTests
     }
 
     [Test]
-    public async Task BindingOutsideAnInteropAreareportsNothing()
+    public async Task BindingOutsideAnInteropAreaReportsNothing()
     {
         const string source = """
             using System.Runtime.InteropServices;

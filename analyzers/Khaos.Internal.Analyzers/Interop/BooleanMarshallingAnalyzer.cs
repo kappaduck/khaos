@@ -46,25 +46,23 @@ public sealed class BooleanMarshallingAnalyzer : DiagnosticAnalyzer
         if (!HasAttribute(method.GetAttributes(), libraryImport))
             return;
 
-        InteropArea? area = InteropAreas.Resolve(method);
-
-        if (area is null)
+        if (InteropAreas.Resolve(method) is not InteropArea area)
             return;
 
-        if (method.ReturnType.SpecialType is SpecialType.System_Boolean && Marshalling(method.GetReturnTypeAttributes(), marshalAs) != area.Value.Convention())
-            Report(context, declaration.ReturnType.GetLocation(), $"The return value of '{method.Name}'", area.Value, "return: ");
+        if (method.ReturnType.SpecialType is SpecialType.System_Boolean && Marshalling(method.GetReturnTypeAttributes(), marshalAs) != area.Convention())
+            Report(context, declaration.ReturnType.GetLocation(), $"The return value of '{method.Name}'", area, "return: ");
 
         foreach (IParameterSymbol parameter in method.Parameters)
         {
             if (parameter.Type.SpecialType is not SpecialType.System_Boolean)
                 continue;
 
-            if (Marshalling(parameter.GetAttributes(), marshalAs) == area.Value.Convention())
+            if (Marshalling(parameter.GetAttributes(), marshalAs) == area.Convention())
                 continue;
 
             ParameterSyntax syntax = declaration.ParameterList.Parameters[parameter.Ordinal];
 
-            Report(context, (syntax.Type ?? (SyntaxNode)syntax).GetLocation(), $"Parameter '{parameter.Name}' of '{method.Name}'", area.Value, string.Empty);
+            Report(context, (syntax.Type ?? (SyntaxNode)syntax).GetLocation(), $"Parameter '{parameter.Name}' of '{method.Name}'", area, string.Empty);
         }
     }
 
@@ -80,12 +78,10 @@ public sealed class BooleanMarshallingAnalyzer : DiagnosticAnalyzer
             if (field.IsStatic || field.IsConst || field.Type.SpecialType is not SpecialType.System_Boolean || field.ContainingType.TypeKind is not TypeKind.Struct)
                 continue;
 
-            InteropArea? area = InteropAreas.Resolve(field);
-
-            if (area is null)
+            if (InteropAreas.Resolve(field) is not InteropArea area)
                 continue;
 
-            context.ReportDiagnostic(Diagnostic.Create(Descriptors.BooleanField, declaration.Declaration.Type.GetLocation(), $"Field '{field.ContainingType.Name}.{field.Name}'", area.Value.Name, area.Value.FieldType));
+            context.ReportDiagnostic(Diagnostic.Create(Descriptors.BooleanField, declaration.Declaration.Type.GetLocation(), $"Field '{field.ContainingType.Name}.{field.Name}'", area.Name, area.FieldType));
         }
     }
 

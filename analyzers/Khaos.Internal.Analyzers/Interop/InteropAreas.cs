@@ -55,6 +55,14 @@ internal static class InteropAreas
             throw new ArgumentOutOfRangeException(nameof(area));
         }
 
+        // The typed pointer a reader is most likely to reach for in this area, used as the example in KHI002.
+        internal string ExampleType => area switch
+        {
+            InteropArea.Sdl => "SDL_Window*",
+            InteropArea.Win32 => "HWND*",
+            _ => throw new ArgumentOutOfRangeException(nameof(area))
+        };
+
         internal string FieldType => area switch
         {
             InteropArea.Sdl => "byte",
