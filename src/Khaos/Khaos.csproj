@@ -3,9 +3,6 @@
     <IsAotCompatible>true</IsAotCompatible>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
-    <!-- Experimental feature: https://github.com/dotnet/core/blob/main/release-notes/11.0/preview/preview1/runtime.md#runtime-async -->
-    <Features>$(Features);runtime-async=on</Features>
   </PropertyGroup>
 
   <PropertyGroup Label="Configure nupkg generation" Condition="$(Configuration) == 'Debug'">

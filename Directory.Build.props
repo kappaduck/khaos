@@ -11,6 +11,10 @@
     <AssemblyName>KappaDuck.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>$(AssemblyName)</RootNamespace>
 
+    <!-- Experimental feature: https://github.com/dotnet/core/blob/main/release-notes/11.0/preview/preview1/runtime.md#runtime-async -->
+    <!-- Experimental feature: https://github.com/dotnet/core/blob/main/release-notes/11.0/preview/rc1/csharp.md#unsafe-evolution-refinements -->
+    <Features>$(Features);runtime-async=on;updated-memory-safety-rules</Features>
+
     <!-- Configure packages which are only Development dependency -->
     <!-- https://github.com/NuGet/Home/wiki/DevelopmentDependency-support-for-PackageReference -->
     <DevAssets>runtime;build;native;contentfiles;analyzers;buildtransitive</DevAssets>
