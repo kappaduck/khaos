@@ -29,6 +29,15 @@
     <PackageReleaseNotes>https://github.com/kappaduck/khaos/blob/main/changelog.md</PackageReleaseNotes>
   </PropertyGroup>
 
+  <ItemGroup Label="Global usings">
+    <Using Include="KappaDuck.Khaos.Interop" />
+    <Using Include="KappaDuck.Khaos.Interop.SDL" />
+    <Using Include="System.Diagnostics.CodeAnalysis" />
+    <Using Include="System.Runtime.CompilerServices" />
+    <Using Include="System.Runtime.InteropServices" />
+    <Using Include="System.Runtime.InteropServices.Marshalling" />
+  </ItemGroup>
+
   <ItemGroup Label="Common files to include">
     <None Include="$(KhaosRoot)assets/nuget/$(PackageReadmeFile)" Pack="true" PackagePath="" Visible="false" />
     <None Include="$(KhaosRoot)$(PackageLicenseFile)" Pack="true" PackagePath="" Visible="false" />
