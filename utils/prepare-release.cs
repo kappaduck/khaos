@@ -1,16 +1,24 @@
 #!/usr/bin/env dotnet
+
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
-#:include markdownTable.cs
+#:include MarkdownTable.cs
 
+using Khaos.Utils;
 using System.Globalization;
-using Utils;
 
 const string projectPath = "src/Khaos/Khaos.csproj";
 const string changelogPath = "changelog.md";
 const string readmePath = "readme.md";
 const string packagesPath = "Directory.Packages.props";
+
+string? missingFile = Array.Find([projectPath, changelogPath, readmePath, packagesPath], static f => !File.Exists(f));
+if (!string.IsNullOrEmpty(missingFile))
+{
+    Console.Error.WriteLine($"error: Cannot find '{missingFile}'. Run the script from the repository root.");
+    return 1;
+}
 
 try
 {
@@ -22,9 +30,9 @@ try
         _ => Usage()
     };
 }
-catch (ReleaseException exception)
+catch (Exception ex)
 {
-    Console.Error.WriteLine($"error: {exception.Message}");
+    Console.Error.WriteLine($"error: {ex.Message}");
     Console.Error.WriteLine("No file was modified.");
     return 1;
 }
@@ -37,126 +45,68 @@ static int Usage()
 
 static async Task<int> PrepareReleaseAsync()
 {
-    TextFile project = await TextFile.LoadAsync(projectPath);
-    TextFile changelog = await TextFile.LoadAsync(changelogPath);
-    TextFile readme = await TextFile.LoadAsync(readmePath);
-    TextFile packages = await TextFile.LoadAsync(packagesPath);
-
-    Version version = ReadVersionPrefix(project);
-    string today = DateOnly.FromDateTime(DateTime.Now).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-
-    int unreleased = changelog.Lines.FindIndex(IsUnreleasedHeading);
-
-    if (unreleased < 0)
-        throw new ReleaseException($"'{changelogPath}' has no {Changelog.UnreleasedMarker} section.");
-
-    if (changelog.Lines.Exists(line => IsVersionHeading(line, version)))
-        throw new ReleaseException($"'{changelogPath}' already has a section for {version}.");
-
-    if (IsSectionEmpty(changelog.Lines, unreleased))
-        throw new ReleaseException($"The {Changelog.UnreleasedMarker} section of '{changelogPath}' is empty.");
-
-    changelog.Lines[unreleased] = $"## {version} {Changelog.Separator} {today}";
-
-    CompatibilityTable table = CompatibilityTable.Find(readme);
-    string[] source = table.SourceRow();
-
-    if (table.Table.Rows.Any(row => row[table.KhaosColumn] == Code(version)))
-        throw new ReleaseException($"The SDL compatibility table already has a row for Khaos {version}.");
+    string[] packages = await File.ReadAllLinesAsync(packagesPath);
 
     Version runtime = ReadRuntimeVersion(packages);
-    Version? sourceRuntime = ParseRuntime(source[table.RuntimesColumn]);
+    DateOnly today = DateOnly.FromDateTime(DateTime.Now);
 
-    if (sourceRuntime != runtime)
-    {
-        throw new ReleaseException(
-            $"Khaos references KappaDuck.Khaos.Runtimes {runtime} in '{packagesPath}', but the `source` row of the SDL "
-            + $"compatibility table ships {sourceRuntime?.ToString() ?? "an unknown version"}. Update one of them first.");
-    }
+    Project project = await Project.ParseAsync(projectPath);
 
-    string[] released = [.. source];
-    released[table.KhaosColumn] = Code(version);
-    released[table.RuntimesColumn] = Code(runtime);
-    table.Table.Rows.Insert(1, released);
-    table.Save();
+    Changelog changelog = await Changelog.ParseAsync(changelogPath);
+    changelog.Release(project.Version, today);
+
+    CompatibilityTable table = await CompatibilityTable.ParseAsync(readmePath);
+    table.AddRelease(project.Version, runtime);
 
     await changelog.SaveAsync();
-    await readme.SaveAsync();
+    await table.SaveAsync();
 
-    Console.WriteLine($"Prepared Khaos {version} ({today}):");
-    Console.WriteLine($"  {changelogPath}: dated the {Changelog.UnreleasedMarker} section");
-    Console.WriteLine($"  {readmePath}: added Khaos {version} with KappaDuck.Khaos.Runtimes {runtime} to the SDL compatibility table");
+    Console.WriteLine($"Prepared Khaos {project.Version} ({today:yyyy-MM-dd}):");
+    Console.WriteLine($"  {changelogPath}: dated the [Unreleased] section");
+    Console.WriteLine($"  {readmePath}: added Khaos {project.Version} with KappaDuck.Khaos.Runtimes {runtime} to the SDL compatibility table");
     return 0;
 }
 
 static async Task<int> PrepareNextAsync(string? requested)
 {
-    TextFile project = await TextFile.LoadAsync(projectPath);
-    TextFile changelog = await TextFile.LoadAsync(changelogPath);
+    Project project = await Project.ParseAsync(projectPath);
 
-    Version current = ReadVersionPrefix(project);
-    Version next = NextKhaosVersion(requested, current);
+    Version current = project.Version;
+    Version next = NextVersion(requested, current);
+    project.SetVersion(next);
 
-    if (next <= current)
-        throw new ReleaseException($"The next version ({next}) must be greater than the current one ({current}).");
-
-    if (changelog.Lines.Exists(IsUnreleasedHeading))
-        throw new ReleaseException($"'{changelogPath}' already has an {Changelog.UnreleasedMarker} section.");
-
-    if (!changelog.Lines.Exists(line => IsVersionHeading(line, current)))
-        throw new ReleaseException($"'{changelogPath}' has no section for {current}. Prepare and publish the release first.");
-
-    int firstSection = changelog.Lines.FindIndex(line => line.StartsWith("## ", StringComparison.Ordinal));
-    string placeholder = string.Create(CultureInfo.InvariantCulture, $"## {next} {Changelog.Separator} {DateTime.Now.Year}-xx-xx {Changelog.UnreleasedMarker}");
-
-    changelog.Lines.InsertRange(firstSection < 0 ? changelog.Lines.Count : firstSection, [placeholder, string.Empty]);
-
-    int prefix = project.Lines.FindIndex(line => line.Contains(VersionPrefix.OpenTag, StringComparison.Ordinal));
-    project.Lines[prefix] = project.Lines[prefix].Replace(
-        VersionPrefix.OpenTag + current + VersionPrefix.CloseTag,
-        VersionPrefix.OpenTag + next + VersionPrefix.CloseTag,
-        StringComparison.Ordinal);
+    Changelog changelog = await Changelog.ParseAsync(changelogPath);
+    changelog.OpenNext(current, next);
 
     await changelog.SaveAsync();
     await project.SaveAsync();
 
     Console.WriteLine($"Prepared the next version: {current} -> {next}");
     Console.WriteLine($"  {projectPath}: VersionPrefix is {next}");
-    Console.WriteLine($"  {changelogPath}: opened the {Changelog.UnreleasedMarker} section");
+    Console.WriteLine($"  {changelogPath}: opened the [Unreleased] section");
     return 0;
 }
 
-static Version NextKhaosVersion(string? requested, Version current)
+static Version NextVersion(string? requested, Version current)
 {
-    if (requested is null)
+    if (string.IsNullOrEmpty(requested))
         return new Version(current.Major, current.Minor + 1, 0);
 
     if (!Version.TryParse(requested, out Version? parsed) || parsed.Build < 0 || parsed.Revision >= 0)
-        throw new ReleaseException($"'{requested}' is not a major.minor.patch version.");
+        throw new FormatException($"'{requested}' is not a major.minor.patch version.");
 
     return parsed;
 }
 
-static Version ReadVersionPrefix(TextFile project)
-{
-    string? line = project.Lines.Find(candidate => candidate.Contains(VersionPrefix.OpenTag, StringComparison.Ordinal));
-    string? text = line is null ? null : Between(line, VersionPrefix.OpenTag, VersionPrefix.CloseTag);
-
-    if (text is null || !Version.TryParse(text, out Version? version) || version.Build < 0 || version.Revision >= 0)
-        throw new ReleaseException($"Cannot read a major.minor.patch VersionPrefix in '{projectPath}'.");
-
-    return version;
-}
-
-static Version ReadRuntimeVersion(TextFile packages)
+static Version ReadRuntimeVersion(string[] packages)
 {
     const string include = "Include=\"KappaDuck.Khaos.Runtimes\"";
 
-    string? line = packages.Lines.Find(candidate => candidate.Contains(include, StringComparison.Ordinal));
-    string? text = line is null ? null : Between(line, "Version=\"", "\"");
+    string? line = Array.Find(packages, c => c.Contains(include, StringComparison.Ordinal));
+    string? text = string.IsNullOrEmpty(line) ? null : Between(line, "Version=\"", "\"");
 
-    if (text is null || !Version.TryParse(text, out Version? version))
-        throw new ReleaseException($"Cannot read the KappaDuck.Khaos.Runtimes version in '{packagesPath}'.");
+    if (string.IsNullOrEmpty(text) || !Version.TryParse(text, out Version? version))
+        throw new FormatException($"Cannot read the KappaDuck.Khaos.Runtimes version in '{packagesPath}'.");
 
     return version;
 }
@@ -174,72 +124,140 @@ static string? Between(string text, string start, string end)
     return to < 0 ? null : text[from..to].Trim();
 }
 
-static Version? ParseRuntime(string cell)
-    => Version.TryParse(cell.Trim('`'), out Version? version) ? version : null;
-
-static bool IsUnreleasedHeading(string line)
-    => line.StartsWith("## ", StringComparison.Ordinal) && line.TrimEnd().EndsWith(Changelog.UnreleasedMarker, StringComparison.Ordinal);
-
-static bool IsVersionHeading(string line, Version version)
-    => line.StartsWith($"## {version} ", StringComparison.Ordinal);
-
-static bool IsSectionEmpty(List<string> lines, int heading)
+internal sealed class Changelog
 {
-    for (int i = heading + 1; i < lines.Count; i++)
-    {
-        if (lines[i].StartsWith("## ", StringComparison.Ordinal))
-            return true;
+    private const string UnreleasedMarker = "[Unreleased]";
+    private const string Separator = "&#8212;";
+    private const string SectionPrefix = "## ";
 
-        if (!string.IsNullOrWhiteSpace(lines[i]))
-            return false;
+    private readonly string _path;
+    private string[] _lines;
+
+    private Changelog(string path, string[] lines)
+    {
+        _lines = lines;
+        _path = path;
     }
 
-    return true;
-}
-
-static string Code(Version version) => $"`{version}`";
-
-internal static class Changelog
-{
-    public const string UnreleasedMarker = "[Unreleased]";
-    public const string Separator = "&#8212;";
-}
-
-internal static class VersionPrefix
-{
-    public const string OpenTag = "<VersionPrefix>";
-    public const string CloseTag = "</VersionPrefix>";
-}
-
-internal sealed class ReleaseException(string message) : Exception(message);
-
-internal sealed class TextFile
-{
-    private TextFile(string path, string newLine, List<string> lines)
+    internal static async Task<Changelog> ParseAsync(string path)
     {
-        Path = path;
-        NewLine = newLine;
-        Lines = lines;
+        string[] lines = await File.ReadAllLinesAsync(path);
+        return new Changelog(path, lines);
     }
 
-    public string Path { get; }
-
-    public string NewLine { get; }
-
-    public List<string> Lines { get; }
-
-    public static async Task<TextFile> LoadAsync(string path)
+    internal void Release(Version version, DateOnly date)
     {
-        if (!File.Exists(path))
-            throw new ReleaseException($"Cannot find '{path}'. Run the script from the repository root.");
+        int unreleased = Array.FindIndex(_lines, static l => IsUnreleasedHeading(l));
 
+        if (unreleased < 0)
+            throw new InvalidOperationException($"'{_path}' has no {UnreleasedMarker} section.");
+
+        if (HasSection(version))
+            throw new InvalidOperationException($"'{_path}' already has a section for {version}.");
+
+        if (IsSectionEmpty(unreleased))
+            throw new InvalidOperationException($"The {UnreleasedMarker} section of '{_path}' is empty.");
+
+        _lines[unreleased] = string.Create(CultureInfo.InvariantCulture, $"{SectionPrefix}{version} {Separator} {date:yyyy-MM-dd}");
+    }
+
+    internal void OpenNext(Version current, Version next)
+    {
+        if (Array.Exists(_lines, static l => IsUnreleasedHeading(l)))
+            throw new InvalidOperationException($"'{_path}' already has an {UnreleasedMarker} section.");
+
+        if (!HasSection(current))
+            throw new InvalidOperationException($"'{_path}' has no section for {current}. Prepare and publish the release first.");
+
+        int firstSection = Array.FindIndex(_lines, static l => l.StartsWith(SectionPrefix, StringComparison.Ordinal));
+        string placeholder = string.Create(CultureInfo.InvariantCulture, $"{SectionPrefix}{next} {Separator} {DateTime.Now.Year}-xx-xx {UnreleasedMarker}");
+
+        _lines = [.. _lines.AsSpan(..firstSection), placeholder, string.Empty, .. _lines.AsSpan(firstSection..)];
+    }
+
+    internal Task SaveAsync() => File.WriteAllTextAsync(_path, string.Join('\n', _lines) + '\n');
+
+
+    private bool HasSection(Version version) => Array.Exists(_lines, l => IsVersionHeading(l, version));
+
+    private bool IsSectionEmpty(int heading)
+    {
+        for (int i = heading + 1; i < _lines.Length; i++)
+        {
+            if (_lines[i].StartsWith(SectionPrefix, StringComparison.Ordinal))
+                return true;
+
+            if (!string.IsNullOrWhiteSpace(_lines[i]))
+                return false;
+        }
+
+        return true;
+    }
+
+    private static bool IsUnreleasedHeading(ReadOnlySpan<char> line)
+        => line.StartsWith(SectionPrefix, StringComparison.Ordinal) && line.TrimEnd().EndsWith(UnreleasedMarker, StringComparison.Ordinal);
+
+    private static bool IsVersionHeading(ReadOnlySpan<char> line, Version version)
+        => line.StartsWith($"{SectionPrefix}{version} ", StringComparison.Ordinal) && !IsUnreleasedHeading(line);
+}
+
+internal sealed class Project
+{
+    private const string OpenTag = "<VersionPrefix>";
+    private const string CloseTag = "</VersionPrefix>";
+
+    private readonly string _path;
+    private string _content;
+
+    private Project(string path, string content, Version version)
+    {
+        _path = path;
+        _content = content;
+
+        Version = version;
+    }
+
+    public Version Version { get; private set; }
+
+    internal static async Task<Project> ParseAsync(string path)
+    {
         string content = await File.ReadAllTextAsync(path);
-        string newLine = content.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
 
-        return new TextFile(path, newLine, [.. content.Split('\n').Select(line => line.TrimEnd('\r'))]);
+        (int start, int end) = GetVersionIndexes(content);
+        ReadOnlySpan<char> versionTag = content.AsSpan(start, end).Trim();
+
+        if (!Version.TryParse(versionTag, out Version? version) || version.Build < 0 || version.Revision >= 0)
+            throw new FormatException($"'{version}' is not a major.minor.patch VersionPrefix in '{path}'.");
+
+        return new Project(path, content, version);
     }
 
-    public Task SaveAsync() => File.WriteAllTextAsync(Path, string.Join(NewLine, Lines));
+    internal void SetVersion(Version version)
+    {
+        if (version <= Version)
+            throw new ArgumentException($"The next version ({version}) must be greater than the current one ({Version}).");
+
+        string text = version.ToString();
+
+        (int start, int end) = GetVersionIndexes(_content);
+
+        _content = string.Concat(_content.AsSpan(0, start), text, _content.AsSpan(start + end));
+        Version = version;
+    }
+
+    internal Task SaveAsync() => File.WriteAllTextAsync(_path, _content);
+
+    private static (int Start, int End) GetVersionIndexes(string content)
+    {
+        int open = content.IndexOf(OpenTag, StringComparison.Ordinal);
+        int close = open < 0 ? -1 : content.IndexOf(CloseTag, open, StringComparison.Ordinal);
+
+        if (close < 0)
+            throw new FormatException($"Cannot find a {OpenTag} element in '.csproj'.");
+
+        int start = open + OpenTag.Length;
+        return (start, close - start);
+    }
 }
 
 internal sealed class CompatibilityTable
@@ -247,69 +265,81 @@ internal sealed class CompatibilityTable
     private const string Heading = "## SDL compatibility";
     private const string Source = "`source`";
 
-    private readonly TextFile _file;
+    private readonly string[] _lines;
+    private readonly string _path;
     private readonly int _start;
     private readonly int _length;
+    private readonly MarkdownTable _table;
+    private readonly int _khaosColumn;
+    private readonly int _runtimesColumn;
 
-    private CompatibilityTable(TextFile file, int start, int length, MarkdownTable table)
+    internal CompatibilityTable(string path, string[] lines, int start, int length, MarkdownTable table, int khaosColumn, int runtimesColumn)
     {
-        _file = file;
+        _lines = lines;
+        _path = path;
         _start = start;
         _length = length;
-        Table = table;
-        KhaosColumn = IndexOfColumn(table.Header, "Khaos");
-        RuntimesColumn = IndexOfColumn(table.Header, "Runtimes");
-
-        if (KhaosColumn < 0 || RuntimesColumn < 0)
-            throw new ReleaseException($"The SDL compatibility table in '{file.Path}' needs a Khaos and a Runtimes column.");
+        _table = table;
+        _khaosColumn = khaosColumn;
+        _runtimesColumn = runtimesColumn;
     }
 
-    public MarkdownTable Table { get; }
-
-    public int KhaosColumn { get; }
-
-    public int RuntimesColumn { get; }
-
-    public static CompatibilityTable Find(TextFile file)
+    internal static async Task<CompatibilityTable> ParseAsync(string path)
     {
-        List<string> lines = file.Lines;
+        string[] lines = await File.ReadAllLinesAsync(path);
 
-        int heading = lines.FindIndex(line => line.Trim() == Heading);
-        int start = heading < 0 ? -1 : lines.FindIndex(heading + 1, line => line.TrimStart().StartsWith('|'));
+        int heading = Array.FindIndex(lines, static l => l.AsSpan().Trim().SequenceEqual(Heading));
+        int start = heading < 0 ? -1 : Array.FindIndex(lines, heading + 1, static l => l.AsSpan().TrimStart().StartsWith('|'));
 
         if (start < 0)
-            throw new ReleaseException($"Cannot find the table under '{Heading}' in '{file.Path}'.");
+            throw new FormatException($"Cannot find the table under '{Heading}' in '{path}'.");
 
         int end = start;
 
-        while (end < lines.Count && lines[end].TrimStart().StartsWith('|'))
+        while (end < lines.Length && lines[end].AsSpan().TrimStart().StartsWith('|'))
             end++;
 
-        return new CompatibilityTable(file, start, end - start, MarkdownTable.Parse([.. lines.GetRange(start, end - start)]));
+        MarkdownTable table = MarkdownTable.Parse(lines.AsSpan(start..end));
+
+        int khaosColumn = table.IndexOfColumn("Khaos");
+        int runtimesColumn = table.IndexOfColumn("Runtimes");
+
+        if (khaosColumn < 0 || runtimesColumn < 0)
+            throw new FormatException($"The SDL compatibility table in '{path}' needs a Khaos and a Runtimes column.");
+
+        if (table.RowCount == 0 || table[0, khaosColumn] != Source)
+            throw new FormatException($"The first row of the SDL compatibility table in '{path}' must be the {Source} row.");
+
+        return new CompatibilityTable(path, lines, start, end - start, table, khaosColumn, runtimesColumn);
     }
 
-    public string[] SourceRow()
+    public void AddRelease(Version khaos, Version runtime)
     {
-        if (Table.Rows.Count == 0 || Table.Rows[0][KhaosColumn] != Source)
-            throw new ReleaseException($"The first row of the SDL compatibility table in '{_file.Path}' must be the {Source} row.");
+        string khaosCell = Code(khaos);
 
-        return Table.Rows[0];
+        if (_table.IndexOfRow(_khaosColumn, khaosCell) >= 0)
+            throw new InvalidOperationException($"The SDL compatibility table already has a row for Khaos {khaos}.");
+
+        Version? sourceRuntime = ParseVersion(_table[0, _runtimesColumn]);
+
+        if (sourceRuntime != runtime)
+            throw new InvalidOperationException($"Khaos references KappaDuck.Khaos.Runtimes {runtime}, but the {Source} row of the SDL compatibility table ships {sourceRuntime?.ToString() ?? "an unknown version"}. Update one of them first.");
+
+        string[] release = _table[0].ToArray();
+        release[_khaosColumn] = khaosCell;
+        release[_runtimesColumn] = Code(runtime);
+
+        _table.Insert(1, release);
     }
 
-    private static int IndexOfColumn(IReadOnlyList<string> header, string name)
+    public Task SaveAsync()
     {
-        for (int column = 0; column < header.Count; column++)
-        {
-            if (header[column] == name)
-                return column;
-        }
-
-        return -1;
+        string[] lines = [.. _lines.AsSpan(.._start), .. _table.Render(), .. _lines.AsSpan((_start + _length)..)];
+        return File.WriteAllTextAsync(_path, string.Join('\n', lines) + '\n');
     }
 
-    public void Save()
-    {
-        _file.Lines.RemoveRange(_start, _length);
-        _file.Lines.InsertRange(_start, Table.Render().ToArray());
-    }
+    private static string Code(Version version) => $"`{version}`";
+
+    private static Version? ParseVersion(string cell)
+        => Version.TryParse(cell.AsSpan().Trim('`'), out Version? version) ? version : null;
 }

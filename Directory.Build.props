@@ -12,8 +12,10 @@
     <RootNamespace>$(AssemblyName)</RootNamespace>
 
     <!-- Experimental feature: https://github.com/dotnet/core/blob/main/release-notes/11.0/preview/preview1/runtime.md#runtime-async -->
+    <Features>$(Features);runtime-async=on</Features>
+
     <!-- Experimental feature: https://github.com/dotnet/core/blob/main/release-notes/11.0/preview/rc1/csharp.md#unsafe-evolution-refinements -->
-    <Features>$(Features);runtime-async=on;updated-memory-safety-rules</Features>
+    <Features Condition="'$(FileBasedProgram)' != 'true'">$(Features);updated-memory-safety-rules</Features>
 
     <!-- Configure packages which are only Development dependency -->
     <!-- https://github.com/NuGet/Home/wiki/DevelopmentDependency-support-for-PackageReference -->

@@ -4,17 +4,21 @@ is_global = true
 # Some types are named in all upper case like SDL
 dotnet_diagnostic.S101.severity = none
 
+# S1075: Refactor your code not to use hardcoded absolute paths or URIs.
+# Some hardcoded paths are fine
+dotnet_diagnostic.S1075.severity = none
+
 # S1135: Complete the task associated to this 'TODO' comment.
 # Uses as suggestion instead of warning
 dotnet_diagnostic.S1135.severity = suggestion
 
+# S3903: Move into a named namespace
+# Some types are in top-level program and don't have namespace
+dotnet_diagnostic.S3903.severity = none
+
 # S4200: Make this wrapper for native method less trivial
 # Some method are trivial and should be kept as is
 dotnet_diagnostic.S4200.severity = none
-
-# S6640: Avoid using unsafe blocks
-# Disabled for now because using Memory Safety C#16
-dotnet_diagnostic.S6640.severity = none
 
 # S6966: Use async method instead.
 # Is a duplicate of CA1849: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1849
