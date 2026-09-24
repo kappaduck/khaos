@@ -3,22 +3,18 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
-#:include ../utils/markdownTable.cs
+#:include ../utils/MarkdownTable.cs
 
+using Khaos.Utils;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json.Serialization;
-using Utils;
 
 const string versionsPath = "runtimes/utils/sdl.env";
 const string nuspecPath = "runtimes/package.nuspec";
 const string readmePath = "readme.md";
 const string runtimesReadmePath = "runtimes/readme.md";
-
-const string compatibilityHeading = "## SDL compatibility";
-const string bundledVersionsHeading = "## Bundled versions";
-const string unreleasedKhaos = "`source`";
 
 Dictionary<string, Library> libraries = new()
 {
@@ -28,44 +24,28 @@ Dictionary<string, Library> libraries = new()
     ["SDL3_MIXER"] = new Library("SDL_mixer", "SDL_mixer")
 };
 
-string[] requiredFiles = [versionsPath, nuspecPath, readmePath, runtimesReadmePath];
-
-foreach (string file in requiredFiles)
+string? missingFile = Array.Find([versionsPath, nuspecPath, readmePath, runtimesReadmePath], f => !File.Exists(f));
+if (!string.IsNullOrEmpty(missingFile))
 {
-    if (!File.Exists(file))
-    {
-        Console.Error.WriteLine($"Cannot find '{file}'");
-        return 1;
-    }
+    Console.Error.WriteLine($"Cannot find '{missingFile}'");
+    return 1;
 }
+
+SdlVersions versions = await SdlVersions.ParseAsync(versionsPath);
+RuntimePackage package = await RuntimePackage.ParseAsync(nuspecPath);
+BundledVersionsTable bundledTable = await BundledVersionsTable.ParseAsync(runtimesReadmePath);
+CompatibilityTable compatibilityTable = await CompatibilityTable.ParseAsync(readmePath);
 
 using HttpClient http = CreateGitHubClient();
 
-string[] lines = await File.ReadAllLinesAsync(versionsPath);
 List<UpdatedRelease> updates = [];
 Dictionary<string, Version> bundled = [];
 
-for (int i = 0; i < lines.Length; i++)
+foreach ((string key, Library library) in libraries)
 {
-    string line = lines[i];
-    int separator = line.IndexOf('=');
-
-    if (separator <= 0 || line.TrimStart().StartsWith('#'))
-        continue;
-
-    string key = line[..separator].Trim();
-    string version = line[(separator + 1)..].Trim();
-
-    if (!libraries.TryGetValue(key, out Library? library))
-        continue;
-
-    if (!Version.TryParse(version, out Version? current))
-    {
-        Console.Error.WriteLine($"skipping '{key}': '{version}' is not a valid version.");
-        continue;
-    }
-
+    Version current = versions.GetVersion(key);
     bundled[library.DisplayName] = current;
+
     Version? latest = await GetLatestStableVersionAsync(library.Repository);
 
     if (latest is null)
@@ -82,7 +62,7 @@ for (int i = 0; i < lines.Length; i++)
 
     Console.WriteLine($"{key}: {current} -> {latest}");
 
-    lines[i] = $"{key}={latest}";
+    versions.SetVersion(key, latest);
     bundled[library.DisplayName] = latest;
     updates.Add(new UpdatedRelease(key, library.Repository, current, latest));
 }
@@ -95,18 +75,22 @@ if (updates.Count == 0)
     return 0;
 }
 
-(Version previousRuntime, Version nextRuntime) = await BumpRuntimeVersionAsync(nuspecPath, updates);
+Version previousRuntime = package.Version;
+package.Bump(updates);
+
+Version nextRuntime = package.Version;
 Console.WriteLine($"Runtimes: {previousRuntime} -> {nextRuntime}");
 
-await File.WriteAllTextAsync(versionsPath, string.Join('\n', lines) + '\n');
-await UpdateMarkdownTableAsync(runtimesReadmePath, bundledVersionsHeading, table => UpdateBundledVersions(table, bundled));
-await UpdateMarkdownTableAsync(readmePath, compatibilityHeading, table => AddCompatibilityRow(table, nextRuntime, bundled));
+bundledTable.Update(bundled);
+compatibilityTable.SetSource(nextRuntime, bundled);
 
-string body = BuildTable(updates, "Newer stable SDL releases are available. This updates the versions used to build the native runtimes in `runtimes/utils/sdl.env`.", withLinks: true)
-    + Environment.NewLine
-    + BuildRuntimeNotice(previousRuntime, nextRuntime);
+await versions.SaveAsync();
+await package.SaveAsync();
+await bundledTable.SaveAsync();
+await compatibilityTable.SaveAsync();
 
-await File.WriteAllTextAsync("pr-body.md", body);
+string body = BuildTable(updates, "Newer stable SDL releases are available. This updates the versions used to build the native runtimes in `runtimes/utils/sdl.env`.", withLinks: true);
+await File.WriteAllTextAsync("pr-body.md", $"{body}{Environment.NewLine}{BuildRuntimeNotice(previousRuntime, nextRuntime)}");
 
 SetOutput("updated", "true");
 AppendStepSummary(BuildTable(updates, "### SDL updates", withLinks: false));
@@ -167,109 +151,11 @@ static bool TryParseReleaseVersion(string? tag, out Version? version)
     const string prefix = "release-";
     version = null;
 
-    if (tag is null || !tag.StartsWith(prefix, StringComparison.Ordinal))
+    if (tag?.StartsWith(prefix, StringComparison.Ordinal) != true)
         return false;
 
     return Version.TryParse(tag[prefix.Length..], out version);
 }
-
-static async Task<(Version Previous, Version Next)> BumpRuntimeVersionAsync(string path, List<UpdatedRelease> updates)
-{
-    const string openTag = "<version>";
-    const string closeTag = "</version>";
-
-    string nuspec = await File.ReadAllTextAsync(path);
-
-    int start = nuspec.IndexOf(openTag, StringComparison.Ordinal);
-    int end = start < 0 ? -1 : nuspec.IndexOf(closeTag, start, StringComparison.Ordinal);
-
-    if (start < 0 || end < 0)
-        throw new InvalidOperationException($"Cannot find the package version in '{path}'.");
-
-    start += openTag.Length;
-    string text = nuspec[start..end].Trim();
-
-    if (!Version.TryParse(text, out Version? previous) || previous.Build < 0)
-        throw new InvalidOperationException($"'{text}' in '{path}' is not a major.minor.patch version.");
-
-    Version next = NextRuntimeVersion(previous, updates);
-
-    await File.WriteAllTextAsync(path, nuspec[..start] + next + nuspec[end..]);
-    return (previous, next);
-}
-
-static Version NextRuntimeVersion(Version previous, List<UpdatedRelease> updates)
-{
-    if (updates.Exists(u => u.Latest.Major != u.Current.Major))
-        return new Version(previous.Major + 1, 0, 0);
-
-    if (updates.Exists(u => u.Latest.Minor != u.Current.Minor))
-        return new Version(previous.Major, previous.Minor + 1, 0);
-
-    return new Version(previous.Major, previous.Minor, previous.Build + 1);
-}
-
-static void UpdateBundledVersions(MarkdownTable table, Dictionary<string, Version> bundled)
-{
-    foreach (string[] row in table.Rows)
-    {
-        if (bundled.TryGetValue(row[0], out Version? version))
-            row[1] = Code(version.ToString());
-    }
-}
-
-static void AddCompatibilityRow(MarkdownTable table, Version runtime, Dictionary<string, Version> bundled)
-{
-    List<string> cells = [];
-
-    foreach (string column in table.Header)
-    {
-        string cell = column switch
-        {
-            "Khaos" => unreleasedKhaos,
-            "Runtimes" => Code(runtime.ToString()),
-            _ when bundled.TryGetValue(column, out Version? version) => Code(version.ToString()),
-            _ => throw new InvalidOperationException($"Unknown column '{column}' in the SDL compatibility table.")
-        };
-
-        cells.Add(cell);
-    }
-
-    string[] row = [.. cells];
-
-    if (table.Rows.Count > 0 && table.Rows[0][0] == unreleasedKhaos)
-        table.Rows[0] = row;
-    else
-        table.Rows.Insert(0, row);
-}
-
-static async Task UpdateMarkdownTableAsync(string path, string heading, Action<MarkdownTable> update)
-{
-    string content = await File.ReadAllTextAsync(path);
-    string newLine = content.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
-    List<string> lines = [.. content.Split('\n').Select(line => line.TrimEnd('\r'))];
-
-    int headingIndex = lines.FindIndex(line => line.Trim() == heading);
-    int start = headingIndex < 0 ? -1 : lines.FindIndex(headingIndex + 1, line => line.TrimStart().StartsWith('|'));
-
-    if (start < 0)
-        throw new InvalidOperationException($"Cannot find the table under '{heading}' in '{path}'.");
-
-    int end = start;
-
-    while (end < lines.Count && lines[end].TrimStart().StartsWith('|'))
-        end++;
-
-    MarkdownTable table = MarkdownTable.Parse([.. lines.GetRange(start, end - start)]);
-    update(table);
-
-    lines.RemoveRange(start, end - start);
-    lines.InsertRange(start, table.Render().ToArray());
-
-    await File.WriteAllTextAsync(path, string.Join(newLine, lines));
-}
-
-static string Code(string value) => $"`{value}`";
 
 static string BuildRuntimeNotice(Version previous, Version next)
 {
@@ -295,10 +181,10 @@ static string BuildTable(IEnumerable<UpdatedRelease> updates, string heading, bo
     foreach (UpdatedRelease update in updates)
     {
         string latest = withLinks
-            ? $"[{update.Latest}](https://github.com/libsdl-org/{update.Repository}/releases/tag/release-{update.Latest})"
+            ? $"[`{update.Latest}`](https://github.com/libsdl-org/{update.Repository}/releases/tag/release-{update.Latest})"
             : update.Latest.ToString();
 
-        builder.AppendLine(CultureInfo.InvariantCulture, $"| `{update.Key}` | `{update.Current}` | `{latest}` |");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"| `{update.Key}` | `{update.Current}` | {latest} |");
     }
 
     return builder.ToString();
@@ -334,7 +220,215 @@ internal sealed record Library(string Repository, string DisplayName);
 
 internal sealed record UpdatedRelease(string Key, string Repository, Version Current, Version Latest);
 
-[JsonSerializable(typeof(Release[]))]
-internal sealed partial class GithubContext : JsonSerializerContext
+internal sealed class SdlVersions
 {
+    private readonly string[] _lines;
+    private readonly string _path;
+    private readonly Dictionary<string, int> _entries = [];
+
+    private SdlVersions(string[] lines, string path)
+    {
+        _lines = lines;
+        _path = path;
+
+        for (int i = 0; i < lines.Length; i++)
+        {
+            ReadOnlySpan<char> line = lines[i].AsSpan().Trim();
+            int separator = line.IndexOf('=');
+
+            if (separator <= 0 || line.StartsWith('#'))
+                continue;
+
+            _entries[line[..separator].Trim().ToString()] = i;
+        }
+    }
+
+    public static async Task<SdlVersions> ParseAsync(string path)
+        => new(await File.ReadAllLinesAsync(path), path);
+
+    public Version GetVersion(string key)
+    {
+        if (!_entries.TryGetValue(key, out int index))
+            throw new FormatException($"'{_path}' has no {key} entry.");
+
+        ReadOnlySpan<char> line = _lines[index];
+        ReadOnlySpan<char> text = line[(line.IndexOf('=') + 1)..].Trim();
+
+        if (!Version.TryParse(text, out Version? version))
+            throw new FormatException($"'{text}' is not a valid {key} version in '{_path}'.");
+
+        return version;
+    }
+
+    public void SetVersion(string key, Version version)
+    {
+        if (!_entries.TryGetValue(key, out int index))
+            throw new FormatException($"'{_path}' has no {key} entry.");
+
+        _lines[index] = $"{key}={version}";
+    }
+
+    public Task SaveAsync() => File.WriteAllTextAsync(_path, string.Join('\n', _lines) + '\n');
 }
+
+internal sealed class RuntimePackage
+{
+    private const string OpenTag = "<version>";
+    private const string CloseTag = "</version>";
+
+    private readonly string _path;
+    private readonly int _versionStart;
+    private string _content;
+    private int _versionLength;
+
+    private RuntimePackage(string content, string path)
+    {
+        int open = content.IndexOf(OpenTag, StringComparison.Ordinal);
+        int close = open < 0 ? -1 : content.IndexOf(CloseTag, open, StringComparison.Ordinal);
+
+        if (close < 0)
+            throw new FormatException($"Cannot find the package version in '{path}'.");
+
+        _content = content;
+        _path = path;
+        _versionStart = open + OpenTag.Length;
+        _versionLength = close - _versionStart;
+
+        ReadOnlySpan<char> text = content.AsSpan(_versionStart, _versionLength).Trim();
+
+        if (!Version.TryParse(text, out Version? version) || version.Build < 0)
+            throw new FormatException($"'{text}' in '{path}' is not a major.minor.patch version.");
+
+        Version = version;
+    }
+
+    public Version Version { get; private set; }
+
+    public static async Task<RuntimePackage> ParseAsync(string path)
+        => new(await File.ReadAllTextAsync(path), path);
+
+    public void Bump(List<UpdatedRelease> updates)
+    {
+        bool major = updates.Exists(static u => u.Latest.Major != u.Current.Major);
+        bool minor = updates.Exists(static u => u.Latest.Minor != u.Current.Minor);
+
+        Version next = (major, minor) switch
+        {
+            (true, _) => new Version(Version.Major + 1, 0, 0),
+            (false, true) => new Version(Version.Major, Version.Minor + 1, 0),
+            (false, false) => new Version(Version.Major, Version.Minor, Version.Build + 1),
+        };
+
+        string text = next.ToString();
+
+        _content = string.Concat(_content.AsSpan(0, _versionStart), text, _content.AsSpan(_versionStart + _versionLength));
+        _versionLength = text.Length;
+        Version = next;
+    }
+
+    public Task SaveAsync() => File.WriteAllTextAsync(_path, _content);
+}
+
+internal abstract class ReadmeTable
+{
+    private readonly string[] _lines;
+    private readonly string _newLine;
+    private readonly int _start;
+    private readonly int _length;
+
+    protected ReadmeTable(string content, string path, string heading)
+    {
+        _newLine = content.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
+        string[] lines = content.Split(_newLine);
+
+        int headingIndex = Array.FindIndex(lines, l => l.AsSpan().Trim().SequenceEqual(heading));
+        int start = headingIndex < 0 ? -1 : Array.FindIndex(lines, headingIndex + 1, static l => l.AsSpan().TrimStart().StartsWith('|'));
+
+        if (start < 0)
+            throw new FormatException($"Cannot find the table under '{heading}' in '{path}'.");
+
+        int end = start;
+
+        while (end < lines.Length && lines[end].AsSpan().TrimStart().StartsWith('|'))
+            end++;
+
+        _lines = lines;
+        _start = start;
+        _length = end - start;
+
+        Path = path;
+        Table = MarkdownTable.Parse(lines.AsSpan(start..end));
+    }
+
+    protected string Path { get; }
+
+    protected MarkdownTable Table { get; }
+
+    public Task SaveAsync()
+    {
+        string[] lines = [.. _lines.AsSpan(.._start), .. Table.Render(), .. _lines.AsSpan((_start + _length)..)];
+        return File.WriteAllTextAsync(Path, string.Join(_newLine, lines));
+    }
+
+    protected static string Code(Version version) => $"`{version}`";
+}
+
+internal sealed class BundledVersionsTable : ReadmeTable
+{
+    private BundledVersionsTable(string content, string path)
+        : base(content, path, "## Bundled versions")
+    {
+    }
+
+    public static async Task<BundledVersionsTable> ParseAsync(string path)
+        => new(await File.ReadAllTextAsync(path), path);
+
+    public void Update(IReadOnlyDictionary<string, Version> bundled)
+    {
+        for (int row = 0; row < Table.RowCount; row++)
+        {
+            if (bundled.TryGetValue(Table[row, 0], out Version? version))
+                Table[row, 1] = Code(version);
+        }
+    }
+}
+
+internal sealed class CompatibilityTable : ReadmeTable
+{
+    private const string Source = "`source`";
+
+    private CompatibilityTable(string content, string path)
+        : base(content, path, "## SDL compatibility")
+    {
+    }
+
+    public static async Task<CompatibilityTable> ParseAsync(string path)
+        => new(await File.ReadAllTextAsync(path), path);
+
+    public void SetSource(Version runtime, IReadOnlyDictionary<string, Version> bundled)
+    {
+        ReadOnlySpan<string> header = Table.Header;
+        string[] row = new string[header.Length];
+
+        for (int column = 0; column < header.Length; column++)
+        {
+            string name = header[column];
+
+            row[column] = name switch
+            {
+                "Khaos" => Source,
+                "Runtimes" => Code(runtime),
+                _ when bundled.TryGetValue(name, out Version? version) => Code(version),
+                _ => throw new FormatException($"Unknown column '{name}' in the SDL compatibility table of '{Path}'.")
+            };
+        }
+
+        if (Table.RowCount > 0 && Table[0, 0] == Source)
+            Table.Replace(0, row);
+        else
+            Table.Insert(0, row);
+    }
+}
+
+[JsonSerializable(typeof(Release[]))]
+internal sealed partial class GithubContext : JsonSerializerContext;
