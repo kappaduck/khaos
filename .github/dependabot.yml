@@ -28,27 +28,10 @@ updates:
     ignore:
       # Pinned to the compiler shipped with the minimum supported SDK (.NET 11.0.100),
       # otherwise the packaged analyzers fail to load for users (CS8032).
-      # See Directory.Packages.props.
       - dependency-name: 'Microsoft.CodeAnalysis.*'
     groups:
-      analyzers:
-        patterns:
-          - 'AsyncFixer'
-          - 'Microsoft.VisualStudio.Threading.Analyzers'
-          - 'Roslynator.*'
-          - 'SonarAnalyzer.*'
-      build:
-        patterns:
-          - 'DotNet.ReproducibleBuilds'
-          - 'PolySharp'
-      runtimes:
-        patterns:
-          - 'KappaDuck.Khaos.Runtimes'
-      tests:
-        patterns:
-          - 'TUnit*'
-          - 'Verify.*'
-          - 'Basic.Reference.Assemblies.*'
+      nugets:
+        patterns: ['*']
 
   - package-ecosystem: github-actions
     directory: /
