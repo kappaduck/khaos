@@ -13,8 +13,8 @@ It is referenced by `KappaDuck.Khaos` and does not need to be installed directly
 
 | Library   | Version  |
 | :-------- | :------: |
-| SDL3      | `3.4.16` |
-| SDL_image | `3.4.6`  |
+| SDL3      | `3.4.18` |
+| SDL_image | `3.4.8`  |
 | SDL_ttf   | `3.2.2`  |
 | SDL_mixer | `3.2.4`  |
 
