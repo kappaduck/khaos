@@ -7,7 +7,7 @@
   <ItemGroup Label="Global analyzers">
     <GlobalPackageReference Include="AsyncFixer" Version="2.1.0" />
     <GlobalPackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="18.7.23" />
-    <GlobalPackageReference Include="Roslynator.Analyzers" Version="5.0.0" />
+    <GlobalPackageReference Include="Roslynator.Analyzers" Version="5.0.1" />
     <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="10.35.0.4138" />
   </ItemGroup>
 
@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Runtimes">
-    <PackageVersion Include="KappaDuck.Khaos.Runtimes" Version="1.0.2" />
+    <PackageVersion Include="KappaDuck.Khaos.Runtimes" Version="1.0.3" />
   </ItemGroup>
 
   <!--
