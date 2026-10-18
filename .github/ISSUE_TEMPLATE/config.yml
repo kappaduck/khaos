@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://khaos.kappaduck.com
+    about: API reference and guides.
+  - name: SDL3 documentation
+    url: https://wiki.libsdl.org/SDL3/FrontPage
+    about: For questions about SDL itself rather than Khaos's wrapper over it.

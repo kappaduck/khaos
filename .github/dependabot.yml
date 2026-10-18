@@ -1,0 +1,29 @@
+version: 2
+
+updates:
+  - package-ecosystem: dotnet-sdk
+    directory: /
+    schedule:
+      interval: weekly
+      day: thursday
+      time: '11:30'
+      timezone: America/Toronto
+    labels: [dependencies]
+    assignees: [beauchama]
+    commit-message:
+      prefix: 'SDK:'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: thursday
+      time: '11:30'
+      timezone: America/Toronto
+    labels: [dependencies]
+    assignees: [beauchama]
+    commit-message:
+      prefix: 'Actions:'
+    groups:
+      actions:
+        patterns: ['*']

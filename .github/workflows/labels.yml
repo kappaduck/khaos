@@ -1,0 +1,38 @@
+name: Labels
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/labels.yml', '.github/workflows/labels.yml']
+  pull_request:
+    branches: [main]
+    paths: ['.github/labels.yml', '.github/workflows/labels.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync labels
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Synchronize
+        uses: crazy-max/ghaction-github-labeler@v6
+        with:
+          yaml-file: .github/labels.yml
+          skip-delete: true
+          dry-run: ${{ github.event_name == 'pull_request' }}

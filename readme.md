@@ -1,0 +1,302 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kappaduck/khaos/main/assets/github/khaos-lockup-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kappaduck/khaos/main/assets/github/khaos-lockup-light.svg">
+    <img src="https://raw.githubusercontent.com/kappaduck/khaos/main/assets/github/khaos-lockup-light.svg" alt="Khaos" width="384">
+  </picture>
+</p>
+
+<p align="center">A modern, fast and flexible .NET game framework using SDL3</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/.NET-11.0-512BD4" alt=".NET 11.0">
+  <a href="https://www.nuget.org/packages/KappaDuck.Khaos/"><img src="https://img.shields.io/nuget/v/KappaDuck.Khaos?style=flat&label=NuGet" alt="NuGet Version"></a>
+</p>
+
+## Overview
+
+Khaos is a .NET 11 game framework built on SDL3 and its extensions ([SDL_image], [SDL_mixer], [SDL_ttf]).
+
+It wraps SDL in a clean, idiomatic C# API, so your game is plain C#: no pointers, no native handles, no C-style calls.
+The framework takes care of the window, the loop and the platform.
+
+- **2D first, then 3D**: `Game2D` builds on [SDL_Renderer]. `Game3D` will build on [SDL_GPU] once 2D is done (see the [Roadmap](#roadmap)).
+- **Low allocation**: the framework avoids allocating on every frame, so the garbage collector stays out of the way.
+- **Everything a game needs**: input actions for keyboard, mouse and gamepad, audio with buses and text.
+- **Generated events**: `Event` is a source-generated union, so `OnEvent` pattern-matches on cases like `KeyPressed`
+  without boxing or allocating. A game declares its own events with `[CustomEvents]` and receives them the same way.
+- **Typed assets**: `[AssetCatalog]` turns the assets folder into properties like `Content.Sprites.Ball`, so a missing
+  or renamed file breaks the build instead of the game.
+- **One game, every platform**: `dotnet new khaos` sets up the game with a desktop and a web application.
+- **Hosting built in**: dependency injection, logging and configuration from `Microsoft.Extensions`.
+
+## Usage
+
+```csharp
+// Pong/PongGame.cs: the game, a library shared by the desktop and web applications
+namespace Pong;
+
+[AssetCatalog("assets")]
+internal static partial class Content;
+
+internal sealed class PongGame() : Game2D("Pong!", 1280, 720)
+{
+    private Sprite _ball = null!;
+    private Vector2 _previous = new(640f, 360f);
+    private Vector2 _position = new(640f, 360f);
+    private Vector2 _velocity = new(240f, 180f);
+
+    protected override void Load()
+    {
+        _ball = new Sprite(Assets.Load(Content.Sprites.Ball));
+    }
+
+    protected override void OnEvent(in Event e)
+    {
+        if (e is KeyPressed { Scancode: Scancode.Escape })
+            Exit();
+    }
+
+    protected override void FixedUpdate(in GameTime time)
+    {
+        _previous = _position;
+        _position += _velocity * (float)time.Delta;
+    }
+
+    protected override void Update(in GameTime time)
+    {
+        // Cosmetic only, so it follows the real clock and stays smooth whatever the simulation rate.
+        _ball.Rotation += Angle.FromDegrees(180f * (float)time.Delta);
+    }
+
+    protected override void Draw(Renderer renderer, in Frame frame)
+    {
+        _ball.Position = Vector2.Lerp(_previous, _position, frame.Alpha);
+
+        renderer.Clear(Color.Slate);
+
+        renderer.Draw(_ball);
+        renderer.Present();
+    }
+}
+```
+
+```csharp
+// Pong.Desktop/Program.cs: configure any settings, then run the game. Pong.Web has its own too.
+using Pong;
+
+KhaosApplicationBuilder builder = KhaosApplication.CreateBuilder(args);
+
+return builder.Build<PongGame>().Run();
+```
+
+`FixedUpdate` runs on the simulation clock and `Update` on the real one. `Draw` gets neither: `frame.Alpha` is
+how far the frame sits between two simulation steps, so the ball is drawn between its last two positions instead of
+jumping from one to the next. The renderer is handed to `Draw` and nowhere else, so nothing can draw outside of it.
+
+More samples and documentation can be found at [Documentation](#documentation)
+
+> [!NOTE]
+> The public API is still a prototype. Expect frequent changes.
+
+## Installation
+
+The quickest start is the template, which sets up the game, a desktop and a web applications:
+
+```bash
+dotnet new install KappaDuck.Khaos.Templates
+dotnet new khaos -o Pong
+```
+
+Or install Khaos via [NuGet]:
+
+```bash
+dotnet package add KappaDuck.Khaos -v 0.1.0
+```
+
+or via your `.csproj`:
+
+```xml
+<PackageReference Include="KappaDuck.Khaos" Version="0.1.0" />
+```
+
+You can also install via the NuGet Package Manager in Visual Studio or JetBrains Rider.
+
+> [!WARNING]
+> Khaos is still in early development. Expect breaking changes and frequent updates. Always use the latest version for the best experience.
+
+### Beta packages
+
+Pre-release versions are published to NuGet.org alongside stable releases. To install the latest beta:
+
+```bash
+dotnet package add KappaDuck.Khaos --prerelease
+```
+
+## Packages
+
+| Package                  | What it brings                                                                                    |
+| :----------------------- | :------------------------------------------------------------------------------------------------ |
+| `KappaDuck.Khaos`        | The framework: game loop, windowing, input, 2D rendering, audio, text, assets, hosting, analyzers |
+| `KappaDuck.Khaos.Native` | SDL3 native libraries for Windows and Linux                                                       |
+
+## Roadmap
+
+The first goal is a 2D game made with Khaos that runs on desktop and in the browser by March 31, 2027, ready for
+[Ludum Dare] in April 2027. Each milestone ends with a release on NuGet that runs on Windows, Linux and in the browser.
+
+| Version | Target          | What it brings                                                                                                     |
+| :-----: | :-------------- | :----------------------------------------------------------------------------------------------------------------- |
+| `0.1.0` | Late Nov. 2026  | The pipeline: `Game2D` on SDL's main callbacks with a fixed step, events, window, hosting, SDKs and the template   |
+| `0.2.0` | Late Dec. 2026  | Drawing and moving: batched 2D renderer, shapes, textures, sprites, letterbox, keyboard, mouse, gamepad, input map |
+| `0.3.0` | Mid Jan. 2027   | A game from start to finish: audio with buses, text, the asset catalog, scenes and transitions, timers and tweens  |
+| `0.4.0` | Early Feb. 2027 | The 2D world: 2D camera, sprite sheets and animations, collisions, tilemaps                                        |
+| `0.5.0` | Late Feb. 2027  | Jam comfort: splash and loading screens, debug overlay, particles, simple UI, render targets                       |
+| `0.6.0` | Mar. 31, 2027   | The jam release: fixes only, then the engine freezes                                                               |
+
+Scenes, cameras, tilemaps, collisions and tweens will ship in a separate `KappaDuck.Khaos.Toolkit` package.
+
+After the jam: `Game3D` on [SDL_GPU], 2D shader effects, Android, networking and more. Dates and scope can move, the
+jam comes first.
+
+## Documentation
+
+Full API documentation and samples are available:
+
+- [Full API reference][khaos.kappaduck.com]
+- [Benchmarks](https://khaos.kappaduck.com/benchmarks/): measured on every release, on the JIT and with NativeAOT
+- **[`examples/`][examples]**: one concept per example, playable in the documentation
+- **[`samples/`][samples]**: complete small games
+- **[`demo/`][demo]**: a full game
+
+> [!NOTE]
+> The documention is in work in progress
+
+## Cross-platform support
+
+Khaos supports Windows, Linux and the browser thanks to SDL3's abstraction layer and .NET on WebAssembly.
+
+The framework may have platform-specific implementations or limitations depending on the underlying SDL support. Using platform-specific features will surface a compiler warning (CA1416) indicating the code may not be portable across all targets.
+
+## SDL compatibility
+
+SDL3 native libraries are bundled via `KappaDuck.Khaos.Native`. The table below shows the SDL versions included in each release of both packages.
+The `source` row tracks the main branch and every other row lists the native version that Khaos release depends on.
+
+|  Khaos   | Native  |  SDL3   | SDL_image | SDL_ttf | SDL_mixer |
+| :------: | :-----: | :-----: | :-------: | :-----: | :-------: |
+| `source` | `0.0.0` | `0.0.0` |  `0.0.0`  | `0.0.0` |  `0.0.0`  |
+
+## Development & Sandbox
+
+You can build Khaos from source and experiment quickly using the included sandbox project.
+
+### Prerequisites
+
+- [.NET 11.0 SDK](https://dotnet.microsoft.com/download/dotnet/11.0)
+
+### Setup
+
+**1. Clone the repository**
+
+```bash
+git clone https://github.com/KappaDuck/khaos.git
+cd khaos
+```
+
+**2. Build and test**
+
+```bash
+dotnet build
+dotnet test
+```
+
+Tests run headless by default, so they work on a machine without a display. To watch the windows appear, pick a driver:
+
+```bash
+dotnet test -- --test-parameter video-driver=default
+```
+
+`default` lets the platform choose, the way a real application does. You can also name a driver directly, such as `x11` or `windows`. An `SDL_VIDEODRIVER` environment variable that is already set always wins.
+
+**3. Running documentation** (optional)
+
+```bash
+dotnet tool restore
+dotnet build src/Khaos --configuration Release
+dotnet docfx docs/docfx.json --serve
+```
+
+The API reference is generated from the compiled assembly and its XML documentation, so the build has to run first.
+
+### Sandbox
+
+`sandbox/` is for experimenting without touching the main source. Its code is compiled by both heads, desktop and web, and references `src/Khaos` directly so changes are reflected immediately.
+
+Your code (any `.cs` file in `sandbox/`, subfolders included) and your assets (`sandbox/assets/`) are ignored by git.
+If the folder holds no source at all, the first build drops a starter `Program.cs` in from `Program.cs.template`, so a
+fresh clone always compiles.
+
+```bash
+dotnet run --project sandbox/Desktop
+```
+
+or simply run it in your IDE.
+
+### Repository layout
+
+| Folder                           | What it holds                                                                  |
+| :------------------------------- | :----------------------------------------------------------------------------- |
+| `src/`                           | the packages a game references                                                 |
+| `analyzers/`                     | `KHAOS` rules shipped to games, `KHI` rules for Khaos itself                   |
+| `native/`                        | SDL versions, the scripts that build SDL for each platform, the Native package |
+| `build/`                         | The shared version, NuGet metadata and Emscripten version                      |
+| `sandbox/`                       | A playground with a desktop and a web head                                     |
+| `examples/`, `samples/`, `demo/` | Code to learn from, from one concept to a full game                            |
+| `tests/`, `benchmarks/`          | TUnit tests and BenchmarkDotNet measurements                                   |
+| `docs/`                          | DocFX site, guides, diagnostics, decision records                              |
+| `tools/`                         | Release and packing scripts                                                    |
+| `rules/`                         | Analyzer and style settings                                                    |
+
+### Benchmarks
+
+```bash
+dotnet run -c Release --project benchmarks/Khaos.Benchmarks -- --filter '*'
+```
+
+The [Benchmarks workflow](.github/workflows/benchmarks.yml) runs them on demand, with any filter, and on every release,
+whose results are published in the [documentation](https://khaos.kappaduck.com/benchmarks/).
+
+## AI disclosure
+
+AI (Claude) helps with this project: documentation, prototypes, design exploration, configuration and
+reviews. Everything it produces is reviewed by the author, and the code of Khaos is written by hand.
+
+## Credits
+
+Built on
+
+- [SDL3]
+- [SDL_image]
+- [SDL_ttf]
+- [SDL_mixer]
+
+Inspired by
+
+- [SFML](https://www.sfml-dev.org/)
+- [LazyFoo](https://lazyfoo.net/index.php)
+- [Sayers.SDL2.Core](https://github.com/JeremySayers/Sayers.SDL2.Core)
+- [SDL3-CS](https://github.com/flibitijibibo/SDL3-CS)
+
+[examples]: examples
+[samples]: samples
+[demo]: demo
+[NuGet]: https://www.nuget.org/packages/KappaDuck.Khaos/
+[SDL3]: https://www.libsdl.org/
+[SDL_image]: https://github.com/libsdl-org/SDL_image
+[SDL_mixer]: https://github.com/libsdl-org/SDL_mixer
+[SDL_ttf]: https://github.com/libsdl-org/SDL_ttf
+[SDL_Renderer]: https://wiki.libsdl.org/SDL3/CategoryRender
+[SDL_GPU]: https://wiki.libsdl.org/SDL3/CategoryGPU
+[Ludum Dare]: https://ludumdare.com/
+[khaos.kappaduck.com]: https://khaos.kappaduck.com

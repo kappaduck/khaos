@@ -1,0 +1,10 @@
+# Platforms
+- name: "platform:windows"
+  color: "006B75"
+  description: "Bugs/features related to the Windows platform"
+- name: "platform:linux"
+  color: "006B75"
+  description: "Bugs/features related to the Linux platform"
+- name: "platform:browser"
+  color: "006B75"
+  description: "Bugs/features related to the browser platform"

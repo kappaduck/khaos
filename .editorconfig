@@ -1,0 +1,38 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# .NET
+[*.{csproj,slnx,slnf}]
+indent_size = 2
+
+[*.cs]
+dotnet_sort_system_directives_first = false
+file_header_template = Copyright (c) KappaDuck.\nLicensed under the MIT license.
+
+# Configuration
+[*.{config,props,targets,xml,json,yml,nuspec}]
+indent_size = 2
+
+# TypeScript
+[*.ts]
+indent_size = 2
+
+# Linux files
+[*.{sh,cmake,env}]
+end_of_line = lf
+
+# Verified files
+[*.{received,verified}.{txt,cs,json,xml}]
+charset = utf-8-bom
+end_of_line = lf
+insert_final_newline = false
+trim_trailing_whitespace = false
+indent_size = unset
+indent_style = unset
+tab_width = unset
