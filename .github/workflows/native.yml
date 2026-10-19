@@ -1,0 +1,293 @@
+name: Native
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'native/sdl.env'
+      - 'native/packages/**'
+      - 'native/scripts/build-linux.sh'
+      - 'native/scripts/build-windows.sh'
+      - 'native/scripts/dependencies.sh'
+      - 'native/scripts/mingw.cmake'
+      - 'native/scripts/smoke-test.py'
+      - '.github/workflows/native.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  # The glibc of the Linux build image (Steam Runtime 4 = Debian 13 = glibc 2.41). The image is
+  # written in build-linux and in the smoke-test matrix:
+  GLIBC_MAX: '2.41'
+
+jobs:
+  version:
+    name: Check the version
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      published: ${{ steps.check.outputs.published }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Is it on nuget.org?
+        id: check
+        run: |
+          version=$(sed -n 's:.*<version>\(.*\)</version>.*:\1:p' native/packages/Native.nuspec)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if curl -fsS https://api.nuget.org/v3-flatcontainer/kappaduck.khaos.native/index.json | jq -e --arg v "$version" '.versions | index($v)' > /dev/null; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "KappaDuck.Khaos.Native $version is already published."
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-linux:
+    name: Build linux-x64
+    runs-on: ubuntu-latest
+    needs: version
+    if: needs.version.outputs.published != 'true' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 90
+    container: registry.gitlab.steamos.cloud/steamrt/steamrt4/sdk
+
+    defaults:
+      run:
+        working-directory: native
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Load versions
+        run: grep -v '^#' sdl.env >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: |
+          chmod +x scripts/dependencies.sh
+          scripts/dependencies.sh linux
+
+      - name: Build
+        run: |
+          chmod +x scripts/build-linux.sh
+          scripts/build-linux.sh
+
+      - name: Check files, dependencies and glibc
+        run: |
+          cd artifacts/runtimes/linux-x64/native
+          status=0
+          expected='libSDL3.so libSDL3_image.so libSDL3_mixer.so libSDL3_ttf.so'
+          actual=$(ls | sort | xargs)
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::Expected $expected, found $actual"
+            status=1
+          fi
+          allowed='^(libc|libm|libdl|libpthread|librt|ld-linux-x86-64|libSDL3)\.so'
+          for lib in *.so; do
+            for needed in $(readelf -d "$lib" | sed -n 's/.*Shared library: \[\(.*\)\]/\1/p'); do
+              if ! echo "$needed" | grep -Eq "$allowed"; then
+                echo "::error::$lib needs $needed, which a player's distribution may not have"
+                status=1
+              fi
+            done
+          done
+          highest=$(objdump -T *.so | grep -o 'GLIBC_[0-9.]*' | sed 's/GLIBC_//' | sort -Vu | tail -n 1)
+          echo "Highest glibc symbol: $highest (allowed: $GLIBC_MAX)"
+          if [ "$(printf '%s\n%s\n' "$highest" "$GLIBC_MAX" | sort -V | tail -n 1)" != "$GLIBC_MAX" ]; then
+            echo "::error::The libraries need glibc $highest, above GLIBC_MAX $GLIBC_MAX"
+            status=1
+          fi
+          ls -l
+          exit $status
+
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: linux-native
+          path: native/artifacts
+          retention-days: 7
+
+  build-windows:
+    name: Build win-x64
+    # Cross-compiled with MinGW: the runner's own libraries do not end up in the DLLs.
+    runs-on: ubuntu-latest
+    needs: version
+    if: needs.version.outputs.published != 'true' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 90
+
+    defaults:
+      run:
+        working-directory: native
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Load versions
+        run: grep -v '^#' sdl.env >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: |
+          chmod +x scripts/dependencies.sh
+          scripts/dependencies.sh windows
+
+      - name: Build
+        run: |
+          chmod +x scripts/build-windows.sh
+          scripts/build-windows.sh
+
+      - name: Check files and imports
+        run: |
+          cd artifacts/runtimes/win-x64/native
+          status=0
+          expected='SDL3.dll SDL3_image.dll SDL3_mixer.dll SDL3_ttf.dll'
+          actual=$(ls | sort | xargs)
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::Expected $expected, found $actual"
+            status=1
+          fi
+          allowed='^(SDL3(_image|_ttf|_mixer)?|api-ms-win-[a-z0-9-]+|ADVAPI32|BCRYPT|CFGMGR32|GDI32|HID|IMM32|KERNEL32|msvcrt|OLE32|OLEAUT32|RPCRT4|SETUPAPI|SHELL32|USER32|VERSION|WINMM)\.dll$'
+          for lib in *.dll; do
+            for imported in $(x86_64-w64-mingw32-objdump -p "$lib" | sed -n 's/.*DLL Name: \(.*\)/\1/p'); do
+              if ! echo "$imported" | grep -Eiq "$allowed"; then
+                echo "::error::$lib imports $imported, which is not part of Windows"
+                status=1
+              fi
+            done
+          done
+          ls -l
+          exit $status
+
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-native
+          path: native/artifacts
+          retention-days: 7
+
+  smoke-test-linux:
+    name: Load on ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    needs: build-linux
+    timeout-minutes: 10
+    container: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: debian:13
+            install: apt-get update && apt-get install -y --no-install-recommends python3
+          - image: ubuntu:25.10
+            install: apt-get update && apt-get install -y --no-install-recommends python3
+          - image: fedora:latest
+            install: dnf install -y python3
+          - image: archlinux:latest
+            install: pacman -Sy --noconfirm python
+          - image: registry.gitlab.steamos.cloud/steamrt/steamrt4/sdk
+            install: 'true'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Download
+        uses: actions/download-artifact@v8
+        with:
+          name: linux-native
+          path: native/artifacts
+
+      - name: Install Python
+        run: ${{ matrix.install }}
+
+      - name: Load SDL
+        run: python3 native/scripts/smoke-test.py native/artifacts/runtimes/linux-x64/native
+
+  smoke-test-windows:
+    name: Load on Windows
+    runs-on: windows-latest
+    needs: build-windows
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Download
+        uses: actions/download-artifact@v8
+        with:
+          name: windows-native
+          path: native/artifacts
+
+      - name: Load SDL
+        run: python native/scripts/smoke-test.py native/artifacts/runtimes/win-x64/native
+
+  publish:
+    name: Publish ${{ needs.version.outputs.version }}
+    runs-on: ubuntu-latest
+    needs: [version, build-linux, build-windows, smoke-test-linux, smoke-test-windows]
+    timeout-minutes: 15
+    environment: nuget
+    permissions:
+      contents: read
+      id-token: write
+
+    defaults:
+      run:
+        working-directory: native
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: ./global.json
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: native/artifacts
+
+      - name: Structure artifacts
+        run: |
+          mkdir -p packages/runtimes/linux-x64/native packages/runtimes/win-x64/native packages/licenses
+          cp artifacts/linux-native/runtimes/linux-x64/native/* packages/runtimes/linux-x64/native/
+          cp artifacts/windows-native/runtimes/win-x64/native/* packages/runtimes/win-x64/native/
+          cp -r artifacts/linux-native/licenses/. packages/licenses/
+          cp -r artifacts/windows-native/licenses/. packages/licenses/
+          find packages/runtimes packages/licenses -type f | sort
+
+      - name: Package
+        run: dotnet pack packages/Native.nuspec --output .
+
+      - name: Generate key
+        id: nuget
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841
+        with:
+          user: ${{ secrets.USER }}
+
+      - name: Publish to NuGet
+        run: dotnet nuget push KappaDuck.Khaos.Native.*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget.outputs.NUGET_API_KEY }} --skip-duplicate

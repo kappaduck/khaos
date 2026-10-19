@@ -183,9 +183,9 @@ The framework may have platform-specific implementations or limitations dependin
 SDL3 native libraries are bundled via `KappaDuck.Khaos.Native`. The table below shows the SDL versions included in each release of both packages.
 The `source` row tracks the main branch and every other row lists the native version that Khaos release depends on.
 
-|  Khaos   | Native  |  SDL3   | SDL_image | SDL_ttf | SDL_mixer |
-| :------: | :-----: | :-----: | :-------: | :-----: | :-------: |
-| `source` | `0.0.0` | `0.0.0` |  `0.0.0`  | `0.0.0` |  `0.0.0`  |
+|  Khaos   | Native  |   SDL3   | SDL_image | SDL_ttf | SDL_mixer |
+| :------: | :-----: | :------: | :-------: | :-----: | :-------: |
+| `source` | `1.0.0` | `3.4.18` |  `3.4.8`  | `3.2.2` |  `3.2.4`  |
 
 ## Development & Sandbox
 

@@ -33,3 +33,14 @@
 *.verified.cs  text  eol=lf
 *.received.txt text  eol=lf
 *.received.cs  text  eol=lf
+
+# Others
+*.cmake    text eol=lf
+*.env      text eol=lf
+*.md       text diff=markdown linguist-detectable
+codeowners text
+*.sh       text eol=lf
+*.json     text
+*.xml      text eol=crlf
+*.yaml     text eol=crlf
+*.yml      text eol=crlf
