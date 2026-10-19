@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <KhaosPublishNativeLicenses Condition="'$(KhaosPublishNativeLicenses)' == ''">true</KhaosPublishNativeLicenses>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(KhaosPublishNativeLicenses)' == 'true' and '$(OutputType)' != 'Library'">
+    <None Include="$(MSBuildThisFileDirectory)../licenses/**"
+          Link="licenses/sdl/%(RecursiveDir)%(Filename)%(Extension)"
+          CopyToOutputDirectory="Never"
+          CopyToPublishDirectory="PreserveNewest"
+          Visible="false" />
+  </ItemGroup>
+</Project>
