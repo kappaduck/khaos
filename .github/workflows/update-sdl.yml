@@ -1,0 +1,58 @@
+name: Update SDL
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 12 * * 2'
+      timezone: America/Toronto
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  update:
+    name: Check for updates
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: ./global.json
+
+      - name: Check for updates
+        id: sdl
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: dotnet native/auto-update.cs
+
+      - name: Create pull request
+        if: steps.sdl.outputs.updated == 'true'
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
+        with:
+          branch: dependencies/sdl
+          delete-branch: true
+          add-paths: |
+            native/sdl.env
+            native/packages/Native.nuspec
+            native/packages/readme.md
+            readme.md
+          commit-message: 'SDL: update native dependencies'
+          title: 'SDL: update native dependencies'
+          body-path: pr-body.md
+          labels: |
+            dependencies
+            package:native
+          assignees: beauchama
