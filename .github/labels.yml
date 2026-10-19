@@ -1,3 +1,8 @@
+# Packages
+- name: "package:native"
+  color: "5319E7"
+  description: "Bugs/features related to the native package"
+
 # Platforms
 - name: "platform:windows"
   color: "006B75"
