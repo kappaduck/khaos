@@ -10,6 +10,6 @@
 - name: "platform:linux"
   color: "006B75"
   description: "Bugs/features related to the Linux platform"
-- name: "platform:browser"
+- name: "platform:wasm"
   color: "006B75"
-  description: "Bugs/features related to the browser platform"
+  description: "Bugs/features related to the WebAssembly platform"

@@ -23,12 +23,12 @@ body:
     id: platforms
     attributes:
       label: Where does it happen?
-      description: A bug in the browser often does not reproduce on desktop, and the other way around.
+      description: A bug in WebAssembly often does not reproduce on desktop, and the other way around.
       multiple: true
       options:
         - Windows
         - Linux
-        - Browser
+        - WebAssembly
     validations:
       required: true
   - type: input

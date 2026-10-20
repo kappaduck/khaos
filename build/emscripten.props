@@ -29,6 +29,6 @@
   </ItemGroup>
 
   <PropertyGroup Condition="Exists('$(KhaosRoot)native/packages/wasm/')">
-    <KhaosBrowserNativeRoot>$(KhaosRoot)native/packages/wasm/</KhaosBrowserNativeRoot>
+    <KhaosWasmNativeRoot>$(KhaosRoot)native/packages/wasm/</KhaosWasmNativeRoot>
   </PropertyGroup>
 </Project>
