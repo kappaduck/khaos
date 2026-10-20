@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds SDL3, SDL_image, SDL_ttf and SDL_mixer for linux-x64 into artifacts/runtimes/linux-x64/native.
+# Builds SDL3, SDL_image, SDL_ttf and SDL_mixer for linux-x64
 set -euo pipefail
 
 : "${SDL3:?SDL3 version not set}"

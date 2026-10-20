@@ -7,11 +7,8 @@ on:
     paths:
       - 'native/sdl.env'
       - 'native/packages/**'
-      - 'native/scripts/build-linux.sh'
-      - 'native/scripts/build-windows.sh'
-      - 'native/scripts/dependencies.sh'
-      - 'native/scripts/mingw.cmake'
-      - 'native/scripts/smoke-test.py'
+      - 'native/scripts/**'
+      - 'build/emscripten.props'
       - '.github/workflows/native.yml'
 
 permissions:
@@ -24,8 +21,7 @@ concurrency:
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
-  # The glibc of the Linux build image (Steam Runtime 4 = Debian 13 = glibc 2.41). The image is
-  # written in build-linux and in the smoke-test matrix:
+  # The glibc of the Linux build image (Steam Runtime 4 = Debian 13 = glibc 2.41).
   GLIBC_MAX: '2.41'
 
 jobs:
@@ -48,9 +44,9 @@ jobs:
         run: |
           version=$(sed -n 's:.*<version>\(.*\)</version>.*:\1:p' native/packages/Native.nuspec)
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          if curl -fsS https://api.nuget.org/v3-flatcontainer/kappaduck.khaos.native/index.json | jq -e --arg v "$version" '.versions | index($v)' > /dev/null; then
+          if curl -fsS https://api.nuget.org/v3-flatcontainer/kappaduck.khaos.native/index.json 2>/dev/null | jq -e --arg v "$version" '.versions | index($v)' > /dev/null; then
             echo "published=true" >> "$GITHUB_OUTPUT"
-            echo "KappaDuck.Khaos.Native $version is already published."
+            echo "Native $version is already published."
           else
             echo "published=false" >> "$GITHUB_OUTPUT"
           fi
@@ -60,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: version
     if: needs.version.outputs.published != 'true' || github.event_name == 'workflow_dispatch'
-    timeout-minutes: 90
+    timeout-minutes: 30
     container: registry.gitlab.steamos.cloud/steamrt/steamrt4/sdk
 
     defaults:
@@ -127,7 +123,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: version
     if: needs.version.outputs.published != 'true' || github.event_name == 'workflow_dispatch'
-    timeout-minutes: 90
+    timeout-minutes: 30
 
     defaults:
       run:
@@ -185,15 +181,13 @@ jobs:
     name: Load on ${{ matrix.image }}
     runs-on: ubuntu-latest
     needs: build-linux
-    timeout-minutes: 10
+    timeout-minutes: 15
     container: ${{ matrix.image }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - image: debian:13
-            install: apt-get update && apt-get install -y --no-install-recommends python3
-          - image: ubuntu:25.10
+          - image: ubuntu:rolling
             install: apt-get update && apt-get install -y --no-install-recommends python3
           - image: fedora:latest
             install: dnf install -y python3
@@ -224,7 +218,7 @@ jobs:
     name: Load on Windows
     runs-on: windows-latest
     needs: build-windows
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository
@@ -241,12 +235,58 @@ jobs:
       - name: Load SDL
         run: python native/scripts/smoke-test.py native/artifacts/runtimes/win-x64/native
 
+  build-browser:
+    name: Build browser
+    runs-on: ubuntu-latest
+    needs: version
+    if: needs.version.outputs.published != 'true' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: ./global.json
+
+      - name: Install the browser workload and Ninja
+        run: |
+          dotnet workload install wasm-tools
+          sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Build
+        run: |
+          chmod +x native/scripts/build-wasm.sh
+          native/scripts/build-wasm.sh
+
+      - name: Check files
+        run: |
+          status=0
+          for dir in native/packages/wasm/*/; do
+            for lib in SDL3 SDL3_image SDL3_mixer SDL3_ttf; do
+              test -f "$dir$lib.a" || { echo "::error::$dir$lib.a is missing"; status=1; }
+            done
+          done
+          find native/packages/wasm -type f | sort
+          exit $status
+
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: browser-native
+          path: native/packages/wasm
+          retention-days: 7
+
   publish:
     name: Publish ${{ needs.version.outputs.version }}
     runs-on: ubuntu-latest
-    needs: [version, build-linux, build-windows, smoke-test-linux, smoke-test-windows]
+    needs: [version, smoke-test-linux, smoke-test-windows, build-browser]
     timeout-minutes: 15
-    environment: nuget
+    environment: native
     permissions:
       contents: read
       id-token: write
@@ -273,12 +313,13 @@ jobs:
 
       - name: Structure artifacts
         run: |
-          mkdir -p packages/runtimes/linux-x64/native packages/runtimes/win-x64/native packages/licenses
+          mkdir -p packages/runtimes/linux-x64/native packages/runtimes/win-x64/native packages/licenses packages/wasm
           cp artifacts/linux-native/runtimes/linux-x64/native/* packages/runtimes/linux-x64/native/
           cp artifacts/windows-native/runtimes/win-x64/native/* packages/runtimes/win-x64/native/
           cp -r artifacts/linux-native/licenses/. packages/licenses/
           cp -r artifacts/windows-native/licenses/. packages/licenses/
-          find packages/runtimes packages/licenses -type f | sort
+          cp -r artifacts/browser-native/. packages/wasm/
+          find packages/runtimes packages/licenses packages/wasm -type f | sort
 
       - name: Package
         run: dotnet pack packages/Native.nuspec --output .

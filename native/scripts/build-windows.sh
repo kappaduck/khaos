@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Cross-compiles SDL3, SDL_image, SDL_ttf and SDL_mixer for win-x64 with MinGW into
-# artifacts/runtimes/win-x64/native.
+# Cross-compiles SDL3, SDL_image, SDL_ttf and SDL_mixer for win-x64
 set -euo pipefail
 
 : "${SDL3:?SDL3 version not set}"
