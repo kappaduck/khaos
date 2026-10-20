@@ -6,8 +6,16 @@ Native SDL3 libraries for [KappaDuck.Khaos](https://www.nuget.org/packages/Kappa
 
 ## Overview
 
-This package ships prebuilt native binaries of SDL3 and its extensions ([SDL_image], [SDL_ttf], [SDL_mixer]).
-It is referenced by `KappaDuck.Khaos` and does not need to be installed directly.
+This package ships SDL3 and its extensions ([SDL_image], [SDL_ttf], [SDL_mixer]), prebuilt for every platform Khaos
+runs on. It is referenced by [KappaDuck.Khaos](https://www.nuget.org/packages/KappaDuck.Khaos/) and does not need to
+be installed directly.
+
+A game only gets what it runs on:
+
+- **Desktop**: native libraries under `runtimes/<rid>/native/`. `dotnet publish` copies the ones of the runtime identifier
+  it publishes for.
+- **Browser**: static libraries under `wasm/<tfm>/`, which the `wasm-tools` workload links into the game's
+  `dotnet.native.wasm`. They are never copied: players download what is linked in, nothing more.
 
 ## Formats
 
@@ -16,6 +24,12 @@ The codecs are compiled into the four libraries:
 - **Images**: PNG and APNG, JPEG, WebP, GIF, QOI, BMP, TGA, SVG, ICO, CUR, ANI.
 - **Fonts**: TrueType and OpenType with HarfBuzz shaping and colour emoji.
 - **Audio**: WAV, AIFF, Ogg Vorbis, Opus, FLAC, MP3, tracker modules (MOD, XM, S3M, IT...).
+
+Every player downloads what is linked in, so the browser keeps the formats that need no outside library:
+
+- **Images**: PNG, JPEG, GIF, QOI, BMP, TGA, SVG, ICO, CUR, ANI.
+- **Fonts**: TrueType and OpenType through FreeType, without HarfBuzz shaping or colour emoji.
+- **Audio**: WAV, AIFF, Ogg Vorbis, FLAC, MP3.
 
 ## Bundled versions
 
@@ -26,18 +40,22 @@ The codecs are compiled into the four libraries:
 | SDL_ttf   | `3.2.2`  |
 | SDL_mixer | `3.2.4`  |
 
-For the versions bundled in other releases and which Khaos release uses them, see the
-[SDL compatibility table](https://github.com/kappaduck/khaos#sdl-compatibility).
+The same version on every platform. For the versions bundled in other releases and which Khaos release uses them,
+see the [SDL compatibility table](https://github.com/kappaduck/khaos#sdl-compatibility).
 
 ## Supported platforms
 
-| Runtime identifier |
-| :----------------- |
-| `win-x64`          |
-| `linux-x64`        |
+| Platform | Runtime identifier or target framework | Notes                            |
+| :------- | :------------------------------------- | :------------------------------- |
+| Windows  | `win-x64`                              |                                  |
+| Linux    | `linux-x64`                            | glibc 2.41 or later              |
+| Browser  | `net11.0`                              | compiled with Emscripten `6.0.3` |
 
 On Linux the libraries need glibc 2.41 or later (Debian 13, Ubuntu 25.04, Fedora 42, Arch). They are
 built in the Steam Runtime 4 SDK; see `native/readme.md` in the repository for why and when it changes.
+
+In the browser, the `wasm-tools` workload picks its Emscripten from the game's target framework, so the libraries are
+compiled once per supported .NET version, with that version's Emscripten.
 
 ## Versioning
 

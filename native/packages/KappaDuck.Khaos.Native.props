@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <KhaosBrowserNativeRoot Condition="'$(KhaosBrowserNativeRoot)' == ''">$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', 'wasm'))</KhaosBrowserNativeRoot>
+  </PropertyGroup>
+</Project>

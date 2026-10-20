@@ -12,9 +12,10 @@ using System.Text;
 using System.Text.Json.Serialization;
 
 const string versionsPath = "native/sdl.env";
-const string nuspecPath = "native/packages/Native.nuspec";
 const string readmePath = "readme.md";
-const string runtimesReadmePath = "native/packages/readme.md";
+
+const string nuspecPath = "native/packages/Native.nuspec";
+const string packageReadmePath = "native/packages/readme.md";
 
 Dictionary<string, Library> libraries = new()
 {
@@ -24,7 +25,7 @@ Dictionary<string, Library> libraries = new()
     ["SDL3_MIXER"] = new Library("SDL_mixer", "SDL_mixer")
 };
 
-string? missingFile = Array.Find([versionsPath, nuspecPath, readmePath, runtimesReadmePath], f => !File.Exists(f));
+string? missingFile = Array.Find([versionsPath, readmePath, nuspecPath, packageReadmePath], static f => !File.Exists(f));
 if (!string.IsNullOrEmpty(missingFile))
 {
     Console.Error.WriteLine($"Cannot find '{missingFile}'");
@@ -33,8 +34,10 @@ if (!string.IsNullOrEmpty(missingFile))
 
 SdlVersions versions = await SdlVersions.ParseAsync(versionsPath);
 RuntimePackage package = await RuntimePackage.ParseAsync(nuspecPath);
-BundledVersionsTable bundledTable = await BundledVersionsTable.ParseAsync(runtimesReadmePath);
+BundledVersionsTable bundledTable = await BundledVersionsTable.ParseAsync(packageReadmePath);
 CompatibilityTable compatibilityTable = await CompatibilityTable.ParseAsync(readmePath);
+
+Version previousRuntime = package.Version;
 
 using HttpClient http = CreateGitHubClient();
 
@@ -75,21 +78,23 @@ if (updates.Count == 0)
     return 0;
 }
 
-Version previousRuntime = package.Version;
 package.Bump(updates);
 
 Version nextRuntime = package.Version;
 Console.WriteLine($"Native: {previousRuntime} -> {nextRuntime}");
 
 bundledTable.Update(bundled);
+
 compatibilityTable.SetSource(nextRuntime, bundled);
 
 await versions.SaveAsync();
+
 await package.SaveAsync();
 await bundledTable.SaveAsync();
+
 await compatibilityTable.SaveAsync();
 
-string body = BuildTable(updates, "Newer stable SDL releases are available. This updates the versions used to build the native runtimes in `native/sdl.env`. The browser libraries in `KappaDuck.Khaos.Browser` are rebuilt from the same file by `native-browser.yml`.", withLinks: true);
+string body = BuildTable(updates, "Newer stable SDL releases are available. This updates the versions in `native/sdl.env`, which `native.yml` builds for the desktop and for the browser once this is merged.", withLinks: true);
 await File.WriteAllTextAsync("pr-body.md", $"{body}{Environment.NewLine}{BuildRuntimeNotice(previousRuntime, nextRuntime)}");
 
 SetOutput("updated", "true");

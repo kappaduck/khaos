@@ -2,10 +2,11 @@
 
 SDL3, SDL_image, SDL_ttf and SDL_mixer, built from the versions in `sdl.env`:
 
-| Built by                   | For                                 | Ships in                 | Workflow     |
-| :------------------------- | :---------------------------------- | :----------------------- | :----------- |
-| `scripts/build-windows.sh` | win-x64, cross-compiled with MinGW  | `KappaDuck.Khaos.Native` | `native.yml` |
-| `scripts/build-linux.sh`   | linux-x64, in the Steam Runtime SDK | `KappaDuck.Khaos.Native` | `native.yml` |
+| Built by                   | For                                     | In the package        |
+| :------------------------- | :-------------------------------------- | :-------------------- |
+| `scripts/build-windows.sh` | win-x64, cross-compiled with MinGW      | `runtimes/win-x64/`   |
+| `scripts/build-linux.sh`   | linux-x64, in the Steam Runtime SDK     | `runtimes/linux-x64/` |
+| `scripts/build-wasm.sh`    | the browser, one build per .NET version | `wasm/<tfm>/`         |
 
 `auto-update.cs` checks SDL's releases every week and opens a pull request that updates `sdl.env`,
 `packages/Native.nuspec` and the version tables.

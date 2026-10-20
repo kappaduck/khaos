@@ -101,24 +101,65 @@ More samples and documentation can be found at [Documentation](#documentation)
 
 ## Installation
 
-The quickest start is the template, which sets up the game, a desktop and a web applications:
+### With the template
+
+The quickest start is the template. By default it sets up the game and two applications that run it, one for the
+desktop and one for the browser. `--platform` makes a single project for one of them instead:
 
 ```bash
 dotnet new install KappaDuck.Khaos.Templates
-dotnet new khaos -o Pong
+
+dotnet new khaos -o Pong                       # the game, a desktop and a web application
+dotnet new khaos -o Pong --platform desktop    # one project for Windows and Linux
+dotnet new khaos -o Pong --platform browser    # one project for the browser, made for game jams
 ```
 
-Or install Khaos via [NuGet]:
+The template keeps the Khaos version in one place, `Directory.Packages.props`.
+
+### Without the template
+
+Every project references one package from [NuGet], `KappaDuck.Khaos`. It brings SDL for every platform and sees
+what the project is: a `Microsoft.NET.Sdk` executable runs on Windows and Linux, a `Microsoft.NET.Sdk.WebAssembly`
+one runs in the browser.
 
 ```bash
 dotnet package add KappaDuck.Khaos -v 0.1.0
 ```
 
-or via your `.csproj`:
+or via your `.csproj`, on the desktop:
 
 ```xml
-<PackageReference Include="KappaDuck.Khaos" Version="0.1.0" />
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <PublishAot>true</PublishAot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KappaDuck.Khaos" Version="0.1.0" />
+  </ItemGroup>
+</Project>
 ```
+
+In the browser, the project uses the WebAssembly SDK and needs the `wasm-tools` workload
+(`dotnet workload install wasm-tools`):
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KappaDuck.Khaos" Version="0.1.0" />
+  </ItemGroup>
+</Project>
+```
+
+For both from the same code, put the game in a library that references `KappaDuck.Khaos`, then add one executable
+per platform, as above, that references the library instead of the package.
 
 You can also install via the NuGet Package Manager in Visual Studio or JetBrains Rider.
 
@@ -138,7 +179,7 @@ dotnet package add KappaDuck.Khaos --prerelease
 | Package                  | What it brings                                                                                    |
 | :----------------------- | :------------------------------------------------------------------------------------------------ |
 | `KappaDuck.Khaos`        | The framework: game loop, windowing, input, 2D rendering, audio, text, assets, hosting, analyzers |
-| `KappaDuck.Khaos.Native` | SDL3 native libraries for Windows and Linux                                                       |
+| `KappaDuck.Khaos.Native` | SDL3 native libraries for Windows, Linux and the browser                                          |
 
 ## Roadmap
 
@@ -180,12 +221,13 @@ The framework may have platform-specific implementations or limitations dependin
 
 ## SDL compatibility
 
-SDL3 native libraries are bundled via `KappaDuck.Khaos.Native`. The table below shows the SDL versions included in each release of both packages.
+SDL3 native libraries are bundled via `KappaDuck.Khaos.Native`, on the desktop and in the browser. The table below shows
+the SDL versions included in each release of the package.
 The `source` row tracks the main branch and every other row lists the native version that Khaos release depends on.
 
 |  Khaos   | Native  |   SDL3   | SDL_image | SDL_ttf | SDL_mixer |
 | :------: | :-----: | :------: | :-------: | :-----: | :-------: |
-| `source` | `1.0.0` | `3.4.18` |  `3.4.8`  | `3.2.2` |  `3.2.4`  |
+| `source` | `1.1.0` | `3.4.18` |  `3.4.8`  | `3.2.2` |  `3.2.4`  |
 
 ## Development & Sandbox
 
@@ -194,6 +236,7 @@ You can build Khaos from source and experiment quickly using the included sandbo
 ### Prerequisites
 
 - [.NET 11.0 SDK](https://dotnet.microsoft.com/download/dotnet/11.0)
+- For the browser: the `wasm-tools` workload (see [In the browser](#in-the-browser))
 
 ### Setup
 

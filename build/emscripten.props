@@ -1,0 +1,34 @@
+<Project>
+  <!--
+    The Emscripten version the browser SDL libraries are compiled with, one row per
+    .NET version Khaos ships browser SDL for.
+
+    A browser build relinks dotnet.native.wasm with SDL's static .a libraries, and the
+    workload picks its Emscripten from the game's target framework, not from the SDK:
+    SDK 11 links a net11.0 game with Emscripten 6.0.3 and a net10.0 game with 3.1.56
+    (wasm-tools-net10). Mixing versions fails at link time, so each .NET version gets
+    its own set of .a files in KappaDuck.Khaos.Native (wasm/<tfm>/), built
+    with that version's Emscripten. A game picks the folder matching its TargetFramework.
+
+    The workload records its version in
+    packs/Microsoft.NET.Runtime.Emscripten.<x>.Sdk.<rid>/<version>/tools/emscripten/emscripten-version.txt;
+    the pack's folder name is not enough (the 6.0.2 pack holds 6.0.3).
+
+    Pinned by hand on purpose:
+      - an SDK update that moves Emscripten shows up as a diff of this file;
+      - native/scripts/build-wasm.sh builds one row at a time and stops when the
+        installed workload has another version;
+      - native.yml builds every row, and checks its .a files, before it packs
+        KappaDuck.Khaos.Native.
+
+    When a new .NET arrives: add a netxx.0 row with its previews, keep net11.0 while
+    Khaos supports it. On SDK xx, a net11.0 build needs `dotnet workload install wasm-tools-net11`.
+  -->
+  <ItemGroup>
+    <KhaosEmscripten Include="net11.0" Version="6.0.3" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="Exists('$(KhaosRoot)native/packages/wasm/')">
+    <KhaosBrowserNativeRoot>$(KhaosRoot)native/packages/wasm/</KhaosBrowserNativeRoot>
+  </PropertyGroup>
+</Project>
