@@ -176,10 +176,10 @@ dotnet package add KappaDuck.Khaos --prerelease
 
 ## Packages
 
-| Package                  | What it brings                                                                                    |
-| :----------------------- | :------------------------------------------------------------------------------------------------ |
-| `KappaDuck.Khaos`        | The framework: game loop, windowing, input, 2D rendering, audio, text, assets, hosting, analyzers |
-| `KappaDuck.Khaos.Native` | SDL3 native libraries for Windows, Linux and the browser                                          |
+| Package                  | What it brings                                                                                                           |
+| :----------------------- | :----------------------------------------------------------------------------------------------------------------------- |
+| `KappaDuck.Khaos`        | The framework: game loop, windowing, input, 2D rendering, audio, text, assets, hosting, analyzers, the WebAssembly build |
+| `KappaDuck.Khaos.Native` | SDL3 for Windows, Linux and WebAssembly, referenced by `KappaDuck.Khaos`                                                 |
 
 ## Roadmap
 
@@ -188,7 +188,7 @@ The first goal is a 2D game made with Khaos that runs on desktop and in the brow
 
 | Version | Target          | What it brings                                                                                                     |
 | :-----: | :-------------- | :----------------------------------------------------------------------------------------------------------------- |
-| `0.1.0` | Late Nov. 2026  | The pipeline: `Game2D` on SDL's main callbacks with a fixed step, events, window, hosting, SDKs and the template   |
+| `0.1.0` | Late Nov. 2026  | The pipeline: `Game2D` on SDL's main callbacks with a fixed step, events, window, hosting and the template         |
 | `0.2.0` | Late Dec. 2026  | Drawing and moving: batched 2D renderer, shapes, textures, sprites, letterbox, keyboard, mouse, gamepad, input map |
 | `0.3.0` | Mid Jan. 2027   | A game from start to finish: audio with buses, text, the asset catalog, scenes and transitions, timers and tweens  |
 | `0.4.0` | Early Feb. 2027 | The 2D world: 2D camera, sprite sheets and animations, collisions, tilemaps                                        |
@@ -228,87 +228,6 @@ The `source` row tracks the main branch and every other row lists the native ver
 |  Khaos   | Native  |   SDL3   | SDL_image | SDL_ttf | SDL_mixer |
 | :------: | :-----: | :------: | :-------: | :-----: | :-------: |
 | `source` | `1.1.0` | `3.4.18` |  `3.4.8`  | `3.2.2` |  `3.2.4`  |
-
-## Development & Sandbox
-
-You can build Khaos from source and experiment quickly using the included sandbox project.
-
-### Prerequisites
-
-- [.NET 11.0 SDK](https://dotnet.microsoft.com/download/dotnet/11.0)
-- For the browser: the `wasm-tools` workload (see [In the browser](#in-the-browser))
-
-### Setup
-
-**1. Clone the repository**
-
-```bash
-git clone https://github.com/KappaDuck/khaos.git
-cd khaos
-```
-
-**2. Build and test**
-
-```bash
-dotnet build
-dotnet test
-```
-
-Tests run headless by default, so they work on a machine without a display. To watch the windows appear, pick a driver:
-
-```bash
-dotnet test -- --test-parameter video-driver=default
-```
-
-`default` lets the platform choose, the way a real application does. You can also name a driver directly, such as `x11` or `windows`. An `SDL_VIDEODRIVER` environment variable that is already set always wins.
-
-**3. Running documentation** (optional)
-
-```bash
-dotnet tool restore
-dotnet build src/Khaos --configuration Release
-dotnet docfx docs/docfx.json --serve
-```
-
-The API reference is generated from the compiled assembly and its XML documentation, so the build has to run first.
-
-### Sandbox
-
-`sandbox/` is for experimenting without touching the main source. Its code is compiled by both heads, desktop and web, and references `src/Khaos` directly so changes are reflected immediately.
-
-Your code (any `.cs` file in `sandbox/`, subfolders included) and your assets (`sandbox/assets/`) are ignored by git.
-If the folder holds no source at all, the first build drops a starter `Program.cs` in from `Program.cs.template`, so a
-fresh clone always compiles.
-
-```bash
-dotnet run --project sandbox/Desktop
-```
-
-or simply run it in your IDE.
-
-### Repository layout
-
-| Folder                           | What it holds                                                                  |
-| :------------------------------- | :----------------------------------------------------------------------------- |
-| `src/`                           | the packages a game references                                                 |
-| `analyzers/`                     | `KHAOS` rules shipped to games, `KHI` rules for Khaos itself                   |
-| `native/`                        | SDL versions, the scripts that build SDL for each platform, the Native package |
-| `build/`                         | The shared version, NuGet metadata and Emscripten version                      |
-| `sandbox/`                       | A playground with a desktop and a web head                                     |
-| `examples/`, `samples/`, `demo/` | Code to learn from, from one concept to a full game                            |
-| `tests/`, `benchmarks/`          | TUnit tests and BenchmarkDotNet measurements                                   |
-| `docs/`                          | DocFX site, guides, diagnostics, decision records                              |
-| `tools/`                         | Release and packing scripts                                                    |
-| `rules/`                         | Analyzer and style settings                                                    |
-
-### Benchmarks
-
-```bash
-dotnet run -c Release --project benchmarks/Khaos.Benchmarks -- --filter '*'
-```
-
-The [Benchmarks workflow](.github/workflows/benchmarks.yml) runs them on demand, with any filter, and on every release,
-whose results are published in the [documentation](https://khaos.kappaduck.com/benchmarks/).
 
 ## AI disclosure
 

@@ -3,7 +3,6 @@ description: Report a bug or unexpected behavior in Khaos
 labels: ["triage"]
 type: Bug
 assignees: [beauchama]
-
 body:
   - type: markdown
     attributes:

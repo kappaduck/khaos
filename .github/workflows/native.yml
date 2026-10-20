@@ -235,8 +235,8 @@ jobs:
       - name: Load SDL
         run: python native/scripts/smoke-test.py native/artifacts/runtimes/win-x64/native
 
-  build-browser:
-    name: Build browser
+  build-wasm:
+    name: Build WebAssembly
     runs-on: ubuntu-latest
     needs: version
     if: needs.version.outputs.published != 'true' || github.event_name == 'workflow_dispatch'
@@ -253,7 +253,7 @@ jobs:
         with:
           global-json-file: ./global.json
 
-      - name: Install the browser workload and Ninja
+      - name: Install the wasm-tools workload and Ninja
         run: |
           dotnet workload install wasm-tools
           sudo apt-get update && sudo apt-get install -y ninja-build
@@ -277,14 +277,14 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v7
         with:
-          name: browser-native
+          name: wasm-native
           path: native/packages/wasm
           retention-days: 7
 
   publish:
     name: Publish ${{ needs.version.outputs.version }}
     runs-on: ubuntu-latest
-    needs: [version, smoke-test-linux, smoke-test-windows, build-browser]
+    needs: [version, smoke-test-linux, smoke-test-windows, build-wasm]
     timeout-minutes: 15
     environment: native
     permissions:
@@ -318,7 +318,7 @@ jobs:
           cp artifacts/windows-native/runtimes/win-x64/native/* packages/runtimes/win-x64/native/
           cp -r artifacts/linux-native/licenses/. packages/licenses/
           cp -r artifacts/windows-native/licenses/. packages/licenses/
-          cp -r artifacts/browser-native/. packages/wasm/
+          cp -r artifacts/wasm-native/. packages/wasm/
           find packages/runtimes packages/licenses packages/wasm -type f | sort
 
       - name: Package
@@ -331,4 +331,4 @@ jobs:
           user: ${{ secrets.USER }}
 
       - name: Publish to NuGet
-        run: dotnet nuget push KappaDuck.Khaos.Native.*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget.outputs.NUGET_API_KEY }} --skip-duplicate
+        run: dotnet nuget push "KappaDuck.Khaos.Native.*.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget.outputs.NUGET_API_KEY }} --skip-duplicate
