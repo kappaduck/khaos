@@ -3,7 +3,6 @@ description: Report a bug or unexpected behavior in Khaos
 labels: ["triage"]
 type: Bug
 assignees: [beauchama]
-
 body:
   - type: markdown
     attributes:
@@ -23,12 +22,12 @@ body:
     id: platforms
     attributes:
       label: Where does it happen?
-      description: A bug in WebAssembly often does not reproduce on desktop, and the other way around.
+      description: A bug in the browser often does not reproduce on desktop, and the other way around.
       multiple: true
       options:
         - Windows
         - Linux
-        - WebAssembly
+        - Browser
     validations:
       required: true
   - type: input
