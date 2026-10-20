@@ -193,6 +193,8 @@ jobs:
             install: dnf install -y python3
           - image: archlinux:latest
             install: pacman -Sy --noconfirm python
+          - image: registry.gitlab.steamos.cloud/steamrt/steamrt4/sdk
+            install: 'true'
 
     steps:
       - name: Checkout repository
