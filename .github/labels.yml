@@ -1,3 +1,8 @@
+# Modules
+- name: "module:analyzers"
+  color: "1D76DB"
+  description: "Bugs/features related to the analyzers and source generators"
+
 # Packages
 - name: "package:native"
   color: "5319E7"
