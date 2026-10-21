@@ -13,6 +13,26 @@ updates:
     commit-message:
       prefix: 'SDK:'
 
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+      day: thursday
+      time: '11:30'
+      timezone: America/Toronto
+    labels: [dependencies]
+    assignees: [beauchama]
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: 'NuGet:'
+    ignore:
+      # Pinned to the compiler shipped with the minimum supported SDK (.NET 11.0.100),
+      # otherwise the packaged analyzers fail to load for users (CS8032).
+      - dependency-name: 'Microsoft.CodeAnalysis.*'
+    groups:
+      nugets:
+        patterns: ['*']
+
   - package-ecosystem: github-actions
     directory: /
     schedule:
