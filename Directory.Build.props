@@ -3,8 +3,6 @@
     <KhaosRoot>$(MSBuildThisFileDirectory)</KhaosRoot>
   </PropertyGroup>
 
-  <Import Project="$(KhaosRoot)build/emscripten.props" />
-
   <ItemGroup Label="Configure analyzer rules">
     <GlobalAnalyzerConfigFiles Include="$(KhaosRoot)rules/*.editorconfig" />
   </ItemGroup>

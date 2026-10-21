@@ -1,5 +1,5 @@
 <Project>
   <PropertyGroup>
-    <KhaosWasmNativeRoot Condition="'$(KhaosWasmNativeRoot)' == ''">$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', 'wasm'))</KhaosWasmNativeRoot>
+    <KhaosWasmNativeRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', 'wasm'))</KhaosWasmNativeRoot>
   </PropertyGroup>
 </Project>

@@ -4,7 +4,7 @@ set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 work="$root/artifacts/sdl-wasm"
-props="$root/build/emscripten.props"
+versions="$root/native/emscripten.env"
 
 step() { printf '\n==> %s\n' "$*"; }
 fail() { printf 'error: %s\n' "$*" >&2; exit 1; }
@@ -19,9 +19,9 @@ set -a
 . "$root/native/sdl.env"
 set +a
 
-# <KhaosEmscripten Include="net11.0" Version="6.0.3" /> -> "net11.0 6.0.3"
+# NET11=6.0.3 -> "net11.0 6.0.3"
 rows() {
-    sed -n 's/.*<KhaosEmscripten[[:space:]]\{1,\}Include="\([^"]*\)"[[:space:]]\{1,\}Version="\([^"]*\)".*/\1 \2/p' "$props"
+    sed -n 's/^NET\([0-9]\{1,\}\)=\([^[:space:]#]\{1,\}\).*/net\1.0 \2/p' "$versions"
 }
 
 pinned_version() {
@@ -76,8 +76,6 @@ build_library() {
     local name="$1" source="$2" build="$out/build/$1"
     shift 2
 
-    [[ "${KHAOS_CLEAN:-}" == 1 ]] && rm -rf "$build"
-
     emcmake cmake -S "$source" -B "$build" -G Ninja \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX="$prefix" \
@@ -92,7 +90,7 @@ build_library() {
 build_tfm() {
     local tfm="$1" emscripten major installed target
     emscripten="$(pinned_version "$tfm")"
-    [[ -n "$emscripten" ]] || fail "$tfm has no row in build/emscripten.props."
+    [[ -n "$emscripten" ]] || fail "$tfm has no line in native/emscripten.env."
 
     major="${tfm#net}"
     major="${major%%.*}"
@@ -105,25 +103,15 @@ build_tfm() {
 
     installed="$(workload_version "$major")"
 
-    if [[ -z "$installed" ]]; then
-        [[ "${KHAOS_SKIP_WORKLOAD_CHECK:-}" == 1 ]] || fail "No wasm-tools workload for .NET $major. Install it: dotnet workload install wasm-tools (or wasm-tools-net$major when the SDK is newer than .NET $major)."
-        echo "  no workload for .NET $major, check skipped"
-    elif [[ "$installed" != "$emscripten" ]]; then
-        fail "The .NET $major workload links with Emscripten $installed, build/emscripten.props pins $emscripten for $tfm. Update the row (and rebuild), or update the workload."
-    else
-        echo "  matches the .NET $major workload"
-    fi
+    [[ -n "$installed" ]] || fail "No wasm-tools workload for .NET $major (wasm-tools-net$major when the SDK is newer than .NET $major)."
+    [[ "$installed" == "$emscripten" ]] || fail "The .NET $major workload links with Emscripten $installed, native/emscripten.env pins $emscripten for $tfm. Update the line."
+    echo "  matches the .NET $major workload"
 
     step "Installing Emscripten $emscripten through emsdk"
 
     local emsdk="$work/emsdk"
 
-    if [[ -d "$emsdk" ]]; then
-        # A version newer than the clone knows about needs a fresher tag list.
-        git -C "$emsdk" pull --quiet --ff-only || true
-    else
-        git clone --quiet --depth 1 https://github.com/emscripten-core/emsdk.git "$emsdk"
-    fi
+    [[ -d "$emsdk" ]] || git clone --quiet --depth 1 https://github.com/emscripten-core/emsdk.git "$emsdk"
 
     "$emsdk/emsdk" install "$emscripten"
     "$emsdk/emsdk" activate "$emscripten"
@@ -153,8 +141,6 @@ build_tfm() {
 
     export CFLAGS="${compile_flags[*]}"
     export CXXFLAGS="${compile_flags[*]}"
-
-    [[ "${KHAOS_CLEAN:-}" == 1 ]] && rm -rf "$prefix"
 
     step "SDL $SDL3"
     build_library SDL "$(source_of SDL "$SDL3")" \
@@ -211,13 +197,9 @@ PROPS
     echo "  emscripten.props, emscripten-version.txt"
 }
 
-if [[ $# -gt 0 ]]; then
-    tfms=("$@")
-else
-    mapfile -t tfms < <(rows | awk '{ print $1 }')
-fi
+mapfile -t tfms < <(rows | awk '{ print $1 }')
 
-[[ ${#tfms[@]} -gt 0 ]] || fail "build/emscripten.props has no KhaosEmscripten row."
+[[ ${#tfms[@]} -gt 0 ]] || fail "native/emscripten.env has no NET<major>= line."
 
 for tfm in "${tfms[@]}"; do
     build_tfm "$tfm"
