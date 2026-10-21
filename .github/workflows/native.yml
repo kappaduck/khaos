@@ -8,7 +8,7 @@ on:
       - 'native/sdl.env'
       - 'native/packages/**'
       - 'native/scripts/**'
-      - 'build/emscripten.props'
+      - 'native/emscripten.env'
       - '.github/workflows/native.yml'
 
 permissions:

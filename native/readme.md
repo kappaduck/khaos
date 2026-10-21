@@ -1,12 +1,13 @@
 # Native libraries
 
-SDL3, SDL_image, SDL_ttf and SDL_mixer, built from the versions in `sdl.env`:
+SDL3, SDL_image, SDL_ttf and SDL_mixer, built from the versions in `sdl.env` (and, for WebAssembly, with the Emscripten
+versions in `emscripten.env`):
 
 | Built by                   | For                                     | In the package        |
 | :------------------------- | :-------------------------------------- | :-------------------- |
 | `scripts/build-windows.sh` | win-x64, cross-compiled with MinGW      | `runtimes/win-x64/`   |
 | `scripts/build-linux.sh`   | linux-x64, in the Steam Runtime SDK     | `runtimes/linux-x64/` |
-| `scripts/build-wasm.sh`    | the browser, one build per .NET version | `wasm/<tfm>/`         |
+| `scripts/build-wasm.sh`    | WebAssembly, one build per .NET version | `wasm/<tfm>/`         |
 
 `auto-update.cs` checks SDL's releases every week and opens a pull request that updates `sdl.env`,
 `packages/Native.nuspec` and the version tables.
@@ -58,7 +59,7 @@ The package holds every license under `licenses/` (`SDL3_image/optional/LICENSE.
 `KhaosPublishNativeLicenses=false` turns it off). The FreeType License also asks for a credit in the game's
 documentation: "Portions of this software are copyright © The FreeType Project (www.freetype.org)."
 
-### The browser is lighter
+### WebAssembly is lighter
 
 `build-wasm.sh` keeps a subset of the desktop formats: everything is linked into `dotnet.native.wasm`,
 which every player downloads, so the formats that need an outside library stay out. PNG and JPEG go through
