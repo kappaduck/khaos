@@ -2,6 +2,7 @@
   <Folder Name="/analyzers/">
     <File Path="analyzers/.editorconfig" />
     <File Path="analyzers/Directory.Build.props" />
+    <Project Path="analyzers/Khaos.Analyzers/Khaos.Analyzers.csproj" />
     <Project Path="analyzers/Khaos.Internal.Analyzers/Khaos.Internal.Analyzers.csproj" />
   </Folder>
   <Folder Name="/configuration/">
@@ -43,6 +44,7 @@
     <File Path="tests/.editorconfig" />
     <File Path="tests/Directory.Build.props" />
     <File Path="tests/Directory.Packages.props" />
+    <Project Path="tests/Khaos.Analyzers.Tests/Khaos.Analyzers.Tests.csproj" />
     <Project Path="tests/Khaos.Internal.Analyzers.Tests/Khaos.Internal.Analyzers.Tests.csproj" />
   </Folder>
   <Folder Name="/workflows/">
