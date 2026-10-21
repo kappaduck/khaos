@@ -42,5 +42,5 @@ codeowners text
 *.sh       text eol=lf
 *.json     text
 *.xml      text eol=crlf
-*.yaml     text eol=crlf
-*.yml      text eol=crlf
+*.yaml     text eol=lf
+*.yml      text eol=lf
