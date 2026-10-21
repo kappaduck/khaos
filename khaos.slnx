@@ -1,0 +1,54 @@
+<Solution>
+  <Folder Name="/analyzers/">
+    <File Path="analyzers/.editorconfig" />
+    <File Path="analyzers/Directory.Build.props" />
+    <Project Path="analyzers/Khaos.Internal.Analyzers/Khaos.Internal.Analyzers.csproj" />
+  </Folder>
+  <Folder Name="/configuration/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+  </Folder>
+  <Folder Name="/native/">
+    <File Path="native/emscripten.env" />
+    <File Path="native/readme.md" />
+    <File Path="native/sdl.env" />
+  </Folder>
+  <Folder Name="/native/packages/">
+    <File Path="native/packages/KappaDuck.Khaos.Native.props" />
+    <File Path="native/packages/KappaDuck.Khaos.Native.targets" />
+    <File Path="native/packages/Native.nuspec" />
+    <File Path="native/packages/readme.md" />
+  </Folder>
+  <Folder Name="/native/scripts/">
+    <File Path="native/scripts/build-linux.sh" />
+    <File Path="native/scripts/build-wasm.sh" />
+    <File Path="native/scripts/build-windows.sh" />
+    <File Path="native/scripts/dependencies.sh" />
+    <File Path="native/scripts/mingw.cmake" />
+    <File Path="native/scripts/smoke-test.py" />
+  </Folder>
+  <Folder Name="/rules/">
+    <File Path="rules/code.style.editorconfig" />
+    <File Path="rules/disabled.editorconfig" />
+    <File Path="rules/roslynator.editorconfig" />
+    <File Path="rules/sonar.editorconfig" />
+    <File Path="rules/underscore.editorconfig" />
+    <File Path="rules/vsthrd.editorconfig" />
+  </Folder>
+  <Folder Name="/tests/">
+    <File Path="tests/.editorconfig" />
+    <File Path="tests/Directory.Build.props" />
+    <File Path="tests/Directory.Packages.props" />
+    <Project Path="tests/Khaos.Internal.Analyzers.Tests/Khaos.Internal.Analyzers.Tests.csproj" />
+  </Folder>
+  <Folder Name="/workflows/">
+    <File Path=".github/dependabot.yml" />
+    <File Path=".github/workflows/labels.yml" />
+    <File Path=".github/workflows/native.yml" />
+    <File Path=".github/workflows/update-sdl.yml" />
+  </Folder>
+</Solution>
