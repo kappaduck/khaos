@@ -2,7 +2,8 @@
   "solution": {
     "path": "khaos.slnx",
     "projects": [
-      "src\\Khaos\\Khaos.csproj"
+      "src\\Khaos\\Khaos.csproj",
+      "src\\Khaos.Templates\\Khaos.Templates.csproj"
     ]
   }
 }

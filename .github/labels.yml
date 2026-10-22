@@ -7,6 +7,9 @@
 - name: "package:native"
   color: "5319E7"
   description: "Bugs/features related to the native package"
+- name: "package:templates"
+  color: "5319E7"
+  description: "Bugs/features related to the dotnet new template"
 
 # Platforms
 - name: "platform:windows"

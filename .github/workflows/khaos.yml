@@ -40,6 +40,9 @@ jobs:
         with:
           global-json-file: ./global.json
 
+      - name: Install the wasm-tools workload
+        run: dotnet workload install wasm-tools
+
       - name: Read version
         id: versions
         run: echo "Khaos=$(dotnet msbuild src/Khaos/Khaos.csproj -getProperty:VersionPrefix)" >> "$GITHUB_OUTPUT"
