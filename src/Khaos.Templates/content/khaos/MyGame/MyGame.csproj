@@ -1,0 +1,28 @@
+<!--#if (platform == "browser") -->
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KappaDuck.Khaos" />
+  </ItemGroup>
+</Project>
+<!--#elseif (platform == "desktop") -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <PublishAot>true</PublishAot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KappaDuck.Khaos" />
+  </ItemGroup>
+</Project>
+<!--#else -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="KappaDuck.Khaos" />
+  </ItemGroup>
+</Project>
+<!--#endif -->

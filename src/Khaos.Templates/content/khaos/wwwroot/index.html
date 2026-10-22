@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" class="khaos-page">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Khaos replaces this with the game window's title as soon as the game starts. -->
+  <title>KHAOS_TITLE</title>
+  <link rel="icon" href="_khaos/favicon.ico" sizes="16x16 32x32 48x48" />
+  <!-- The screens' styles come with KappaDuck.Khaos; css/app.css is the game's, loaded after to override them. -->
+  <link rel="stylesheet" href="_khaos/khaos.css" />
+  <link rel="stylesheet" href="css/app.css" />
+  <!--
+    The game's page: change anything. khaos.js starts the game and only sets data-khaos-state on
+    the host (loading, ready, playing, failed); khaos.css shows the matching [data-khaos-screen].
+    Every element below is optional, found by its data-khaos-* attribute: a page with only
+    <canvas id="canvas"> runs the game, without screens. Delete this file to get the default page.
+  -->
+  <script type="module" src="_khaos/khaos.js"></script>
+</head>
+<body>
+  <div class="khaos-host" data-khaos-host data-khaos-state="loading">
+    <canvas id="canvas" tabindex="-1"></canvas>
+
+    <div class="khaos-screen" data-khaos-screen="loading" role="status">
+      <img class="khaos-mark khaos-bob" src="_khaos/khaos.svg" alt="" />
+      <div class="khaos-progress" aria-hidden="true"></div>
+      <p class="khaos-status">Loading...</p>
+      <p class="khaos-made-with">Made with Khaos</p>
+    </div>
+
+    <div class="khaos-screen" data-khaos-screen="ready">
+      <img class="khaos-mark" src="_khaos/khaos.svg" alt="" />
+      <button type="button" class="khaos-play" data-khaos-play>Play</button>
+      <p class="khaos-hint">Click or press Enter</p>
+    </div>
+
+    <div class="khaos-screen" data-khaos-screen="failed" role="alert">
+      <p class="khaos-error" data-khaos-error-message>The game could not start.</p>
+      <pre class="khaos-details" data-khaos-error-details></pre>
+    </div>
+
+    <button type="button" class="khaos-fullscreen" data-khaos-fullscreen title="Fullscreen" aria-label="Fullscreen">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />
+      </svg>
+    </button>
+  </div>
+</body>
+</html>

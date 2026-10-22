@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json.schemastore.org/ide.host",
+  "icon": "icon.png",
+  "symbolInfo": [
+    {
+      "id": "platform",
+      "name": {
+        "text": "Platform"
+      },
+      "isVisible": true
+    },
+    {
+      "id": "title",
+      "name": {
+        "text": "Game title"
+      },
+      "isVisible": true
+    },
+    {
+      "id": "khaosVersion",
+      "isVisible": false
+    }
+  ]
+}

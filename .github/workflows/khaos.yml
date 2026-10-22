@@ -76,7 +76,7 @@ jobs:
       - name: Check packages
         run: |
           ls artifacts/packages
-          for id in KappaDuck.Khaos KappaDuck.Khaos.Toolkit KappaDuck.Khaos.Templates; do
+          for id in KappaDuck.Khaos KappaDuck.Khaos.Templates; do
             test -f "artifacts/packages/$id.${{ steps.package.outputs.Version }}.nupkg" || { echo "::error::$id was not packed"; exit 1; }
           done
 

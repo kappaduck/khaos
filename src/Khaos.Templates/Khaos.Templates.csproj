@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup Label="No assembly">
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeSymbols>false</IncludeSymbols>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package">
+    <PackageType>Template</PackageType>
+    <Title>Khaos templates</Title>
+    <Description>dotnet new templates for KappaDuck.Khaos games: khaos (desktop, browser, or both from the same code)</Description>
+    <PackageTags>$(PackageTags);dotnet-new;templates</PackageTags>
+
+    <IncludeContentInPack>true</IncludeContentInPack>
+
+    <!-- .gitignore and .template.config/ start with a dot: NuGet leaves them out unless told otherwise. -->
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+  </PropertyGroup>
+
+  <ItemGroup Label="Package content">
+    <Content Include="content/**/*" Exclude="content/**/bin/**;content/**/obj/**;content/**/.vs/**;content/**/template.json" PackagePath="content" />
+  </ItemGroup>
+
+  <Target Name="KhaosStampTemplateVersion" BeforeTargets="_GetPackageFiles">
+    <ItemGroup>
+      <_KhaosTemplateJson Include="content/**/.template.config/template.json" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_KhaosStampedDirectory>$(IntermediateOutputPath)templates/</_KhaosStampedDirectory>
+    </PropertyGroup>
+
+    <Error Condition="$([System.IO.File]::ReadAllText('%(_KhaosTemplateJson.FullPath)').Contains('\')) or $([System.IO.File]::ReadAllText('%(_KhaosTemplateJson.FullPath)').Contains(';'))"
+           Text="%(_KhaosTemplateJson.Identity) contains a backslash or a semicolon, which WriteLinesToFile would change. Quote with ' in conditions." />
+
+    <WriteLinesToFile File="$(_KhaosStampedDirectory)%(_KhaosTemplateJson.RecursiveDir)template.json"
+                      Lines="$([System.IO.File]::ReadAllText('%(_KhaosTemplateJson.FullPath)').Replace('KHAOS_PACKAGE_VERSION', '$(Version)'))"
+                      Overwrite="true" WriteOnlyWhenDifferent="true" />
+
+    <ItemGroup>
+      <None Include="$(_KhaosStampedDirectory)%(_KhaosTemplateJson.RecursiveDir)template.json"
+            Pack="true" PackagePath="content/%(_KhaosTemplateJson.RecursiveDir)" Visible="false" />
+    </ItemGroup>
+  </Target>
+</Project>

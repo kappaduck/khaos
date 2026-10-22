@@ -49,6 +49,7 @@
   </Folder>
   <Folder Name="/src/">
     <File Path="src/Directory.Build.props" />
+    <Project Path="src/Khaos.Templates/Khaos.Templates.csproj" Id="1a9df4ff-db05-4d0f-984e-0941ecfdd3a1" />
   </Folder>
   <Folder Name="/tests/">
     <File Path="tests/.editorconfig" />
