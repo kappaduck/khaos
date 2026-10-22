@@ -69,5 +69,5 @@
     <ApplicationIcon>$(MSBuildThisFileDirectory)khaos.ico</ApplicationIcon>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildThisFileDirectory)KappaDuck.Khaos.WebAssembly.targets" Condition="'$(UsingMicrosoftNETSdkWebAssembly)' == 'true' and '$(_KhaosWasmTargetsImported)' != 'true'" />
+  <Import Project="$(MSBuildThisFileDirectory)KappaDuck.Khaos.WebAssembly.targets" Condition="'$(UsingMicrosoftNETSdkWebAssembly)' == 'true'" />
 </Project>

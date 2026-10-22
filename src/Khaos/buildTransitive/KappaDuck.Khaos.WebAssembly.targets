@@ -21,8 +21,6 @@
                                 in a Debug build, false otherwise.
   -->
   <PropertyGroup>
-    <_KhaosWasmTargetsImported>true</_KhaosWasmTargetsImported>
-
     <KhaosWasmRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..'))</KhaosWasmRoot>
     <KhaosWasmWebDir>$([MSBuild]::NormalizeDirectory('$(KhaosWasmRoot)', 'web'))</KhaosWasmWebDir>
 
@@ -42,10 +40,7 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Environment">
-    <_KhaosWasmEnvironment>$(KhaosEnvironment)</_KhaosWasmEnvironment>
-    <_KhaosWasmEnvironment Condition="'$(_KhaosWasmEnvironment)' == '' and '$(Configuration)' == 'Debug'">Development</_KhaosWasmEnvironment>
-    <_KhaosWasmEnvironment Condition="'$(_KhaosWasmEnvironment)' == ''">Production</_KhaosWasmEnvironment>
-    <WasmApplicationEnvironmentName Condition="'$(WasmApplicationEnvironmentName)' == ''">$(_KhaosWasmEnvironment)</WasmApplicationEnvironmentName>
+    <WasmApplicationEnvironmentName Condition="'$(WasmApplicationEnvironmentName)' == ''">$(KhaosEnvironment)</WasmApplicationEnvironmentName>
   </PropertyGroup>
 
   <Target Name="KhaosCollectPageFiles" BeforeTargets="BeforeBuild" Condition="'@(ProjectReference)' != ''">
@@ -82,6 +77,9 @@
     EmscriptenUpstreamEmscriptenPath is set by the workload's Emscripten pack (tools/emscripten/).
   -->
   <Target Name="KhaosCheckWasmNative" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == 'browser-wasm'">
+    <Error Code="KHAOS103" Condition="'$(WasmNativeWorkloadAvailable)' != 'true'"
+           Text="The wasm-tools workload for $(KhaosWasmTargetFramework) is not installed, so SDL cannot be linked into dotnet.native.wasm. Run 'dotnet workload install wasm-tools'." />
+
     <Error Code="KHAOS100" Condition="!Exists('$(KhaosWasmNativeDir)SDL3.a')"
            Text="KappaDuck.Khaos.Native has no SDL for $(KhaosWasmTargetFramework) (looked in $(KhaosWasmNativeDir)). Target a .NET version it supports, or update KappaDuck.Khaos." />
 
