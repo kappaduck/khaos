@@ -10,21 +10,17 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 
   <ItemGroup Label="Shared code">
-    <Compile Include="$(MSBuildThisFileDirectory)**/*.cs" Exclude="$(_SandboxSourceExclude)" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+    <_SandboxSource Include="$(MSBuildThisFileDirectory)**/*.cs" Exclude="$(_SandboxSourceExclude)" />
+    <Compile Include="@(_SandboxSource)" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+
+    <Compile Include="$(MSBuildThisFileDirectory)Program.cs.template" Link="Program.cs" Condition="'@(_SandboxSource)' == ''" />
+    <None Include="$(MSBuildThisFileDirectory)Program.cs.template" Link="Program.cs.template" Condition="'@(_SandboxSource)' != ''" />
   </ItemGroup>
 
-  <Target Name="CreateEntryPoint" BeforeTargets="CoreCompile">
-    <ItemGroup>
-      <_SandboxSource Include="$(MSBuildThisFileDirectory)**/*.cs" Exclude="$(_SandboxSourceExclude)" />
-    </ItemGroup>
-
-    <Copy Condition="'@(_SandboxSource)' == ''"
+  <Target Name="CreateEntryPoint" BeforeTargets="CoreCompile" Condition="'@(_SandboxSource)' == ''">
+    <Copy Condition="!Exists('$(MSBuildThisFileDirectory)Program.cs')"
           SourceFiles="$(MSBuildThisFileDirectory)Program.cs.template"
           DestinationFiles="$(MSBuildThisFileDirectory)Program.cs"
           Retries="3" RetryDelayMilliseconds="100" />
-
-    <ItemGroup Condition="'@(_SandboxSource)' == ''">
-      <Compile Include="$(MSBuildThisFileDirectory)Program.cs" Link="Program.cs" />
-    </ItemGroup>
   </Target>
 </Project>
