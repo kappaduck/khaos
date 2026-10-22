@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup Label="Assembly">
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>KappaDuck.Khaos.Benchmarks</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <PublishAot>true</PublishAot>
+    <IsPublishable>true</IsPublishable>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(KhaosRoot)src/Khaos/Khaos.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup Label="Artifacts">
+    <BenchmarkArtifactsPath>$(KhaosRoot)artifacts/benchmarks</BenchmarkArtifactsPath>
+  </PropertyGroup>
+
+  <ItemGroup Label="Tell the benchmark host where to write its reports">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>ArtifactsPath</_Parameter1>
+      <_Parameter2>$(BenchmarkArtifactsPath)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" />
+  </ItemGroup>
+</Project>
