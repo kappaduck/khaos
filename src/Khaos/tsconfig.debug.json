@@ -1,0 +1,11 @@
+{
+  // What a Debug build of a game serves: web/debug/khaos.js with its source map, the map
+  // carrying the TypeScript itself, so the browser's debugger steps through khaos.ts.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "web/debug",
+    "declaration": false,
+    "sourceMap": true,
+    "inlineSources": true
+  }
+}

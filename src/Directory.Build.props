@@ -1,0 +1,46 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup Label="Shipped libraries">
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Packaging">
+    <Authors>KappaDuck</Authors>
+    <Company>KappaDuck</Company>
+    <Copyright>Copyright © KappaDuck</Copyright>
+    <PackageProjectUrl>https://khaos.kappaduck.com</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/kappaduck/khaos</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/kappaduck/khaos/blob/main/changelog.md</PackageReleaseNotes>
+    <PackageTags>dotnet;csharp;sdl;sdl3;gamedev;game-framework;2d;webassembly</PackageTags>
+
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup Label="Packaging">
+    <None Include="$(KhaosRoot)assets/nuget/icon.png" Pack="true" PackagePath="" Visible="false" />
+
+    <None Include="$(MSBuildProjectDirectory)/readme.md" Pack="true" PackagePath="" Visible="false" Condition="Exists('$(MSBuildProjectDirectory)/readme.md')" />
+    <None Include="$(KhaosRoot)assets/nuget/readme.md" Pack="true" PackagePath="" Visible="false" Condition="!Exists('$(MSBuildProjectDirectory)/readme.md')" />
+  </ItemGroup>
+
+  <ItemGroup Label="Platforms">
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup Label="Internals">
+    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+    <InternalsVisibleTo Include="$(AssemblyName).Benchmarks" />
+  </ItemGroup>
+
+  <ItemGroup Label="Framework analyzers" Condition="'$(MSBuildProjectName)' != 'Khaos.Templates'">
+    <ProjectReference Include="$(KhaosRoot)analyzers/Khaos.Internal.Analyzers/Khaos.Internal.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

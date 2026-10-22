@@ -3,9 +3,11 @@
 /sandbox/assets/*
 !/sandbox/assets/.gitkeep
 
-# Javascript files
-
-*.js
+# Written by the Khaos build: khaos.js compiled from scripts/, dotnet.d.ts from the runtime pack
+src/Khaos/web/khaos.js
+src/Khaos/web/khaos.d.ts
+src/Khaos/web/debug/
+src/Khaos/types/
 
 # Build outputs
 [Aa]rtifacts/

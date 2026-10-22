@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "es2023",
+    "lib": [ "es2023", "DOM", "DOM.Iterable" ],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+
+    "rootDirs": [ "scripts", "types" ],
+    "rootDir": "scripts/_khaos",
+    "outDir": "web",
+
+    "declaration": true,
+    "sourceMap": false,
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmitOnError": true,
+
+    // dotnet.d.ts is checked against our code, not on its own (it declares a const enum
+    // that isolatedModules rejects in a library file).
+    "skipLibCheck": true,
+    "types": []
+  },
+  "include": [ "scripts/**/*.ts" ]
+}

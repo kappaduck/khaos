@@ -1,0 +1,73 @@
+<Project>
+  <ItemGroup Label="Global usings" Condition="('$(ImplicitUsings)' == 'enable' or '$(ImplicitUsings)' == 'true') and '$(KhaosImplicitUsings)' != 'false'">
+    <Using Include="Microsoft.Extensions.DependencyInjection" />
+    <Using Include="Microsoft.Extensions.Hosting" />
+    <Using Include="Microsoft.Extensions.Logging" />
+  </ItemGroup>
+
+  <!--
+    Environments, like every .NET app: Development, Staging, Production, or any name the game uses.
+    The game reads the active one from IHostEnvironment. At runtime the "environment" switch of the
+    command line (or of the page's query string), KHAOS_ENVIRONMENT and DOTNET_ENVIRONMENT (what
+    launch profiles set) win over these defaults.
+
+      KhaosEnvironment   The environment when nothing else names one. Default: Development in a
+                         Debug build, Production otherwise (dotnet publish is Release).
+      KhaosDiagnostics   The in-game tools (overlay, time control, console) in the build.
+                         Default: true unless KhaosEnvironment is Production, where the trimmer
+                         removes them from what players download.
+
+    Both go through the runtime configuration (runtimeconfig.json on the desktop, the boot config
+    in the browser): launch profiles cannot reach the .NET runtime inside a page, a build can.
+  -->
+  <PropertyGroup Label="Environment">
+    <KhaosEnvironment Condition="'$(KhaosEnvironment)' == '' and '$(Configuration)' == 'Debug'">Development</KhaosEnvironment>
+    <KhaosEnvironment Condition="'$(KhaosEnvironment)' == ''">Production</KhaosEnvironment>
+
+    <KhaosDiagnostics Condition="'$(KhaosDiagnostics)' == '' and '$(KhaosEnvironment)' == 'Production'">false</KhaosDiagnostics>
+    <KhaosDiagnostics Condition="'$(KhaosDiagnostics)' == ''">true</KhaosDiagnostics>
+  </PropertyGroup>
+
+  <ItemGroup Label="Environment" Condition="'$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe'">
+    <RuntimeHostConfigurationOption Include="KappaDuck.Khaos.Environment" Value="$(KhaosEnvironment)" />
+    <RuntimeHostConfigurationOption Include="KappaDuck.Khaos.Diagnostics.IsSupported" Value="$(KhaosDiagnostics)" Trim="true" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <_KhaosAssetsDirectory>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(KhaosAssetsDirectory)'))</_KhaosAssetsDirectory>
+  </PropertyGroup>
+
+  <ItemGroup Label="Assets" Condition="Exists('$(_KhaosAssetsDirectory)')">
+    <KhaosAsset Include="$(_KhaosAssetsDirectory)**/*" Exclude="$(_KhaosAssetsDirectory)**/.*" KhaosRelativePath="%(RecursiveDir)%(Filename)%(Extension)"
+                KhaosPagePath="assets/%(RecursiveDir)%(Filename)%(Extension)" KhaosPageRoot="$(_KhaosAssetsDirectory)" />
+    <None Remove="@(KhaosAsset)" />
+    <Content Include="@(KhaosAsset)" Link="assets/%(KhaosRelativePath)" CopyToOutputDirectory="PreserveNewest"
+             Condition="'$(UsingMicrosoftNETSdkWebAssembly)' != 'true'" />
+
+    <AdditionalFiles Include="@(KhaosAsset)" Link="assets/%(KhaosRelativePath)" />
+  </ItemGroup>
+
+  <ItemGroup Label="Hot reload" Condition="'$(Configuration)' == 'Debug' and Exists('$(_KhaosAssetsDirectory)')">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>KhaosAssetsSource</_Parameter1>
+      <_Parameter2>$(_KhaosAssetsDirectory)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup Label="Settings">
+    <KhaosSettingsFile Include="$(MSBuildProjectDirectory)/appsettings*.json"
+                       KhaosPagePath="%(Filename)%(Extension)" KhaosPageRoot="$(MSBuildProjectDirectory)/" />
+    <None Remove="@(KhaosSettingsFile)" />
+    <Content Remove="@(KhaosSettingsFile)" />
+    <Content Include="@(KhaosSettingsFile)" CopyToOutputDirectory="PreserveNewest"
+             Condition="'$(UsingMicrosoftNETSdkWebAssembly)' != 'true'" />
+  </ItemGroup>
+
+  <Target Name="GetKhaosPageFiles" Returns="@(KhaosAsset);@(KhaosSettingsFile)" />
+
+  <PropertyGroup Label="Desktop" Condition="('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe') and '$(UsingMicrosoftNETSdkWebAssembly)' != 'true' and '$(ApplicationIcon)' == ''">
+    <ApplicationIcon>$(MSBuildThisFileDirectory)khaos.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)KappaDuck.Khaos.WebAssembly.targets" Condition="'$(UsingMicrosoftNETSdkWebAssembly)' == 'true' and '$(_KhaosWasmTargetsImported)' != 'true'" />
+</Project>

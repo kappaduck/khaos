@@ -1,0 +1,8 @@
+<Project>
+  <Import Project="$(KhaosRoot)src/Khaos/buildTransitive/KappaDuck.Khaos.targets" Condition="'$(IsKhaosGame)' == 'true'" />
+
+  <ItemGroup Label="Games: Khaos by path" Condition="'$(IsKhaosGame)' == 'true'">
+    <ProjectReference Include="$(KhaosRoot)src/Khaos/Khaos.csproj" />
+    <ProjectReference Include="$(KhaosRoot)analyzers/Khaos.Analyzers/Khaos.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+</Project>

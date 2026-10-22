@@ -2,6 +2,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+    <KhaosNativeVersion>1.1.0</KhaosNativeVersion>
   </PropertyGroup>
 
   <ItemGroup Label="Global analyzers">
@@ -17,6 +18,28 @@
 
   <ItemGroup Label="Build">
     <PackageVersion Include="PolySharp" Version="1.16.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="TypeScript">
+    <PackageVersion Include="Microsoft.TypeScript.MSBuild" Version="7.0.1" />
+  </ItemGroup>
+
+  <ItemGroup Label="Hosting">
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="11.0.0-rc.2.26504.105" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.CommandLine" Version="11.0.0-rc.2.26504.105" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="11.0.0-rc.2.26504.105" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="11.0.0-rc.2.26504.105" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="11.0.0-rc.2.26504.105" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="11.0.0-rc.2.26504.105" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Configuration" Version="11.0.0-rc.2.26504.105" />
+  </ItemGroup>
+
+  <ItemGroup Label="Benchmarks">
+    <PackageVersion Include="BenchmarkDotNet" Version="0.16.0-preview.2" />
+  </ItemGroup>
+
+  <ItemGroup Label="Native">
+    <PackageVersion Include="KappaDuck.Khaos.Native" Version="$(KhaosNativeVersion)" />
   </ItemGroup>
 
     <!--

@@ -1,0 +1,8 @@
+{
+  "solution": {
+    "path": "khaos.slnx",
+    "projects": [
+      "src\\Khaos\\Khaos.csproj"
+    ]
+  }
+}
