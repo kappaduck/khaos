@@ -1,0 +1,4 @@
+// Copyright (c) KappaDuck.
+// Licensed under the MIT license.
+
+Console.WriteLine("Hello, Khaos!");
