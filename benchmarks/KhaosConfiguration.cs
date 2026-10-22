@@ -15,8 +15,6 @@ namespace KappaDuck.Khaos.Benchmarks;
 
 internal sealed class KhaosConfiguration : ManualConfig
 {
-    private const string ArtifactsKey = "ArtifactsPath";
-
     public KhaosConfiguration()
     {
         AddColumnProvider(DefaultColumnProviders.Instance);
@@ -32,17 +30,9 @@ internal sealed class KhaosConfiguration : ManualConfig
         WithArtifactsPath(ResolveArtifactsPath());
     }
 
-    /// <summary>
-    /// Reports go next to the benchmark project rather than next to wherever the run was started
-    /// from. The path is baked in by the project file, because the host runs out of the shared
-    /// output folder and cannot work out where its own sources live.
-    /// </summary>
     private static string ResolveArtifactsPath()
     {
-        string? path = typeof(KhaosConfiguration).Assembly
-                                            .GetCustomAttributes<AssemblyMetadataAttribute>()
-                                            .FirstOrDefault(attribute => attribute.Key == ArtifactsKey)?.Value;
-
-        return string.IsNullOrEmpty(path) ? Path.Combine(Directory.GetCurrentDirectory(), "benchmarks") : path;
+        return typeof(KhaosConfiguration).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
+                                                  .Single(attribute => attribute.Key == "ArtifactsPath").Value!;
     }
 }

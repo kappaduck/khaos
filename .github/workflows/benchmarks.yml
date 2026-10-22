@@ -1,0 +1,66 @@
+name: Benchmarks
+
+on:
+  workflow_dispatch:
+    inputs:
+      filter:
+        description: BenchmarkDotNet filter (--filter), for example *Renderer*
+        type: string
+        default: '*'
+  workflow_call:
+    inputs:
+      filter:
+        type: string
+        default: '*'
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  run:
+    name: Run
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: ./global.json
+
+      - name: Run the benchmarks
+        env:
+          Filter: ${{ inputs.filter }}
+        run: >-
+          dotnet run --configuration Release --project benchmarks -- --filter "$Filter"
+
+      - name: Summary
+        run: |
+          shopt -s nullglob
+          reports=(artifacts/benchmarks/results/*-report-github.md)
+          if (( ${#reports[@]} == 0 )); then
+            echo "::warning::No benchmark matched the filter."
+            exit 0
+          fi
+          for report in "${reports[@]}"; do
+            name=$(basename "$report" -report-github.md)
+            printf '## %s\n\n' "${name##*.}" >> "$GITHUB_STEP_SUMMARY"
+            cat "$report" >> "$GITHUB_STEP_SUMMARY"
+            echo >> "$GITHUB_STEP_SUMMARY"
+          done
+
+      - name: Upload the reports
+        uses: actions/upload-artifact@v7
+        with:
+          name: benchmarks
+          path: artifacts/benchmarks/results
+          if-no-files-found: ignore
