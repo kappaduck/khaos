@@ -55,6 +55,7 @@
     <File Path="tests/.editorconfig" />
     <File Path="tests/Directory.Build.props" />
     <File Path="tests/Directory.Packages.props" />
+    <Project Path="benchmarks/Benchmarks.csproj" />
     <Project Path="tests/Khaos.Analyzers.Tests/Khaos.Analyzers.Tests.csproj" />
     <Project Path="tests/Khaos.Internal.Analyzers.Tests/Khaos.Internal.Analyzers.Tests.csproj" />
     <Project Path="tests/Khaos.Tests/Khaos.Tests.csproj" Id="a3dc23be-5969-42b3-845b-d1226044a021" />
