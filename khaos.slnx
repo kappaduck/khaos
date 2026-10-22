@@ -10,6 +10,7 @@
     <File Path=".gitattributes" />
     <File Path=".gitignore" />
     <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
     <File Path="Directory.Packages.props" />
     <File Path="global.json" />
   </Folder>
@@ -40,17 +41,30 @@
     <File Path="rules/underscore.editorconfig" />
     <File Path="rules/vsthrd.editorconfig" />
   </Folder>
+  <Folder Name="/sandbox/">
+    <File Path="sandbox/Directory.Build.props" />
+    <File Path="sandbox/Program.cs.template" />
+    <Project Path="sandbox/Desktop/Sandbox.Desktop.csproj" />
+    <Project Path="sandbox/Web/Sandbox.Web.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <File Path="src/Directory.Build.props" />
+  </Folder>
   <Folder Name="/tests/">
     <File Path="tests/.editorconfig" />
     <File Path="tests/Directory.Build.props" />
     <File Path="tests/Directory.Packages.props" />
     <Project Path="tests/Khaos.Analyzers.Tests/Khaos.Analyzers.Tests.csproj" />
     <Project Path="tests/Khaos.Internal.Analyzers.Tests/Khaos.Internal.Analyzers.Tests.csproj" />
+    <Project Path="tests/Khaos.Tests/Khaos.Tests.csproj" Id="a3dc23be-5969-42b3-845b-d1226044a021" />
   </Folder>
   <Folder Name="/workflows/">
     <File Path=".github/dependabot.yml" />
+    <File Path=".github/workflows/khaos.yml" />
     <File Path=".github/workflows/labels.yml" />
     <File Path=".github/workflows/native.yml" />
+    <File Path=".github/workflows/pull-request.yml" />
     <File Path=".github/workflows/update-sdl.yml" />
   </Folder>
+  <Project Path="src/Khaos/Khaos.csproj" />
 </Solution>
