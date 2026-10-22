@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/configuration/">
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="readme.md" />
+  </Folder>
+  <Project Path="MyGame.Desktop/MyGame.Desktop.csproj" />
+  <Project Path="MyGame.Web/MyGame.Web.csproj" />
+  <Project Path="MyGame/MyGame.csproj" />
+</Solution>

@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../MyGame/MyGame.csproj" />
+  </ItemGroup>
+</Project>

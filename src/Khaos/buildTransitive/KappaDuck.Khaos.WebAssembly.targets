@@ -1,0 +1,156 @@
+<Project>
+  <!--
+    Everything a Khaos game needs to run in the browser, for a project using
+    Sdk="Microsoft.NET.Sdk.WebAssembly". KappaDuck.Khaos.targets imports this file for such a
+    project; inside the Khaos repository, the browser apps import it by path in their project file.
+
+      1. Links SDL into dotnet.native.wasm, from the .a files KappaDuck.Khaos.Native
+         carries for the game's .NET version, after checking they match the workload's Emscripten.
+      2. Serves _khaos/khaos.js and _khaos/khaos.css, and a default index.html when the game has none.
+      3. Puts the game's assets (under assets/) and appsettings*.json (at the root) in the
+         page's virtual file system: the app's own, and those of the game projects it references.
+      4. After `dotnet publish`, zips wwwroot into <AssemblyName>-web.zip.
+      5. Makes CA1416 an error and passes the Khaos environment to the runtime's boot config.
+
+    Properties a game can set:
+      KhaosAssetsDirectory      The assets folder, relative to the project. Default: assets/
+      KhaosWebCompression       Brotli (default), Gzip or None: the precompressed copies
+                                that go in the zip next to the plain files.
+      KhaosSkipEmscriptenCheck  true to link even when the Emscripten versions differ.
+      KhaosDebugScripts         true to serve khaos.js with its source map. Default: true
+                                in a Debug build, false otherwise.
+  -->
+  <PropertyGroup>
+    <KhaosWasmRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..'))</KhaosWasmRoot>
+    <KhaosWasmWebDir>$([MSBuild]::NormalizeDirectory('$(KhaosWasmRoot)', 'web'))</KhaosWasmWebDir>
+
+    <KhaosDebugScripts Condition="'$(KhaosDebugScripts)' == '' and '$(Configuration)' == 'Debug'">true</KhaosDebugScripts>
+    <KhaosWasmScriptDir Condition="'$(KhaosDebugScripts)' == 'true'">$([MSBuild]::NormalizeDirectory('$(KhaosWasmWebDir)', 'debug'))</KhaosWasmScriptDir>
+    <KhaosWasmScriptDir Condition="'$(KhaosDebugScripts)' != 'true'">$(KhaosWasmWebDir)</KhaosWasmScriptDir>
+
+    <KhaosWasmTargetFramework Condition="'$(TargetFramework)' != ''">net$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)', 2))</KhaosWasmTargetFramework>
+    <KhaosWasmNativeDir>$([MSBuild]::NormalizeDirectory('$(KhaosWasmNativeRoot)', '$(KhaosWasmTargetFramework)'))</KhaosWasmNativeDir>
+
+    <WasmBuildNative>true</WasmBuildNative>
+
+    <KhaosAssetsDirectory Condition="'$(KhaosAssetsDirectory)' == ''">assets/</KhaosAssetsDirectory>
+    <_KhaosAssetsDirectory>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(KhaosAssetsDirectory)'))</_KhaosAssetsDirectory>
+
+    <KhaosWebCompression Condition="'$(KhaosWebCompression)' == ''">Brotli</KhaosWebCompression>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Environment">
+    <WasmApplicationEnvironmentName Condition="'$(WasmApplicationEnvironmentName)' == ''">$(KhaosEnvironment)</WasmApplicationEnvironmentName>
+  </PropertyGroup>
+
+  <Target Name="KhaosCollectPageFiles" BeforeTargets="BeforeBuild" Condition="'@(ProjectReference)' != ''">
+    <MSBuild Projects="@(ProjectReference)" Targets="GetKhaosPageFiles" SkipNonexistentTargets="true"
+             Properties="Configuration=$(Configuration)" RemoveProperties="RuntimeIdentifier;SelfContained">
+      <Output TaskParameter="TargetOutputs" ItemName="KhaosPageFile" />
+    </MSBuild>
+  </Target>
+
+  <!-- Link SDL into dotnet.native.wasm -->
+  <Import Project="$(KhaosWasmNativeDir)emscripten.props" Condition="Exists('$(KhaosWasmNativeDir)emscripten.props')" />
+
+  <ItemGroup>
+    <NativeFileReference Include="$(KhaosWasmNativeDir)SDL3.a" Condition="Exists('$(KhaosWasmNativeDir)SDL3.a')" />
+    <NativeFileReference Include="$(KhaosWasmNativeDir)SDL3_image.a" Condition="Exists('$(KhaosWasmNativeDir)SDL3_image.a')" />
+    <NativeFileReference Include="$(KhaosWasmNativeDir)SDL3_mixer.a" Condition="Exists('$(KhaosWasmNativeDir)SDL3_mixer.a')" />
+    <NativeFileReference Include="$(KhaosWasmNativeDir)SDL3_ttf.a" Condition="Exists('$(KhaosWasmNativeDir)SDL3_ttf.a')" />
+    <NativeFileReference Include="$(KhaosWasmNativeDir)deps/*.a" ScanForPInvokes="false" />
+  </ItemGroup>
+
+  <!--
+    SDL's video driver replaces Module.requestFullscreen at startup. In a Debug build
+    (-O0, Emscripten assertions on) every runtime symbol that is not exported gets a
+    getter-only trap on Module, and assigning to it throws before the first frame.
+    Exporting it makes it an ordinary property SDL is free to replace.
+  -->
+  <ItemGroup>
+    <EmccExportedRuntimeMethod Include="requestFullscreen" />
+  </ItemGroup>
+
+  <!--
+    .NET checks that emcc is the version its own runtime expects, not that the game's .a
+    files are. A mismatch here otherwise ends in link errors nobody can read.
+    EmscriptenUpstreamEmscriptenPath is set by the workload's Emscripten pack (tools/emscripten/).
+  -->
+  <Target Name="KhaosCheckWasmNative" BeforeTargets="BeforeBuild" Condition="'$(RuntimeIdentifier)' == 'browser-wasm'">
+    <Error Code="KHAOS103" Condition="'$(WasmNativeWorkloadAvailable)' != 'true'"
+           Text="The wasm-tools workload for $(KhaosWasmTargetFramework) is not installed, so SDL cannot be linked into dotnet.native.wasm. Run 'dotnet workload install wasm-tools'." />
+
+    <Error Code="KHAOS100" Condition="!Exists('$(KhaosWasmNativeDir)SDL3.a')"
+           Text="KappaDuck.Khaos.Native has no SDL for $(KhaosWasmTargetFramework) (looked in $(KhaosWasmNativeDir)). Target a .NET version it supports, or update KappaDuck.Khaos." />
+
+    <ReadLinesFromFile File="$(EmscriptenUpstreamEmscriptenPath)emscripten-version.txt"
+                       Condition="'$(EmscriptenUpstreamEmscriptenPath)' != '' and Exists('$(EmscriptenUpstreamEmscriptenPath)emscripten-version.txt')">
+      <Output TaskParameter="Lines" PropertyName="_KhaosWorkloadEmscripten" />
+    </ReadLinesFromFile>
+
+    <PropertyGroup>
+      <!-- The workload's file holds the version in quotes: "6.0.3". -->
+      <_KhaosWorkloadEmscripten>$(_KhaosWorkloadEmscripten.Replace('"', '').Trim())</_KhaosWorkloadEmscripten>
+    </PropertyGroup>
+
+    <Error Code="KHAOS101"
+           Condition="'$(KhaosSkipEmscriptenCheck)' != 'true' and '$(KhaosWasmEmscriptenVersion)' != '' and '$(_KhaosWorkloadEmscripten)' != '' and '$(KhaosWasmEmscriptenVersion)' != '$(_KhaosWorkloadEmscripten)'"
+           Text="SDL for $(KhaosWasmTargetFramework) was compiled with Emscripten $(KhaosWasmEmscriptenVersion), but the wasm-tools workload links with Emscripten $(_KhaosWorkloadEmscripten). Update KappaDuck.Khaos or run 'dotnet workload update'. Set KhaosSkipEmscriptenCheck to true to try anyway." />
+  </Target>
+
+  <!-- The default page: khaos.js, khaos.css and index.html -->
+  <ItemGroup>
+    <Content Include="$(KhaosWasmScriptDir)khaos.js" Link="wwwroot/_khaos/khaos.js" ContentRoot="$(KhaosWasmScriptDir)" />
+    <Content Include="$(KhaosWasmScriptDir)khaos.js.map" Link="wwwroot/_khaos/khaos.js.map" ContentRoot="$(KhaosWasmScriptDir)" Condition="'$(KhaosDebugScripts)' == 'true'" />
+    <Content Include="$(KhaosWasmWebDir)khaos.css" Link="wwwroot/_khaos/khaos.css" ContentRoot="$(KhaosWasmWebDir)" />
+    <Content Include="$(KhaosWasmWebDir)khaos.svg" Link="wwwroot/_khaos/khaos.svg" ContentRoot="$(KhaosWasmWebDir)" />
+    <Content Include="$(KhaosWasmWebDir)favicon.ico" Link="wwwroot/_khaos/favicon.ico" ContentRoot="$(KhaosWasmWebDir)" />
+    <Content Include="$(KhaosWasmWebDir)probe.txt" Link="wwwroot/_khaos/probe.txt" ContentRoot="$(KhaosWasmWebDir)" />
+    <Content Include="$(KhaosWasmWebDir)index.html" Link="wwwroot/index.html" ContentRoot="$(KhaosWasmWebDir)" Condition="!Exists('$(MSBuildProjectDirectory)/wwwroot/index.html')" />
+  </ItemGroup>
+
+  <!-- Link assets and settings in the page's virtual file system -->
+  <ItemGroup Condition="Exists('$(_KhaosAssetsDirectory)')">
+    <KhaosPageFile Include="$(_KhaosAssetsDirectory)**/*" Exclude="$(_KhaosAssetsDirectory)**/.*"
+                   KhaosPagePath="assets/%(RecursiveDir)%(Filename)%(Extension)" KhaosPageRoot="$(_KhaosAssetsDirectory)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <KhaosPageFile Include="$(MSBuildProjectDirectory)/appsettings*.json"
+                   KhaosPagePath="%(Filename)%(Extension)" KhaosPageRoot="$(MSBuildProjectDirectory)/" />
+  </ItemGroup>
+
+  <!-- Before the static web assets are collected, which only see Content items that exist by then. -->
+  <Target Name="KhaosAddPageFiles" BeforeTargets="ResolveProjectStaticWebAssets" Condition="'@(KhaosPageFile)' != ''">
+    <ItemGroup>
+      <Content Remove="@(KhaosPageFile)" />
+      <Content Include="@(KhaosPageFile)" Link="wwwroot/%(KhaosPageFile.KhaosPagePath)" ContentRoot="%(KhaosPageFile.KhaosPageRoot)" />
+      <WasmFilesToIncludeInFileSystem Include="@(KhaosPageFile->'%(KhaosPagePath)')" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Publish task -->
+  <Target Name="KhaosZipWebPublish" AfterTargets="Publish">
+    <Error Code="KHAOS102" Condition="'$(KhaosWebCompression)' != 'Brotli' and '$(KhaosWebCompression)' != 'Gzip' and '$(KhaosWebCompression)' != 'None'"
+           Text="KhaosWebCompression is '$(KhaosWebCompression)': use Brotli, Gzip or None." />
+
+    <PropertyGroup>
+      <_KhaosPublishDir>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(PublishDir)'))</_KhaosPublishDir>
+      <_KhaosPublishWwwroot>$([MSBuild]::NormalizeDirectory('$(_KhaosPublishDir)', 'wwwroot'))</_KhaosPublishWwwroot>
+      <_KhaosZipStaging>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', 'khaos-web'))</_KhaosZipStaging>
+      <_KhaosZip>$(_KhaosPublishDir)$(AssemblyName)-web.zip</_KhaosZip>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_KhaosWebFile Include="$(_KhaosPublishWwwroot)**/*" Exclude="$(_KhaosPublishWwwroot)**/*.br;$(_KhaosPublishWwwroot)**/*.gz" />
+      <_KhaosWebFile Include="$(_KhaosPublishWwwroot)**/*.br" Condition="'$(KhaosWebCompression)' == 'Brotli'" />
+      <_KhaosWebFile Include="$(_KhaosPublishWwwroot)**/*.gz" Condition="'$(KhaosWebCompression)' == 'Gzip'" />
+    </ItemGroup>
+
+    <RemoveDir Directories="$(_KhaosZipStaging)" />
+    <Copy SourceFiles="@(_KhaosWebFile)" DestinationFiles="@(_KhaosWebFile->'$(_KhaosZipStaging)%(RecursiveDir)%(Filename)%(Extension)')" />
+    <ZipDirectory SourceDirectory="$(_KhaosZipStaging)" DestinationFile="$(_KhaosZip)" Overwrite="true" />
+
+    <Message Importance="high" Text="$(MSBuildProjectName) -> $(_KhaosZip)" />
+  </Target>
+</Project>

@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <KhaosVersion>KHAOS_VERSION</KhaosVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="KappaDuck.Khaos" Version="$(KhaosVersion)" />
+  </ItemGroup>
+</Project>

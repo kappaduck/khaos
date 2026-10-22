@@ -1,0 +1,97 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup Label="Assembly">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package">
+    <Title>Khaos</Title>
+    <Description>A modern, fast and flexible .NET game framework using SDL3, for Windows, Linux and the browser</Description>
+    <PackageTags>$(PackageTags);desktop;windows;linux;browser;wasm</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup Label="Global usings">
+    <Using Include="System.Diagnostics.CodeAnalysis" />
+    <Using Include="System.Runtime.CompilerServices" />
+    <Using Include="System.Runtime.InteropServices" />
+    <Using Include="System.Runtime.InteropServices.Marshalling" />
+  </ItemGroup>
+
+  <ItemGroup Label="Configure default search paths for DLL import">
+    <AssemblyAttribute Include="System.Runtime.InteropServices.DefaultDllImportSearchPathsAttribute">
+      <_Parameter1>SafeDirectories</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup Label="Packages">
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" />
+    <PackageReference Include="KappaDuck.Khaos.Native" />
+  </ItemGroup>
+
+  <ItemGroup Label="Game analyzers and source generators">
+    <ProjectReference Include="$(KhaosRoot)analyzers/Khaos.Analyzers/Khaos.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup Label="Branding">
+    <EmbeddedResource Include="Branding/*.png" LogicalName="KappaDuck.Khaos.Branding.%(Filename)%(Extension)" WithCulture="false" />
+  </ItemGroup>
+
+  <ItemGroup Label="Package content">
+    <None Include="buildTransitive/**" Pack="true" PackagePath="buildTransitive/" />
+    <None Include="web/**" Exclude="web/khaos.js;web/khaos.d.ts;web/debug/**" Pack="true" PackagePath="web/" />
+  </ItemGroup>
+
+  <Target Name="PackAnalyzers" DependsOnTargets="ResolveReferences" BeforeTargets="_GetPackageFiles">
+    <ItemGroup>
+      <None Include="@(Analyzer)" Condition="'%(Filename)' == 'KappaDuck.Khaos.Analyzers'" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup Label="TypeScript">
+    <KhaosDotnetTypesVersion Condition="'$(KhaosDotnetTypesVersion)' == ''">$(BundledNETCoreAppPackageVersion)</KhaosDotnetTypesVersion>
+
+    <TypeScriptTarget />
+    <TypeScriptSourceMap>false</TypeScriptSourceMap>
+  </PropertyGroup>
+
+  <ItemGroup Label="TypeScript">
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" PrivateAssets="all" />
+    <PackageDownload Include="Microsoft.NETCore.App.Runtime.Mono.browser-wasm" Version="[$(KhaosDotnetTypesVersion)]" />
+  </ItemGroup>
+
+  <Target Name="KhaosCopyDotnetTypes" BeforeTargets="RunTscCompile">
+    <PropertyGroup>
+      <_KhaosDotnetTypes>$(NuGetPackageRoot)microsoft.netcore.app.runtime.mono.browser-wasm/$(KhaosDotnetTypesVersion.ToLowerInvariant())/runtimes/browser-wasm/native/dotnet.d.ts</_KhaosDotnetTypes>
+    </PropertyGroup>
+
+    <Error Condition="!Exists('$(_KhaosDotnetTypes)')" Text="dotnet.d.ts was not found at $(_KhaosDotnetTypes). Restore the project: the runtime pack Microsoft.NETCore.App.Runtime.Mono.browser-wasm $(KhaosDotnetTypesVersion) carries it." />
+
+    <Copy SourceFiles="$(_KhaosDotnetTypes)" DestinationFolder="$(MSBuildProjectDirectory)/types/_framework/" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="KhaosCompileDebugScripts" AfterTargets="RunTscCompile" Condition="'$(TypeScriptCompileBlocked)' != 'true'">
+    <Exec Command="&quot;$(TscExe)&quot; -p &quot;$(MSBuildProjectDirectory)/tsconfig.debug.json&quot;" />
+  </Target>
+
+  <Target Name="KhaosPackCompiledScripts" BeforeTargets="_GetPackageFiles">
+    <ItemGroup>
+      <_KhaosCompiledScript Include="web/khaos.js;web/khaos.d.ts;web/debug/khaos.js;web/debug/khaos.js.map" />
+    </ItemGroup>
+
+    <Error Condition="!Exists('%(_KhaosCompiledScript.FullPath)')" Text="%(_KhaosCompiledScript.Identity) is missing: the TypeScript compile did not run or failed." />
+
+    <ItemGroup>
+      <None Include="web/khaos.js;web/khaos.d.ts" Pack="true" PackagePath="web/" />
+      <None Include="web/debug/khaos.js;web/debug/khaos.js.map" Pack="true" PackagePath="web/debug/" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="KhaosCleanDebugScripts" AfterTargets="Clean">
+    <RemoveDir Directories="$(MSBuildProjectDirectory)/web/debug" />
+  </Target>
+</Project>

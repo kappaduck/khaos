@@ -1,0 +1,151 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "KappaDuck",
+  "classifications": [
+    "Game",
+    "Desktop",
+    "Web",
+    "WebAssembly"
+  ],
+  "identity": "KappaDuck.Khaos.Templates.Game",
+  "name": "Khaos game",
+  "description": "A KappaDuck.Khaos game for the desktop, the browser, or both from the same code.",
+  "shortName": "khaos",
+  "sourceName": "MyGame",
+  "preferNameDirectory": true,
+  "tags": {
+    "language": "C#",
+    "type": "solution"
+  },
+  "symbols": {
+    "platform": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "both",
+          "description": "Desktop and browser from the same code: the game, a desktop app and a browser app."
+        },
+        {
+          "choice": "desktop",
+          "description": "Desktop only, one project."
+        },
+        {
+          "choice": "browser",
+          "description": "Browser only, one project. Made for game jams."
+        }
+      ],
+      "defaultValue": "both",
+      "description": "Where the game runs."
+    },
+    "title": {
+      "type": "parameter",
+      "datatype": "text",
+      "description": "The game's title: the readme's heading and the page's title until the game sets its own. Defaults to the name."
+    },
+    "titleOrName": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "title",
+        "fallbackVariableName": "name"
+      },
+      "replaces": "KHAOS_TITLE"
+    },
+    "khaosVersion": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "KHAOS_PACKAGE_VERSION",
+      "replaces": "KHAOS_VERSION",
+      "description": "Version of the Khaos packages. Defaults to the version of this template."
+    },
+    "httpPort": {
+      "type": "generated",
+      "generator": "port",
+      "parameters": {
+        "low": 5000,
+        "high": 5300
+      },
+      "replaces": "KHAOS_HTTP_PORT",
+      "description": "The port of the browser launch profiles, picked once per game."
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "exclude": [
+            "**/bin/**",
+            "**/obj/**",
+            "**/.vs/**",
+            "wwwroot/**"
+          ]
+        },
+        {
+          "condition": "(platform == 'both')",
+          "exclude": [
+            "MyGame.single.slnx",
+            "readme.desktop.md",
+            "readme.browser.md",
+            "MyGame/Properties/**",
+            "MyGame/Program.cs"
+          ],
+          "rename": {
+            "readme.both.md": "readme.md"
+          }
+        },
+        {
+          "condition": "(platform == 'desktop')",
+          "exclude": [
+            "MyGame.Desktop/**",
+            "MyGame.Web/**",
+            "MyGame.slnx",
+            "readme.both.md",
+            "readme.browser.md"
+          ],
+          "rename": {
+            "MyGame.single.slnx": "MyGame.slnx",
+            "readme.desktop.md": "readme.md"
+          }
+        },
+        {
+          "condition": "(platform == 'browser')",
+          "exclude": [
+            "MyGame.Desktop/**",
+            "MyGame.Web/**",
+            "MyGame.slnx",
+            "readme.both.md",
+            "readme.desktop.md"
+          ],
+          "rename": {
+            "MyGame.single.slnx": "MyGame.slnx",
+            "readme.browser.md": "readme.md"
+          }
+        }
+      ]
+    },
+    {
+      "condition": "(platform == 'both')",
+      "source": "./wwwroot/",
+      "target": "./MyGame.Web/wwwroot/"
+    },
+    {
+      "condition": "(platform == 'browser')",
+      "source": "./wwwroot/",
+      "target": "./MyGame/wwwroot/"
+    }
+  ],
+  "primaryOutputs": [
+    {
+      "path": "MyGame/MyGame.csproj"
+    },
+    {
+      "condition": "(platform == 'both')",
+      "path": "MyGame.Desktop/MyGame.Desktop.csproj"
+    },
+    {
+      "condition": "(platform == 'both')",
+      "path": "MyGame.Web/MyGame.Web.csproj"
+    }
+  ]
+}

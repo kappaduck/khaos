@@ -1,0 +1,11 @@
+<Project>
+  <!-- Defaults for every project of a game that references KappaDuck.Khaos -->
+  <PropertyGroup>
+    <InvariantGlobalization Condition="'$(InvariantGlobalization)' == ''">true</InvariantGlobalization>
+
+    <EnableTrimAnalyzer Condition="'$(EnableTrimAnalyzer)' == ''">true</EnableTrimAnalyzer>
+    <EnableAotAnalyzer Condition="'$(EnableAotAnalyzer)' == ''">true</EnableAotAnalyzer>
+
+    <KhaosAssetsDirectory Condition="'$(KhaosAssetsDirectory)' == ''">assets/</KhaosAssetsDirectory>
+  </PropertyGroup>
+</Project>

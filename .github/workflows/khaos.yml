@@ -1,0 +1,93 @@
+name: Khaos
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  publish:
+    name: Publish ${{ github.event_name == 'release' && !github.event.release.prerelease && 'production' || 'beta' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: nuget
+    permissions:
+      contents: write
+      id-token: write
+
+    env:
+      Channel: ${{ github.event_name == 'release' && !github.event.release.prerelease && 'production' || 'beta' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: ./global.json
+
+      - name: Install the wasm-tools workload
+        run: dotnet workload install wasm-tools
+
+      - name: Read version
+        id: versions
+        run: echo "Khaos=$(dotnet msbuild src/Khaos/Khaos.csproj -getProperty:VersionPrefix)" >> "$GITHUB_OUTPUT"
+
+      - name: Check the release tag
+        if: github.event_name == 'release'
+        env:
+          Tag: ${{ github.event.release.tag_name }}
+          Prefix: ${{ steps.versions.outputs.Khaos }}
+        run: |
+          if [[ "${Tag#v}" != "$Prefix" ]]; then
+            echo "::error::The release tag is $Tag, but Directory.Build.props says $Prefix. Run tools/prepare-release.cs or fix the tag."
+            exit 1
+          fi
+
+      - name: Resolve version
+        id: package
+        run: |
+          chmod +x tools/resolve-version.sh
+          tools/resolve-version.sh KappaDuck.Khaos ${{ steps.versions.outputs.Khaos }} ${{ env.Channel }}
+
+      - name: Test
+        run: |
+          for project in tests/*/*.csproj; do
+            dotnet test --project "$project" --configuration Release
+          done
+
+      - name: Build
+        run: dotnet build packages.slnf --configuration Release -p:VersionSuffix=${{ steps.package.outputs.Suffix }}
+
+      - name: Package
+        run: dotnet pack packages.slnf --no-build --configuration Release --output artifacts/packages -p:VersionSuffix=${{ steps.package.outputs.Suffix }}
+
+      - name: Check packages
+        run: |
+          ls artifacts/packages
+          for id in KappaDuck.Khaos KappaDuck.Khaos.Templates; do
+            test -f "artifacts/packages/$id.${{ steps.package.outputs.Version }}.nupkg" || { echo "::error::$id was not packed"; exit 1; }
+          done
+
+      - name: Generate key
+        id: nuget
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841
+        with:
+          user: ${{ secrets.USER }}
+
+      - name: Publish to NuGet
+        run: dotnet nuget push "artifacts/packages/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget.outputs.NUGET_API_KEY }} --skip-duplicate

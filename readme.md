@@ -206,9 +206,8 @@ Full API documentation and samples are available:
 
 - [Full API reference][khaos.kappaduck.com]
 - [Benchmarks](https://khaos.kappaduck.com/benchmarks/): measured on every release, on the JIT and with NativeAOT
-- **[`examples/`][examples]**: one concept per example, playable in the documentation
-- **[`samples/`][samples]**: complete small games
-- **[`demo/`][demo]**: a full game
+- **[Examples][examples]**: one concept per example, playable in the documentation
+- **[`demos/`][demos]**: games made with Khaos, from small ones that each show a few features to a full game, playable in the documentation
 
 > [!NOTE]
 > The documention is in work in progress
@@ -228,6 +227,59 @@ The `source` row tracks the main branch and every other row lists the native ver
 |  Khaos   | Native  |   SDL3   | SDL_image | SDL_ttf | SDL_mixer |
 | :------: | :-----: | :------: | :-------: | :-----: | :-------: |
 | `source` | `1.1.0` | `3.4.18` |  `3.4.8`  | `3.2.2` |  `3.2.4`  |
+
+## Development & Sandbox
+
+You can build Khaos from source and experiment quickly using the included sandbox project.
+
+### Prerequisites
+
+- [.NET 11.0 SDK](https://dotnet.microsoft.com/download/dotnet/11.0)
+- For the browser: the `wasm-tools` workload (see [In the browser](#in-the-browser))
+
+### Setup
+
+**1. Clone the repository**
+
+```bash
+git clone https://github.com/KappaDuck/khaos.git
+cd khaos
+```
+
+**2. Build and test**
+
+```bash
+dotnet build khaos.slnx
+dotnet test --solution khaos.slnx
+```
+
+### Sandbox
+
+`sandbox/` is for experimenting without touching the main source. Its code is compiled by both apps, desktop and browser, which use `src/` by path the way a game uses the packages, so changes are reflected immediately.
+
+Your code (any `.cs` file in `sandbox/`, subfolders included) and your assets (`sandbox/assets/`) are ignored by git.
+If the folder holds no source at all, the first build drops a starter `Program.cs` in from `Program.cs.template`, so a
+fresh clone always compiles.
+
+```bash
+dotnet run --project sandbox/Desktop
+```
+
+or simply run it in your IDE.
+
+#### In the browser
+
+The browser app needs the `wasm-tools` workload, which links SDL into the .NET runtime as WebAssembly.
+
+```bash
+dotnet workload install wasm-tools
+dotnet run --project sandbox/Web
+```
+
+or simply run it in your IDE.
+
+`dotnet run` builds the app, starts a local server and prints its address (`App url: ...`): open it in your browser.
+The first build takes longer, since it relinks the .NET runtime with SDL.
 
 ## AI disclosure
 
@@ -250,9 +302,8 @@ Inspired by
 - [Sayers.SDL2.Core](https://github.com/JeremySayers/Sayers.SDL2.Core)
 - [SDL3-CS](https://github.com/flibitijibibo/SDL3-CS)
 
-[examples]: examples
-[samples]: samples
-[demo]: demo
+[examples]: docs/examples
+[demos]: demos
 [NuGet]: https://www.nuget.org/packages/KappaDuck.Khaos/
 [SDL3]: https://www.libsdl.org/
 [SDL_image]: https://github.com/libsdl-org/SDL_image

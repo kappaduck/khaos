@@ -12,6 +12,8 @@
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <UseArtifactsOutput>true</UseArtifactsOutput>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <IsPackable>false</IsPackable>
 
     <ArtifactsPath>$(KhaosRoot)artifacts</ArtifactsPath>
     <AssemblyName>KappaDuck.$(MSBuildProjectName)</AssemblyName>
@@ -31,4 +33,24 @@
   <ItemGroup Label="Configure analyzer rules">
     <GlobalAnalyzerConfigFiles Include="$(KhaosRoot)rules/*.editorconfig" />
   </ItemGroup>
+
+  <PropertyGroup Label="Games: kind of project" Condition="'$(IsKhaosGame)' == 'true'">
+    <IsKhaosDesktop>$(MSBuildProjectName.EndsWith('.Desktop'))</IsKhaosDesktop>
+    <IsKhaosWeb>$(MSBuildProjectName.EndsWith('.Web'))</IsKhaosWeb>
+
+    <!-- A game's assembly is named after the game, not KappaDuck.<project>. -->
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>$(MSBuildProjectName.Replace('.Desktop', '').Replace('.Web', ''))</RootNamespace>
+  </PropertyGroup>
+
+  <!-- What the template writes in each app's project file. -->
+  <PropertyGroup Label="Games: Desktop and Web" Condition="'$(IsKhaosDesktop)' == 'true' or '$(IsKhaosWeb)' == 'true'">
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Games: Desktop" Condition="'$(IsKhaosDesktop)' == 'true'">
+    <PublishAot>true</PublishAot>
+  </PropertyGroup>
+
+  <Import Project="$(KhaosRoot)src/Khaos/buildTransitive/KappaDuck.Khaos.props" Condition="'$(IsKhaosGame)' == 'true'" />
 </Project>

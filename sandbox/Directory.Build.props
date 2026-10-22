@@ -1,0 +1,26 @@
+<Project>
+  <PropertyGroup Label="Sandbox">
+    <IsKhaosGame>true</IsKhaosGame>
+    <KhaosAssetsDirectory>$(MSBuildThisFileDirectory)assets/</KhaosAssetsDirectory>
+
+    <!-- The apps compile their own folder; bin/ and obj/ in case a build writes outside artifacts/. -->
+    <_SandboxSourceExclude>$(MSBuildThisFileDirectory)Desktop/**;$(MSBuildThisFileDirectory)Web/**;$(MSBuildThisFileDirectory)assets/**;$(MSBuildThisFileDirectory)**/bin/**;$(MSBuildThisFileDirectory)**/obj/**</_SandboxSourceExclude>
+  </PropertyGroup>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <ItemGroup Label="Shared code">
+    <_SandboxSource Include="$(MSBuildThisFileDirectory)**/*.cs" Exclude="$(_SandboxSourceExclude)" />
+    <Compile Include="@(_SandboxSource)" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+
+    <Compile Include="$(MSBuildThisFileDirectory)Program.cs.template" Link="Program.cs" Condition="'@(_SandboxSource)' == ''" />
+    <None Include="$(MSBuildThisFileDirectory)Program.cs.template" Link="Program.cs.template" Condition="'@(_SandboxSource)' != ''" />
+  </ItemGroup>
+
+  <Target Name="CreateEntryPoint" BeforeTargets="CoreCompile" Condition="'@(_SandboxSource)' == ''">
+    <Copy Condition="!Exists('$(MSBuildThisFileDirectory)Program.cs')"
+          SourceFiles="$(MSBuildThisFileDirectory)Program.cs.template"
+          DestinationFiles="$(MSBuildThisFileDirectory)Program.cs"
+          Retries="3" RetryDelayMilliseconds="100" />
+  </Target>
+</Project>

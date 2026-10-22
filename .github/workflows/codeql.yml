@@ -74,6 +74,9 @@ jobs:
         with:
           global-json-file: ./global.json
 
+      - name: Install the wasm-tools workload
+        run: dotnet workload install wasm-tools
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
