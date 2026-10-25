@@ -36,3 +36,9 @@
   items:
     - name: Troubleshooting
       href: troubleshooting.md
+- name: The project
+  items:
+    - name: Roadmap
+      href: roadmap.md
+    - name: Contributing
+      href: contributing.md
