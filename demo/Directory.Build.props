@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup Label="Game">
+    <IsKhaosGame>true</IsKhaosGame>
+  </PropertyGroup>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+</Project>
