@@ -1,0 +1,95 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "../artifacts/bin",
+          "files": [
+            "Khaos/release/KappaDuck.Khaos.dll",
+            "Khaos.Toolkit/release/KappaDuck.Khaos.Toolkit.dll"
+          ]
+        }
+      ],
+      "output": "api",
+      "namespaceLayout": "nested",
+      "memberLayout": "samePage",
+      "enumSortOrder": "declaringOrder"
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "**/*.{md,yml}"
+        ],
+        "exclude": [
+          "_site/**",
+          "api/**",
+          "explorations/**",
+          "templates/**",
+          "adr/**",
+          "rules/khi*.md"
+        ]
+      },
+      {
+        "files": [
+          "api/**/*.yml",
+          "api/index.md"
+        ]
+      },
+      {
+        "src": "../demo",
+        "dest": "demo",
+        "files": [
+          "readme.md",
+          "*/readme.md",
+          "toc.yml"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "images/**"
+        ]
+      },
+      {
+        "src": "../assets",
+        "dest": "images",
+        "files": [
+          "logo/khaos-mark.svg",
+          "logo/khaos-mark-light.svg",
+          "logo/favicon.ico",
+          "logo/apple-touch-icon.png",
+          "github/khaos-lockup-dark.svg",
+          "github/khaos-lockup-light.svg"
+        ]
+      }
+    ],
+    "output": "_site",
+    "template": [
+      "default",
+      "modern",
+      "templates/kappaduck"
+    ],
+    "sitemap": {
+      "baseUrl": "https://khaos.kappaduck.com",
+      "changefreq": "weekly"
+    },
+    "globalMetadata": {
+      "_appName": "Khaos",
+      "_appTitle": "Khaos",
+      "_description": "Khaos is a .NET game framework on SDL3 for Windows, Linux and the browser.",
+      "_lang": "en",
+      "_appLogoPath": "images/logo/khaos-mark.svg",
+      "_appFaviconPath": "images/logo/favicon.ico",
+      "_appFooter": "<div class=\"copyright\"><svg class=\"kappaduck-circle\" width=\"20\" height=\"20\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><circle class=\"disc\" cx=\"50\" cy=\"50\" r=\"50\"/><g transform=\"translate(21.5 31) scale(0.68)\"><path class=\"k\" d=\"M12 0L0 0L0 56L12 56L12 32.96L26.08 56L40.14 56L23.03 28L40.14 0L26.08 0L12 23.04Z\"/><path class=\"d\" fill-rule=\"evenodd\" d=\"M44 0H56A28 28 0 0 1 56 56H44Z M56 12A16 16 0 0 1 56 44Z\"/></g></svg><span>&copy; <span class=\"copyright-year\">2026</span> <a href=\"https://kappaduck.com\" target=\"_blank\" rel=\"noopener\" class=\"company\">Kappa<span class=\"duck\">Duck</span></a></span><span class=\"made-with\">Made with <a href=\"https://dotnet.github.io/docfx\" target=\"_blank\" rel=\"noopener\">docfx</a></span></div>",
+      "_enableSearch": true,
+      "_gitContribute": {
+        "repo": "https://github.com/kappaduck/khaos",
+        "branch": "main"
+      }
+    }
+  }
+}
