@@ -24,5 +24,11 @@
       href: assets.md
 - name: Platforms and publishing
   items:
+    - name: Supported platforms
+      href: platforms.md
+    - name: The browser
+      href: browser.md
+    - name: Publishing
+      href: publishing.md
     - name: Publishing for Linux
       href: linux.md
