@@ -1,0 +1,16 @@
+- name: Getting started
+  items:
+    - name: What is Khaos?
+      href: introduction.md
+    - name: Installation
+      href: installation.md
+    - name: Your first game
+      href: getting-started.md
+    - name: Project structure
+      href: project-structure.md
+    - name: Coming from another engine
+      href: coming-from.md
+- name: Platforms and publishing
+  items:
+    - name: Publishing for Linux
+      href: linux.md

@@ -85,9 +85,9 @@ internal sealed class PongGame() : Game2D("Pong!", 1280, 720)
 // Pong.Desktop/Program.cs: configure any settings, then run the game. Pong.Web has its own too.
 using Pong;
 
-KhaosApplicationBuilder builder = KhaosApplication.CreateBuilder(args);
-
-return builder.Build<PongGame>().Run();
+return KhaosApplication.CreateBuilder(args)
+                       .Build<PongGame>()
+                       .Run();
 ```
 
 `FixedUpdate` runs on the simulation clock and `Update` on the real one. `Draw` gets neither: `frame.Alpha` is
