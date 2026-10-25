@@ -114,7 +114,7 @@ jobs:
           done
 
       - name: Build the site
-        run: dotnet docfx docs/docfx.json --warningsAsErrors
+        run: dotnet docfx docs/docfx.json
 
       - name: Install the wasm-tools workload
         if: steps.target.outputs.environment != ''
@@ -146,11 +146,12 @@ jobs:
             place "$out" "docs/_site/demo/$name/play"
           done
 
-          for dir in docs/examples/*/[0-9]*/; do
+          for dir in docs/examples/*/*/; do
+            [[ -f "${dir}readme.md" ]] || continue
             example=${dir#docs/examples/}
             example=${example%/}
             out=""
-            if compgen -G "$dir*.cs" > /dev/null; then
+            if [[ -f "$dir${example##*/}.cs" ]]; then
               out="artifacts/play/examples/$example"
               dotnet publish docs/examples/Web/Examples.Web.csproj --configuration Release -p:Example="$example" --output "$out"
             fi

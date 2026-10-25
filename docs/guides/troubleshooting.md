@@ -35,7 +35,7 @@ That is normal: .NET builds a browser version of itself with Khaos inside. The n
 
 Publishing a desktop game needs Visual Studio's C++ tools. Open the Visual Studio Installer and add the **Desktop
 development with C++** workload, to Visual Studio or to the free Build Tools. See
-[Installation](installation.md#later-to-publish-a-desktop-game).
+[Installation](installation.md#when-publishing-a-desktop-game).
 
 ### clang or zlib is missing (Linux)
 

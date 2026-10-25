@@ -48,7 +48,7 @@ See [Khaos for a game jam](game-jam.md#where-your-game-goes).
 
 A desktop game is published as a native executable where players double-click it, without installing .NET. That step
 needs the C++ tools of your system, installed once (see
-[Installation](installation.md#later-to-publish-a-desktop-game)), and it builds for the system you run it on:
+[Installation](installation.md#when-publishing-a-desktop-game)), and it builds for the system you run it on:
 
 ```bash
 dotnet publish MyGame.Desktop -c Release -r win-x64     # on Windows

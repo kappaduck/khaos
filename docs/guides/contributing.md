@@ -41,21 +41,26 @@ package's own build files (`IsKhaosGame=true`, set by their `Directory.Build.pro
 shows in them without packing anything:
 
 ```bash
-dotnet run --project docs/examples/Desktop -p:Example=rendering/01-clear
+dotnet docs/examples/rendering/clear/clear.cs
+dotnet run --project docs/examples/Web -p:Example=rendering/clear
 dotnet run --project demo/Breakout/Breakout.Web
 ```
 
 ### Adding an example
 
 ```text
-docs/examples/<category>/<NN>-<name>/
-├─ <Name>.cs      the whole example, in one file: its game and its entry point
-├─ readme.md      a title, one sentence, the iframe on /examples/<category>/<NN>-<name>/play/, what to look at
+docs/examples/<category>/<name>/
+├─ <name>.cs      the whole example, in one file: its game and its entry point
+├─ readme.md      a title, one sentence, the iframe on /examples/<category>/<name>/play/, what to look at
 └─ assets/        only when the example needs some
 ```
 
-Add it to `docs/examples/toc.yml`. The page includes the `.cs` file the CI compiles (`[!code-csharp[](...)]`), so the
-code on the page cannot drift from the code that runs.
+An example is a [file-based app](https://learn.microsoft.com/dotnet/core/sdk/file-based-apps):
+`dotnet docs/examples/<category>/<name>/<name>.cs` runs it on the desktop, and `docs/examples/Web` compiles it for the
+browser with `-p:Example=<category>/<name>`.
+
+Add it to `docs/examples/toc.yml`, in the order to read them. The page includes the `.cs` file the CI compiles
+(`[!code-csharp[](...)]`), so the code on the page cannot drift from the code that runs.
 
 ### Adding a demo
 
@@ -97,10 +102,10 @@ the commands that create a game using that feed.
 
 Khaos has two analyzer assemblies, with their own prefixes and numbering:
 
-| Prefix | Assembly | Runs for | Shipped |
-| :----- | :------- | :------- | :------ |
-| `KHI` | `KappaDuck.Khaos.Internal.Analyzers` | The source code of Khaos | Never |
-| `KHAOS` | `KappaDuck.Khaos.Analyzers` | Games using Khaos | Inside the `KappaDuck.Khaos` package |
+| Prefix  | Assembly                             | Runs for                 | Shipped                              |
+| :------ | :----------------------------------- | :----------------------- | :----------------------------------- |
+| `KHI`   | `KappaDuck.Khaos.Internal.Analyzers` | The source code of Khaos | Never                                |
+| `KHAOS` | `KappaDuck.Khaos.Analyzers`          | Games using Khaos        | Inside the `KappaDuck.Khaos` package |
 
 `KHAOS100` and up are build errors reported by the package's MSBuild targets, not by an analyzer. The `KHI` rules
 (interop conventions: `bool` marshalling, no `nint`, explicit entry points…) have their pages in
