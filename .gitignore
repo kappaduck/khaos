@@ -20,7 +20,8 @@ src/Khaos/types/
 
 # DocFX output
 docs/_site/
-docs/api/
+docs/api/*
+!docs/api/index.md
 
 # Test outputs
 [Tt]est[Rr]esults/
