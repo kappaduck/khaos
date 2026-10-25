@@ -48,7 +48,7 @@ internal sealed class PongGame() : Game2D("Pong!", 1280, 720)
 
     protected override void OnEvent(in Event e)
     {
-        if (e is KeyPressed { Scancode: Scancode.Escape })
+        if (e is KeyPressed { Code: Scancode.Escape })
             Exit();
     }
 

@@ -14,6 +14,14 @@
   items:
     - name: Khaos for a game jam
       href: game-jam.md
+- name: Making a game
+  items:
+    - name: How a game runs
+      href: game-loop.md
+    - name: Configuration and environments
+      href: configuration.md
+    - name: Assets
+      href: assets.md
 - name: Platforms and publishing
   items:
     - name: Publishing for Linux
