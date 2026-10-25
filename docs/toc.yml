@@ -1,2 +1,9 @@
 - name: Guides
   href: guides/
+- name: API
+  href: api/
+  topicHref: api/index.md
+- name: Errors
+  href: rules/
+- name: Benchmarks
+  href: benchmarks/index.md
