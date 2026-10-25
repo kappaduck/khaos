@@ -19,8 +19,12 @@ file_header_template = Copyright (c) KappaDuck.\nLicensed under the MIT license.
 [*.{config,props,targets,xml,json,yml,nuspec}]
 indent_size = 2
 
-# TypeScript
-[*.ts]
+# TypeScript/Javascript
+[*.{ts,js}]
+indent_size = 2
+
+# Css
+[*.css]
 indent_size = 2
 
 # Linux files

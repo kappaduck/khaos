@@ -47,6 +47,15 @@
     <AdditionalFiles Include="@(KhaosAsset)" Link="assets/%(KhaosRelativePath)" />
   </ItemGroup>
 
+  <!--
+    What [AssetCatalog] reads, without a path in the attribute: KhaosRelativePath marks an additional file as an
+    asset and gives its path under assets/, which is where the game loads it from whatever KhaosAssetsDirectory
+    says. The generator reads build_metadata.AdditionalFiles.KhaosRelativePath.
+  -->
+  <ItemGroup Label="Asset catalog">
+    <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="KhaosRelativePath" />
+  </ItemGroup>
+
   <ItemGroup Label="Hot reload" Condition="'$(Configuration)' == 'Debug' and Exists('$(_KhaosAssetsDirectory)')">
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
       <_Parameter1>KhaosAssetsSource</_Parameter1>
@@ -65,9 +74,33 @@
 
   <Target Name="GetKhaosPageFiles" Returns="@(KhaosAsset);@(KhaosSettingsFile)" />
 
+  <PropertyGroup Label="Game name" Condition="'$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe'">
+    <KhaosGameName Condition="'$(KhaosGameName)' == ''">$([System.Text.RegularExpressions.Regex]::Replace('$(MSBuildProjectName)', '\.(Desktop|Web)$', ''))</KhaosGameName>
+  </PropertyGroup>
+
+  <Target Name="KhaosRenamePublishedExecutable" AfterTargets="_CopyAotSymbols"
+          Condition="'$(UsingMicrosoftNETSdkWebAssembly)' != 'true' and '$(PublishAot)' == 'true' and '$(KhaosGameName)' != '' and '$(KhaosGameName)' != '$(TargetName)'">
+    <PropertyGroup>
+      <_KhaosPublishDir>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(PublishDir)'))</_KhaosPublishDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_KhaosPublishedBinary Include="$(_KhaosPublishDir)$(TargetName)$(NativeBinaryExt)" />
+      <_KhaosPublishedBinary Include="$(_KhaosPublishDir)$(TargetName)*.pdb;$(_KhaosPublishDir)$(TargetName)*.dbg" />
+      <_KhaosPublishedBinary KhaosRenamed="$(_KhaosPublishDir)$(KhaosGameName)$([System.String]::Copy('%(Filename)%(Extension)').Substring($(TargetName.Length)))" />
+    </ItemGroup>
+
+    <Move SourceFiles="@(_KhaosPublishedBinary)" DestinationFiles="@(_KhaosPublishedBinary->'%(KhaosRenamed)')" />
+    <Message Importance="high" Text="$(MSBuildProjectName) -> $(_KhaosPublishDir)$(KhaosGameName)$(NativeBinaryExt)" />
+  </Target>
+
   <PropertyGroup Label="Desktop" Condition="('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe') and '$(UsingMicrosoftNETSdkWebAssembly)' != 'true' and '$(ApplicationIcon)' == ''">
     <ApplicationIcon>$(MSBuildThisFileDirectory)khaos.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup Label="Window icon" Condition="('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe') and '$(UsingMicrosoftNETSdkWebAssembly)' != 'true' and '$(KhaosWindowIcon)' != ''">
+    <EmbeddedResource Include="$(KhaosWindowIcon)" LogicalName="KappaDuck.Khaos.WindowIcon.png" />
+  </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)KappaDuck.Khaos.WebAssembly.targets" Condition="'$(UsingMicrosoftNETSdkWebAssembly)' == 'true'" />
 </Project>

@@ -53,7 +53,7 @@ internal sealed class PongGame() : Game2D("Pong!", 1280, 720)
 
     protected override void OnEvent(in Event e)
     {
-        if (e is KeyPressed { Scancode: Scancode.Escape })
+        if (e is KeyPressed { Code: Scancode.Escape })
             Exit();
     }
 
@@ -85,9 +85,9 @@ internal sealed class PongGame() : Game2D("Pong!", 1280, 720)
 // Pong.Desktop/Program.cs: configure any settings, then run the game. Pong.Web has its own too.
 using Pong;
 
-KhaosApplicationBuilder builder = KhaosApplication.CreateBuilder(args);
-
-return builder.Build<PongGame>().Run();
+return KhaosApplication.CreateBuilder(args)
+                       .Build<PongGame>()
+                       .Run();
 ```
 
 `FixedUpdate` runs on the simulation clock and `Update` on the real one. `Draw` gets neither: `frame.Alpha` is
@@ -207,7 +207,7 @@ Full API documentation and samples are available:
 - [Full API reference][khaos.kappaduck.com]
 - [Benchmarks](https://khaos.kappaduck.com/benchmarks/): measured on every release, on the JIT and with NativeAOT
 - **[Examples][examples]**: one concept per example, playable in the documentation
-- **[`demos/`][demos]**: games made with Khaos, from small ones that each show a few features to a full game, playable in the documentation
+- **[`demo/`][demo]**: games made with Khaos, from small ones that each show a few features to a full game, playable in the documentation
 
 > [!NOTE]
 > The documention is in work in progress
@@ -303,7 +303,7 @@ Inspired by
 - [SDL3-CS](https://github.com/flibitijibibo/SDL3-CS)
 
 [examples]: docs/examples
-[demos]: demos
+[demo]: demo
 [NuGet]: https://www.nuget.org/packages/KappaDuck.Khaos/
 [SDL3]: https://www.libsdl.org/
 [SDL_image]: https://github.com/libsdl-org/SDL_image

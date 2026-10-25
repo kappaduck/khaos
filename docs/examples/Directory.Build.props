@@ -1,0 +1,27 @@
+<Project>
+  <PropertyGroup Label="Examples">
+    <IsKhaosGame>true</IsKhaosGame>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Example: file-based app" Condition="'$(FileBasedProgram)' == 'true'">
+    <KhaosAssetsDirectory>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', 'assets'))</KhaosAssetsDirectory>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Example: browser app" Condition="'$(FileBasedProgram)' != 'true' and '$(Example)' != ''">
+    <_KhaosExampleDirectory>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '$(Example)'))</_KhaosExampleDirectory>
+    <_KhaosExampleFile>$(_KhaosExampleDirectory)$([System.IO.Path]::GetFileName($(Example.TrimEnd('/')))).cs</_KhaosExampleFile>
+    <KhaosAssetsDirectory>$(_KhaosExampleDirectory)assets/</KhaosAssetsDirectory>
+  </PropertyGroup>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <ItemGroup Label="The example" Condition="'$(_KhaosExampleFile)' != ''">
+    <Compile Include="$(_KhaosExampleFile)" Link="$([System.IO.Path]::GetFileName($(_KhaosExampleFile)))" />
+  </ItemGroup>
+
+  <Target Name="KhaosCheckExample" BeforeTargets="BeforeBuild" Condition="'$(FileBasedProgram)' != 'true'">
+    <Error Condition="'$(Example)' == ''" Text="Name the example to build: -p:Example=rendering/clear" />
+    <Error Condition="'$(Example)' != '' and !Exists('$(_KhaosExampleFile)')"
+           Text="There is no example '$(Example)': '$(_KhaosExampleFile)' does not exist." />
+  </Target>
+</Project>

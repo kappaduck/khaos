@@ -91,3 +91,18 @@ jobs:
 
       - name: Publish to NuGet
         run: dotnet nuget push "artifacts/packages/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget.outputs.NUGET_API_KEY }} --skip-duplicate
+
+  docs:
+    name: Documentation
+    needs: publish
+    if: github.event_name == 'release' && !github.event.release.prerelease
+    permissions:
+      contents: read
+      deployments: write
+    uses: ./.github/workflows/docs.yml
+    with:
+      environment: production
+      benchmarks: true
+    secrets:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

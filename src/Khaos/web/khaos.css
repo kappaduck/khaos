@@ -93,7 +93,9 @@ html.khaos-page .khaos-host {
 }
 
 @keyframes khaos-bob {
-  50% { transform: translateY(-8px); }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 .khaos-status {
@@ -129,8 +131,13 @@ html.khaos-page .khaos-host {
 }
 
 @keyframes khaos-progress {
-  from { margin-left: -40%; }
-  to { margin-left: 100%; }
+  from {
+    margin-left: -40%;
+  }
+
+  to {
+    margin-left: 100%;
+  }
 }
 
 .khaos-play {
@@ -257,6 +264,7 @@ html.khaos-page .khaos-host {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .khaos-bob,
   .khaos-progress::before {
     animation: none;

@@ -36,6 +36,8 @@
 
   <PropertyGroup Label="Games: kind of project" Condition="'$(IsKhaosGame)' == 'true'">
     <IsKhaosDesktop>$(MSBuildProjectName.EndsWith('.Desktop'))</IsKhaosDesktop>
+    <!-- A file-based app (dotnet <file>.cs) is named after its file and runs on the desktop. -->
+    <IsKhaosDesktop Condition="'$(FileBasedProgram)' == 'true'">true</IsKhaosDesktop>
     <IsKhaosWeb>$(MSBuildProjectName.EndsWith('.Web'))</IsKhaosWeb>
 
     <!-- A game's assembly is named after the game, not KappaDuck.<project>. -->

@@ -48,7 +48,7 @@ internal sealed class PongGame() : Game2D("Pong!", 1280, 720)
 
     protected override void OnEvent(in Event e)
     {
-        if (e is KeyPressed { Scancode: Scancode.Escape })
+        if (e is KeyPressed { Code: Scancode.Escape })
             Exit();
     }
 
@@ -71,9 +71,11 @@ internal sealed class PongGame() : Game2D("Pong!", 1280, 720)
 
 ```csharp
 // Program.cs of the desktop or web application
-KhaosApplicationBuilder builder = KhaosApplication.CreateBuilder(args);
+using Pong;
 
-return builder.Build<PongGame>().Run();
+return KhaosApplication.CreateBuilder(args)
+                       .Build<PongGame>()
+                       .Run();
 ```
 
 ## Packages

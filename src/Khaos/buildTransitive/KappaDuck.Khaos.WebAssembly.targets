@@ -138,7 +138,7 @@
       <_KhaosPublishDir>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(PublishDir)'))</_KhaosPublishDir>
       <_KhaosPublishWwwroot>$([MSBuild]::NormalizeDirectory('$(_KhaosPublishDir)', 'wwwroot'))</_KhaosPublishWwwroot>
       <_KhaosZipStaging>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(IntermediateOutputPath)', 'khaos-web'))</_KhaosZipStaging>
-      <_KhaosZip>$(_KhaosPublishDir)$(AssemblyName)-web.zip</_KhaosZip>
+      <_KhaosZip>$(_KhaosPublishDir)$(KhaosGameName).zip</_KhaosZip>
     </PropertyGroup>
 
     <ItemGroup>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Not playable yet</title>
+  <link rel="icon" href="/images/logo/favicon.ico" />
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+  <link rel="stylesheet" href="/public/kappaduck.min.css" />
+  <script>
+    try {
+      const theme = localStorage.getItem('theme');
+      if (theme === 'light' || theme === 'dark')
+        document.documentElement.style.colorScheme = theme;
+    } catch {
+      // No storage (private window, blocked site data): the system's theme applies.
+    }
+  </script>
+  <style>
+    html { height: 100%; overflow: hidden; scrollbar-gutter: auto; }
+    body { height: 100%; }
+
+    body {
+      display: grid;
+      place-items: center;
+      padding: var(--quack-space-6);
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 45%, hsl(from var(--quack-primary) h s l / 0.14), transparent 60%),
+        conic-gradient(from 90deg at 1px 1px, transparent 25%, hsl(from var(--quack-border-200) h s l / calc(alpha * 0.6)) 0) 0 0 / 24px 24px,
+        var(--quack-sunken);
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--quack-space-4);
+      max-width: 28rem;
+      text-align: center;
+    }
+
+    .duck {
+      width: clamp(56px, 14vmin, 96px);
+      height: auto;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 6px 0 hsl(from var(--quack-primary) h s l / 0.18));
+      animation: bob 1.6s steps(2, jump-none) infinite alternate;
+    }
+
+    @keyframes bob {
+      from { translate: 0 0; }
+      to { translate: 0 -6px; }
+    }
+
+    h1 {
+      font-size: clamp(var(--quack-text-xl), 4.5vmin, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--quack-text-primary);
+    }
+
+    p {
+      font-size: clamp(var(--quack-text-sm), 2.6vmin, var(--quack-text-md));
+      color: var(--quack-text-muted);
+    }
+
+    @media (max-height: 260px) {
+      .duck, p { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <span class="quack-badge quack-badge-warning">Coming soon</span>
+    <img class="duck" src="/images/logo/khaos-mark.svg" alt="" width="96" height="96" />
+    <h1>Not playable yet</h1>
+    <p>This one is still being written. It will play right here once its code lands.</p>
+  </main>
+</body>
+</html>
