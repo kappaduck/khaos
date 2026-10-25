@@ -10,6 +10,10 @@
       href: project-structure.md
     - name: Coming from another engine
       href: coming-from.md
+- name: Game jams
+  items:
+    - name: Khaos for a game jam
+      href: game-jam.md
 - name: Platforms and publishing
   items:
     - name: Publishing for Linux
