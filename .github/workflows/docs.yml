@@ -1,0 +1,196 @@
+name: Docs
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Where to deploy
+        type: choice
+        options: [staging, production]
+        default: staging
+      benchmarks:
+        description: Run the benchmarks and publish their results
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      environment:
+        description: staging or production
+        type: string
+        required: true
+      benchmarks:
+        description: Run the benchmarks and publish their results
+        type: boolean
+        default: false
+    secrets:
+      CLOUDFLARE_API_TOKEN:
+        required: true
+      CLOUDFLARE_ACCOUNT_ID:
+        required: true
+  push:
+    branches: [main]
+    paths: ['docs/**', 'demo/**', 'src/**', '.config/dotnet-tools.json', '.github/workflows/docs.yml']
+  pull_request:
+    branches: [main]
+    paths: ['docs/**', 'demo/**', 'src/**', '.config/dotnet-tools.json', '.github/workflows/docs.yml']
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  benchmarks:
+    name: Benchmarks
+    if: inputs.benchmarks
+    uses: ./.github/workflows/benchmarks.yml
+
+  build:
+    name: Build the site
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: benchmarks
+    if: ${{ !failure() && !cancelled() }}
+    concurrency:
+      group: docs-build-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+    outputs:
+      environment: ${{ steps.target.outputs.environment }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Choose the environment
+        id: target
+        env:
+          Requested: ${{ inputs.environment }}
+          Event: ${{ github.event_name }}
+        run: |
+          case "$Event" in
+            pull_request) echo "environment=" >> "$GITHUB_OUTPUT" ;;
+            push) echo "environment=staging" >> "$GITHUB_OUTPUT" ;;
+            *) echo "environment=$Requested" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: ./global.json
+
+      - name: Restore tools
+        run: dotnet tool restore
+
+      - name: Build
+        run: |
+          dotnet build src/Khaos/Khaos.csproj --configuration Release
+          dotnet build src/Khaos.Toolkit/Khaos.Toolkit.csproj --configuration Release
+
+      - name: Download the benchmark results
+        if: inputs.benchmarks
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          name: benchmarks
+          path: artifacts/benchmarks
+
+      # Replace the closing note in docs/benchmarks/index.md
+      - name: Add the benchmark results
+        if: inputs.benchmarks
+        run: |
+          shopt -s nullglob
+          reports=(artifacts/benchmarks/*-report-github.md)
+          (( ${#reports[@]} > 0 )) || { echo "::warning::No benchmark results to publish."; exit 0; }
+          sed -i '/^> \[!NOTE\]/,$d' docs/benchmarks/index.md
+          for report in "${reports[@]}"; do
+            name=$(basename "$report" -report-github.md)
+            printf '\n## %s\n\n' "${name##*.}" >> docs/benchmarks/index.md
+            cat "$report" >> docs/benchmarks/index.md
+          done
+
+      - name: Build the site
+        run: dotnet docfx docs/docfx.json --warningsAsErrors
+
+      - name: Install the wasm-tools workload
+        if: steps.target.outputs.environment != ''
+        run: dotnet workload install wasm-tools
+
+      - name: Publish the games
+        if: steps.target.outputs.environment != ''
+        run: |
+          place() {
+            mkdir -p "$2"
+            if [[ -z "$1" ]]; then
+              cp docs/play/coming-soon.html "$2/index.html"
+            elif [[ -f "$1/wwwroot/index.html" ]]; then
+              cp -r "$1/wwwroot/." "$2/"
+            else
+              echo "::error::No wwwroot/index.html in $1: where did dotnet publish put the page?"
+              exit 1
+            fi
+          }
+
+          for dir in demo/*/; do
+            name=$(basename "$dir")
+            [[ -f "$dir$name.Web/$name.Web.csproj" ]] || continue
+            out=""
+            if find "$dir$name" -name '*.cs' -print -quit | grep -q .; then
+              out="artifacts/play/demo/$name"
+              dotnet publish "$dir$name.Web/$name.Web.csproj" --configuration Release --output "$out"
+            fi
+            place "$out" "docs/_site/demo/$name/play"
+          done
+
+          for dir in docs/examples/*/[0-9]*/; do
+            example=${dir#docs/examples/}
+            example=${example%/}
+            out=""
+            if compgen -G "$dir*.cs" > /dev/null; then
+              out="artifacts/play/examples/$example"
+              dotnet publish docs/examples/Web/Examples.Web.csproj --configuration Release -p:Example="$example" --output "$out"
+            fi
+            place "$out" "docs/_site/examples/$example/play"
+          done
+
+      - name: Upload the site
+        if: steps.target.outputs.environment != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs
+          path: docs/_site
+
+  deploy:
+    name: Deploy to ${{ needs.build.outputs.environment }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build
+    if: ${{ !failure() && !cancelled() && needs.build.outputs.environment != '' }}
+    permissions:
+      contents: read
+      deployments: write
+    environment:
+      name: ${{ needs.build.outputs.environment }}
+      url: ${{ needs.build.outputs.environment == 'production' && 'https://khaos.kappaduck.com' || 'https://staging.khaos.pages.dev' }}
+    concurrency:
+      group: docs-${{ needs.build.outputs.environment }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Download the site
+        uses: actions/download-artifact@v8
+        with:
+          name: docs
+          path: site
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v4.0.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          command: pages deploy site --project-name khaos --branch ${{ needs.build.outputs.environment }}
