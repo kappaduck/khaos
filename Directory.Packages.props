@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
-    <KhaosNativeVersion>1.1.0</KhaosNativeVersion>
+    <KhaosNativeVersion>1.2.0</KhaosNativeVersion>
   </PropertyGroup>
 
   <ItemGroup Label="Global analyzers">

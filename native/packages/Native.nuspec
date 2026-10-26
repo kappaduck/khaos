@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>KappaDuck.Khaos.Native</id>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <authors>KappaDuck</authors>
     <copyright>Copyright © KappaDuck</copyright>
     <description>SDL3, SDL_image, SDL_ttf and SDL_mixer for KappaDuck.Khaos: native libraries for Windows and Linux, and static WebAssembly libraries for the browser.</description>

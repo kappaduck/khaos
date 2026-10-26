@@ -140,30 +140,30 @@ build_tfm() {
     echo "  link:    ${link_flags[*]}"
 
     export CFLAGS="${compile_flags[*]}"
-    export CXXFLAGS="${compile_flags[*]}"
+    export CXXFLAGS="${compile_flags[*]} -DHB_NO_PRAGMA_GCC_DIAGNOSTIC_ERROR"
 
     step "SDL $SDL3"
     build_library SDL "$(source_of SDL "$SDL3")" \
         -DSDL_SHARED=OFF -DSDL_STATIC=ON -DSDL_TESTS=OFF -DSDL_EXAMPLES=OFF -DSDL_TEST_LIBRARY=OFF
 
     step "SDL_image $SDL3_IMAGE"
-    build_library SDL_image "$(source_of SDL_image "$SDL3_IMAGE")" \
-        -DSDLIMAGE_VENDORED=OFF -DSDLIMAGE_DEPS_SHARED=OFF -DSDLIMAGE_BACKEND_STB=ON \
-        -DSDLIMAGE_PNG_LIBPNG=OFF -DSDLIMAGE_AVIF=OFF -DSDLIMAGE_JXL=OFF -DSDLIMAGE_TIF=OFF \
-        -DSDLIMAGE_WEBP=OFF -DSDLIMAGE_LBM=OFF -DSDLIMAGE_PCX=OFF -DSDLIMAGE_PNM=OFF -DSDLIMAGE_XCF=OFF \
+    build_library SDL_image "$(source_of SDL_image "$SDL3_IMAGE" external/libwebp external/libpng external/zlib)" \
+        -DSDLIMAGE_VENDORED=ON -DSDLIMAGE_DEPS_SHARED=OFF -DSDLIMAGE_STRICT=ON -DSDLIMAGE_BACKEND_STB=ON \
+        -DSDLIMAGE_PNG_LIBPNG=ON -DSDLIMAGE_WEBP=ON -DSDLIMAGE_AVIF=OFF -DSDLIMAGE_JXL=OFF -DSDLIMAGE_TIF=OFF \
+        -DSDLIMAGE_LBM=OFF -DSDLIMAGE_PCX=OFF -DSDLIMAGE_PNM=OFF -DSDLIMAGE_XCF=OFF \
         -DSDLIMAGE_XPM=OFF -DSDLIMAGE_XV=OFF -DSDLIMAGE_SAMPLES=OFF -DSDLIMAGE_TESTS=OFF
 
     step "SDL_mixer $SDL3_MIXER"
-    build_library SDL_mixer "$(source_of SDL_mixer "$SDL3_MIXER")" \
-        -DSDLMIXER_VENDORED=OFF -DSDLMIXER_DEPS_SHARED=OFF -DSDLMIXER_FLAC_LIBFLAC=OFF \
-        -DSDLMIXER_GME=OFF -DSDLMIXER_MOD=OFF -DSDLMIXER_MP3_MPG123=OFF -DSDLMIXER_MIDI_FLUIDSYNTH=OFF \
-        -DSDLMIXER_OPUS=OFF -DSDLMIXER_VORBIS_VORBISFILE=OFF -DSDLMIXER_WAVPACK=OFF \
+    build_library SDL_mixer "$(source_of SDL_mixer "$SDL3_MIXER" external/ogg external/opus external/opusfile external/libxmp)" \
+        -DSDLMIXER_VENDORED=ON -DSDLMIXER_DEPS_SHARED=OFF -DSDLMIXER_STRICT=ON -DSDLMIXER_FLAC_LIBFLAC=OFF \
+        -DSDLMIXER_GME=OFF -DSDLMIXER_MOD=ON -DSDLMIXER_MP3_MPG123=OFF -DSDLMIXER_MIDI_FLUIDSYNTH=OFF \
+        -DSDLMIXER_OPUS=ON -DSDLMIXER_VORBIS_VORBISFILE=OFF -DSDLMIXER_WAVPACK=OFF \
         -DSDLMIXER_MIDI=OFF -DSDLMIXER_VOC=OFF -DSDLMIXER_AU=OFF \
         -DSDLMIXER_TESTS=OFF -DSDLMIXER_EXAMPLES=OFF
 
     step "SDL_ttf $SDL3_TTF"
-    build_library SDL_ttf "$(source_of SDL_ttf "$SDL3_TTF" external/freetype)" \
-        -DSDLTTF_VENDORED=ON -DSDLTTF_HARFBUZZ=OFF -DSDLTTF_PLUTOSVG=OFF -DSDLTTF_SAMPLES=OFF
+    build_library SDL_ttf "$(source_of SDL_ttf "$SDL3_TTF" external/freetype external/harfbuzz external/plutosvg external/plutovg)" \
+        -DSDLTTF_VENDORED=ON -DSDLTTF_STRICT=ON -DSDLTTF_HARFBUZZ=ON -DSDLTTF_PLUTOSVG=ON -DSDLTTF_SAMPLES=OFF
 
     step "Copying to native/packages/wasm/$tfm"
 
@@ -180,7 +180,7 @@ build_tfm() {
     while IFS= read -r -d '' dep; do
         cp "$dep" "$target/deps/"
         echo "  deps/$(basename "$dep")"
-    done < <(find "$out/build/SDL_ttf" -name '*.a' ! -name '*SDL3_ttf*' -print0)
+    done < <(find "$out/build/SDL_image" "$out/build/SDL_mixer" "$out/build/SDL_ttf" -type f -name '*.a' ! -name 'libSDL3*' -print0)
 
     cat > "$target/emscripten.props" <<PROPS
 <Project>

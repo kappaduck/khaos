@@ -47,7 +47,7 @@ an hour ago saves jams.
 ## While you make it
 
 - **Test in the browser regularly**, not only at the end: every hour or two, run the browser version and play it for
-  a minute. Some things behave differently there, such as which [file formats](assets.md#which-formats-to-use) load.
+  a minute. Some things behave differently there, such as sound, which waits for the player's first click.
 - **Use PNG, WAV, Ogg Vorbis and TrueType fonts.** They work everywhere.
 - **Put gameplay in `FixedUpdate`.** Your game then plays the same on your PC and on a player's slow laptop. See
   [How a game runs](game-loop.md).

@@ -172,10 +172,9 @@ jobs:
     if: ${{ !failure() && !cancelled() && needs.build.outputs.environment != '' }}
     permissions:
       contents: read
-      deployments: write
     environment:
       name: ${{ needs.build.outputs.environment }}
-      url: ${{ needs.build.outputs.environment == 'production' && 'https://khaos.kappaduck.com' || 'https://staging.khaos.pages.dev' }}
+      url: ${{ needs.build.outputs.environment == 'production' && 'https://khaos.kappaduck.com' || steps.deploy.outputs.pages-deployment-alias-url }}
     concurrency:
       group: docs-${{ needs.build.outputs.environment }}
       cancel-in-progress: false
@@ -188,9 +187,25 @@ jobs:
           path: site
 
       - name: Deploy to Cloudflare Pages
+        id: deploy
         uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           command: pages deploy site --project-name khaos --branch ${{ needs.build.outputs.environment }}
+
+      - name: Summary
+        env:
+          ENVIRONMENT: ${{ needs.build.outputs.environment }}
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          ALIAS_URL: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
+        run: |
+          {
+            echo "## Documentation deployed to $ENVIRONMENT"
+            echo
+            echo "| | |"
+            echo "| :-- | :-- |"
+            echo "| This deployment | $DEPLOYMENT_URL |"
+            [[ -n "$ALIAS_URL" ]] && echo "| Branch alias | $ALIAS_URL |"
+            echo "| Commit | \`${GITHUB_SHA::8}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
