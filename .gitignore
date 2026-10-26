@@ -18,6 +18,10 @@ src/Khaos/types/
 [Bb]in/
 [Oo]bj/
 
+# Claude files
+
+CLAUDE.local.md
+
 # DocFX output
 docs/_site/
 docs/api/*
