@@ -283,8 +283,9 @@ The first build takes longer, since it relinks the .NET runtime with SDL.
 
 ## AI disclosure
 
-AI (Claude) helps with this project: documentation, prototypes, design exploration, configuration and
-reviews. Everything it produces is reviewed by the author, and the code of Khaos is written by hand.
+AI (Claude) helps with this project: design exploration, documentation, build scripts and CI, and reviews.
+The C# of the framework is written by hand. Everything AI produces is reviewed, and commits with AI-written
+changes say so with a `Co-Authored-By` line.
 
 ## Credits
 

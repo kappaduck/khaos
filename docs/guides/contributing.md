@@ -123,8 +123,9 @@ To add a rule:
 
 ## Conventions
 
-- **Code is written by hand.** AI helps with documentation and design exploration, not with the code of the
-  repository (see the readme's AI disclosure).
+- **The C# of the framework is written by hand.** AI may help with design exploration, documentation, build scripts
+  and CI, and reviews; a commit with AI-written changes says so with a `Co-Authored-By` line (see the readme's AI
+  disclosure).
 - One branch, `main`. Changes arrive by pull request, with the template in `.github/`. Titles are short and in the
   past tense: `Added Mathematics module`.
 - The style is enforced by the build (`.editorconfig`, `rules/`, `AnalysisLevel=preview-all`): explicit types, no
