@@ -19,17 +19,14 @@ A game only gets what it runs on:
 
 ## Formats
 
-On the desktop, the codecs are compiled into the four libraries:
+The same formats on the desktop and in WebAssembly:
 
 - **Images**: PNG and APNG, JPEG, WebP, GIF, QOI, BMP, TGA, SVG, ICO, CUR, ANI.
 - **Fonts**: TrueType and OpenType with HarfBuzz shaping and colour emoji.
 - **Audio**: WAV, AIFF, Ogg Vorbis, Opus, FLAC, MP3, tracker modules (MOD, XM, S3M, IT...).
 
-Every player downloads what is linked in, so the WebAssembly build keeps the formats that need no outside library:
-
-- **Images**: PNG, JPEG, GIF, QOI, BMP, TGA, SVG, ICO, CUR, ANI.
-- **Fonts**: TrueType and OpenType through FreeType, without HarfBuzz shaping or colour emoji.
-- **Audio**: WAV, AIFF, Ogg Vorbis, FLAC, MP3.
+On the desktop, the codecs are compiled into the four libraries. In WebAssembly, the libraries they need are separate
+static libraries under `wasm/<tfm>/deps/`, linked into the game with the four.
 
 ## Bundled versions
 

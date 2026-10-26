@@ -22,7 +22,7 @@ desktop program does not:
 |                                    | Desktop |                               Browser                               |
 | :--------------------------------- | :-----: | :-----------------------------------------------------------------: |
 | 2D drawing, input, sound, text     |   yes   |                                 yes                                 |
-| Every image, sound and font format |   yes   |     most of them: see [Assets](assets.md#which-formats-to-use)      |
+| Every image, sound and font format |   yes   |                                 yes                                 |
 | Sound before the player clicks     |   yes   | no: browsers wait for a click, which is what the Play button is for |
 | Running work in background threads |   yes   |           no: everything runs on the page's single thread           |
 | 3D (after April 2027)              | planned |                                later                                |

@@ -59,7 +59,16 @@ To get a class for one subfolder only, name it: `[AssetCatalog("sprites")]` list
 
 ## Which formats to use
 
-The safe choice, which works everywhere, desktop and browser alike:
+Khaos reads the same formats on the desktop and in the browser, so an asset that loads on your computer loads for
+every player:
+
+| Kind   | Formats                                                                                                     |
+| :----- | :---------------------------------------------------------------------------------------------------------- |
+| Images | PNG and animated PNG, JPEG, WebP and animated WebP, GIF and animated GIF, QOI, BMP, TGA, SVG, ICO, CUR, ANI |
+| Audio  | WAV, AIFF, Ogg Vorbis, Opus, FLAC, MP3, and tracker music (MOD, XM, S3M, IT)                                |
+| Fonts  | TrueType and OpenType, including complex scripts (Arabic, Hindi…) and colour emoji                          |
+
+When in doubt, these suit most games, and every tool can export them:
 
 | For                | Use                                            |
 | :----------------- | :--------------------------------------------- |
@@ -67,18 +76,6 @@ The safe choice, which works everywhere, desktop and browser alike:
 | Sound effects      | **WAV** or **Ogg Vorbis**                      |
 | Music              | **Ogg Vorbis** or **MP3**                      |
 | Fonts              | **TrueType** (`.ttf`) or **OpenType** (`.otf`) |
-
-Khaos reads more formats on the desktop. The browser version leaves some out on purpose: everything it supports is
-downloaded by every player before the game starts, so it stays small.
-
-| Kind   | Desktop                                                                                                     | Browser                                                        |
-| :----- | :---------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
-| Images | PNG and animated PNG, JPEG, WebP and animated WebP, GIF and animated GIF, QOI, BMP, TGA, SVG, ICO, CUR, ANI | PNG, JPEG, GIF, QOI, BMP, TGA, SVG. No animated PNG, no WebP   |
-| Audio  | WAV, AIFF, Ogg Vorbis, Opus, FLAC, MP3, and tracker music (MOD, XM, S3M, IT)                                | WAV, AIFF, Ogg Vorbis, FLAC, MP3. No Opus, no tracker music    |
-| Fonts  | TrueType and OpenType, including complex scripts (Arabic, Hindi…) and colour emoji                          | TrueType and OpenType, without complex scripts or colour emoji |
-
-If your game goes to the browser, test your assets there early: a format that works on your desktop may not load in
-the browser version.
 
 ## Assets you did not make
 

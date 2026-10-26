@@ -205,7 +205,7 @@ jam comes first.
 Full API documentation and samples are available:
 
 - [Full API reference][khaos.kappaduck.com]
-- [Benchmarks](https://khaos.kappaduck.com/benchmarks/): measured on every release, on the JIT and with NativeAOT
+- [Benchmarks](https://khaos.kappaduck.com/benchmarks/): measured on every release
 - **[Examples][examples]**: one concept per example, playable in the documentation
 - **[`demo/`][demo]**: games made with Khaos, from small ones that each show a few features to a full game, playable in the documentation
 
@@ -226,7 +226,7 @@ The `source` row tracks the main branch and every other row lists the native ver
 
 |  Khaos   | Native  |   SDL3   | SDL_image | SDL_ttf | SDL_mixer |
 | :------: | :-----: | :------: | :-------: | :-----: | :-------: |
-| `source` | `1.1.0` | `3.4.18` |  `3.4.8`  | `3.2.2` |  `3.2.4`  |
+| `source` | `1.2.0` | `3.4.18` |  `3.4.8`  | `3.2.2` |  `3.2.4`  |
 
 ## Development & Sandbox
 

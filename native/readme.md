@@ -59,12 +59,18 @@ The package holds every license under `licenses/` (`SDL3_image/optional/LICENSE.
 `KhaosPublishNativeLicenses=false` turns it off). The FreeType License also asks for a credit in the game's
 documentation: "Portions of this software are copyright © The FreeType Project (www.freetype.org)."
 
-### WebAssembly is lighter
+### WebAssembly has the same formats
 
-`build-wasm.sh` keeps a subset of the desktop formats: everything is linked into `dotnet.native.wasm`,
-which every player downloads, so the formats that need an outside library stay out. PNG and JPEG go through
-stb_image (no APNG, no WebP); audio is WAV, AIFF, Ogg Vorbis (stb_vorbis), FLAC and MP3 (no Opus, no
-tracker modules); fonts have no HarfBuzz and no colour emoji.
+`build-wasm.sh` turns on the formats of the desktop libraries, so an asset loads the same way on every platform.
+Two things differ from the desktop build:
+
+- **The vendored libraries stay separate archives.** A static library is not linked, so `libSDL3_image.a` only
+  references libwebp. Every vendored archive goes to `wasm/<tfm>/deps/`, and `KappaDuck.Khaos.WebAssembly.targets`
+  links `deps/*.a` with the four libraries.
+- **HarfBuzz needs `-DHB_NO_PRAGMA_GCC_DIAGNOSTIC_ERROR`.** Pragmas in `hb.hh` turn `-Wunused` into an error, and
+  Emscripten's clang reports unused templates under it.
+
+Everything is linked into `dotnet.native.wasm`, which every player downloads.
 
 ## Linux: the glibc baseline
 

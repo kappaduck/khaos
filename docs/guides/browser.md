@@ -74,8 +74,7 @@ To go back to the default page, delete `wwwroot/index.html`: Khaos uses its own 
 ## Your assets
 
 The `assets/` folder of your game is packed into the browser version, and your game loads files from it with the
-same paths as on the desktop. Some formats are not available in the browser, to keep the download small: see
-[Assets](assets.md#which-formats-to-use).
+same paths as on the desktop, and every format works there too: see [Assets](assets.md#which-formats-to-use).
 
 ## Publishing
 
