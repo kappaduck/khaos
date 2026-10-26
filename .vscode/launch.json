@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Sandbox (Desktop)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build sandbox desktop",
+      "program": "${workspaceFolder}/artifacts/bin/Sandbox.Desktop/debug/Sandbox.Desktop.dll",
+      "cwd": "${workspaceFolder}/sandbox/Desktop",
+      "console": "externalTerminal"
+    },
+    {
+      "name": "Sandbox (Web)",
+      "type": "blazorwasm",
+      "request": "launch",
+      "browser": "edge",
+      "cwd": "${workspaceFolder}/sandbox/Web"
+    }
+  ]
+}
