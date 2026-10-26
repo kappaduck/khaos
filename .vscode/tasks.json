@@ -1,0 +1,35 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "khaos.slnx", "-property:GenerateFullPaths=true"],
+      "problemMatcher": "$msCompile",
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "test",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["test", "--solution", "khaos.slnx"],
+      "problemMatcher": "$msCompile",
+      "group": { "kind": "test", "isDefault": true }
+    },
+    {
+      "label": "build sandbox desktop",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "sandbox/Desktop/Sandbox.Desktop.csproj", "-property:GenerateFullPaths=true"],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build sandbox web",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "sandbox/Web/Sandbox.Web.csproj", "-property:GenerateFullPaths=true"],
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}

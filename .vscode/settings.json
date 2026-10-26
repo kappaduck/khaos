@@ -1,0 +1,12 @@
+{
+  "dotnet.defaultSolution": "khaos.slnx",
+  "dotnet.testWindow.useTestingPlatformProtocol": true,
+  "files.exclude": {
+    "**/artifacts": true,
+    "docs/_site": true
+  },
+  "search.exclude": {
+    "**/artifacts": true,
+    "docs/_site": true
+  }
+}
