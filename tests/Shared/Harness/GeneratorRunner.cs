@@ -20,8 +20,8 @@ internal static class GeneratorRunner<TGenerator> where TGenerator : IIncrementa
         return new GeneratorResult(generated, [.. DiagnosticText.InSourceOrder(result.Diagnostics)], [.. output.GetDiagnostics()]);
     }
 
-    internal static Task Verify(ReadOnlySpan<string> sources, [CallerFilePath] string sourceFile = "")
-        => Verifier.Verify(Generate(TestCompilation.Create(sources), out _), sourceFile: sourceFile);
+    internal static Task VerifyAsync(ReadOnlySpan<string> sources, [CallerFilePath] string sourceFile = "")
+        => Verify(Generate(TestCompilation.Create(sources), out _), sourceFile: sourceFile);
 
     private static GeneratorDriver Generate(CSharpCompilation compilation, out Compilation output)
     {

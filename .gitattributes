@@ -53,7 +53,7 @@ codeowners text
 *.yml      text eol=lf
 
 # Verify snapshot files, last so they override the lines above
-*.verified.txt  text eol=lf
-*.verified.cs   text eol=lf
+*.verified.txt text eol=lf working-tree-encoding=UTF-8
+*.verified.cs text eol=lf working-tree-encoding=UTF-8
 *.verified.json text eol=lf
 *.verified.xml  text eol=lf

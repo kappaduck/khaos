@@ -47,6 +47,6 @@ internal static class AnalyzerRunner<TAnalyzer> where TAnalyzer : DiagnosticAnal
         if (result.CompilationErrors.Length > 0)
             throw new InvalidOperationException($"The test sources do not compile:{Environment.NewLine}{result.CompilationErrors}");
 
-        await Verifier.Verify(result.Diagnostics, sourceFile: sourceFile);
+        await Verify(result.Diagnostics, sourceFile: sourceFile);
     }
 }

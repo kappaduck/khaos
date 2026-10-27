@@ -1,0 +1,38 @@
+﻿[
+  {
+    Location: /*
+public sealed class Player;
+                    ^^^^^^
+*/
+ Source0.cs: (0,20)-(0,26),
+    Message: Type 'Player' found,
+    Severity: Warning,
+    WarningLevel: 1,
+    Descriptor: {
+      Id: TEST001,
+      Title: type found,
+      MessageFormat: Type '{0}' found,
+      Category: Test,
+      DefaultSeverity: Warning,
+      IsEnabledByDefault: true
+    }
+  },
+  {
+    Location: /*
+internal enum Team;
+              ^^^^
+*/
+ Source1.cs: (0,14)-(0,18),
+    Message: Type 'Team' found,
+    Severity: Warning,
+    WarningLevel: 1,
+    Descriptor: {
+      Id: TEST001,
+      Title: type found,
+      MessageFormat: Type '{0}' found,
+      Category: Test,
+      DefaultSeverity: Warning,
+      IsEnabledByDefault: true
+    }
+  }
+]

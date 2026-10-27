@@ -1,6 +1,7 @@
 {
   "dotnet.defaultSolution": "khaos.slnx",
   "dotnet.testWindow.useTestingPlatformProtocol": true,
+  "files.insertFinalNewline": false,
   "files.exclude": {
     "**/artifacts": true,
     "docs/_site": true
