@@ -83,9 +83,6 @@ jobs:
         with:
           global-json-file: ./global.json
 
-      - name: Restore tools
-        run: dotnet tool restore
-
       - name: Build
         run: |
           dotnet build src/Khaos/Khaos.csproj --configuration Release
@@ -113,7 +110,7 @@ jobs:
           done
 
       - name: Build the site
-        run: dotnet docfx docs/docfx.json
+        run: dotnet tool exec docfx --yes --allow-roll-forward -- docs/docfx.json
 
       - name: Install the wasm-tools workload
         if: steps.target.outputs.environment != ''

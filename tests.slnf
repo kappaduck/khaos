@@ -1,0 +1,10 @@
+{
+  "solution": {
+    "path": "khaos.slnx",
+    "projects": [
+      "tests\\Khaos.Analyzers.Tests\\Khaos.Analyzers.Tests.csproj",
+      "tests\\Khaos.Internal.Analyzers.Tests\\Khaos.Internal.Analyzers.Tests.csproj",
+      "tests\\Khaos.Tests\\Khaos.Tests.csproj"
+    ]
+  }
+}
