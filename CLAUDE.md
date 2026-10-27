@@ -132,6 +132,47 @@ sentence: `FromDegreesShouldStoreTheAngleInRadians`.
 Hot paths should run with zero allocation. Prove it with a benchmark in `benchmarks/`, not by guessing (how
 benchmarks are set up is still to be decided).
 
+Khaos is a game framework: it must be fast and light. By default, write the code that allocates the least,
+as long as it stays readable:
+
+- take a sequence as `ReadOnlySpan<T>`, and `params ReadOnlySpan<T>` rather than `params T[]`: it promises the
+  method only reads, and it accepts more (arrays, a `string`, another span, a collection expression). Take a
+  `Span<T>` only for a destination the method writes into (`CopyTo(Span<T> destination)`, `TryWrite`);
+- expose an internal array as `ReadOnlySpan<T>` rather than a copy;
+- where a span cannot go (an `async` method, a buffer kept in a field of a class), use `ReadOnlyMemory<T>`
+  (`Memory<T>` to write) and take `.Span` for the synchronous work. Keep it inside Khaos; in the public API only
+  for an `async` method, where callers still pass an array. A method stops using a `Memory<T>` once it returns
+  or its `Task` completes;
+- slice with spans (`AsSpan`, ranges) rather than `Substring`, `Split` or a new array;
+- put a small temporary buffer on the stack (`stackalloc` into a `Span<T>`, with a size limit and a heap
+  fallback); rent a larger one from `ArrayPool<T>.Shared` and return it in a `finally`;
+- no LINQ, closures or boxing in hot paths: plain `for` or `foreach` loops, `static` lambdas elsewhere;
+- `readonly struct` for small values, passed with `in` when they are large;
+- `ref struct` for a short-lived helper that holds a span or lives in one method (a builder, a parser, an
+  enumerator): it never goes on the heap, and can hold `ref` fields;
+- `SearchValues<T>` for repeated searches, `FrozenDictionary` and `FrozenSet` for lookups built once,
+  `CollectionsMarshal.AsSpan` to read a `List<T>` without a copy.
+
+Keep an array, an `IEnumerable<T>` or a plain struct when a span or a `ref struct` cannot work:
+
+- a parameter of an `async` method (CS4012, use `ReadOnlyMemory<T>`), a value captured by a lambda or stored
+  in a field of a class;
+- data that goes through LINQ, or into an API that takes an array or an `IEnumerable<T>` (Roslyn,
+  `ProcessStartInfo`);
+- the analyzers, which target `netstandard2.0`.
+
+Collections in the public API are chosen for a game loop. A `foreach` over an interface (`IEnumerable<T>`,
+`IReadOnlyList<T>`) boxes the enumerator: one allocation per loop, every frame.
+
+- Input: `ReadOnlySpan<T>` (`params` when it reads well). Add an `IEnumerable<T>` overload only on a cold path
+  (loading, setup) where callers hold a lazy sequence.
+- Output looped over right away (touches this frame, pressed keys): `ReadOnlySpan<T>`.
+- Output the caller keeps, awaits across or queries with LINQ: a `readonly struct` view that implements
+  `IReadOnlyList<T>` and has a public struct `GetEnumerator()`, so `foreach` stays free.
+- Results computed on demand (queries such as a raycast): write into the caller's `Span<T>` and return the count.
+- `IReadOnlyList<T>`, `IReadOnlyCollection<T>` or `IEnumerable<T>` (the narrowest that fits) only on cold paths.
+- Never `List<T>`, nor an array that exposes internal state.
+
 Measure before optimizing. No npm and no tricks:
 
 - never `Volatile`;
