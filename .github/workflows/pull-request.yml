@@ -12,6 +12,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
 jobs:
   build:
     name: Build & test on ${{ matrix.os }}
@@ -22,28 +26,32 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
 
+    env:
+      TUNIT_AGGREGATE_REPORTS: defer
+      TUNIT_DISABLE_ARTIFACT_UPLOAD: true
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
           global-json-file: ./global.json
 
-      - name: Install the wasm-tools workload
-        run: dotnet workload install wasm-tools
-
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore tests.slnf
 
       - name: Build
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build tests.slnf --no-restore --configuration Release
 
       - name: Test
         run: >
-          dotnet test --no-build --configuration Release
+          dotnet test --solution tests.slnf --no-build --configuration Release
           --results-directory ${{ github.workspace }}/artifacts/test-results
+          --no-artifact-post-processing
           --
           --report-trx
 
@@ -52,7 +60,9 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: test-results-${{ matrix.os }}
-          path: artifacts/test-results
+          path: |
+            artifacts/test-results/*.trx
+            artifacts/test-results/*.tunit-report.json
           retention-days: 14
 
   publish:
@@ -67,15 +77,47 @@ jobs:
       pull-requests: write
 
     steps:
+      - name: Checkout tool manifest
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            global.json
+            .config/dotnet-tools.json
+          sparse-checkout-cone-mode: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: ./global.json
+
       - name: Download results
         uses: actions/download-artifact@v8
         with:
-          path: artifacts
+          path: artifacts/test-results
           pattern: test-results-*
 
-      - name: Publish test results
+      - name: Merge TUnit reports
+        run: >
+          dotnet tool exec TUnit.Reporting.Tool --yes --allow-roll-forward
+          --
+          merge
+          --directory artifacts/test-results
+          --output artifacts/test-report.html
+          --github-summary
+
+      - name: Upload report
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-report
+          path: artifacts/test-report.html
+          retention-days: 14
+
+      - name: Comment on the pull request
         uses: EnricoMi/publish-unit-test-result-action@7622c5bf3d112a72ab4fa3951c2aa5723d8ab92d
         with:
           check_name: Tests
-          files: artifacts/**/*.trx
+          files: artifacts/test-results/**/*.trx
+          check_run: false
+          job_summary: false
           action_fail_on_inconclusive: true
