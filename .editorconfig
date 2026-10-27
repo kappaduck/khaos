@@ -27,8 +27,12 @@ indent_size = 2
 [*.css]
 indent_size = 2
 
+# Windows files
+[*.{cs,csproj,props,targets,slnx,slnf,nuspec,config,xml}]
+end_of_line = crlf
+
 # Linux files
-[*.{sh,cmake,env}]
+[*.{sh,py,cmake,env,yml,yaml}]
 end_of_line = lf
 
 # Verified files

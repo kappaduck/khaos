@@ -12,35 +12,48 @@
 *.targets text eol=crlf
 *.slnx    text eol=crlf
 *.slnf    text eol=crlf
+*.nuspec  text eol=crlf
+*.config  text eol=crlf
 
 # Graphics
 *.png  binary
 *.jpg  binary
 *.jpeg binary
 *.gif  binary
+*.bmp  binary
+*.webp binary
 *.ico  binary
 
 # Audio and fonts (examples, samples)
-*.wav  binary
-*.ogg  binary
-*.mp3  binary
-*.flac binary
-*.ttf  binary
-*.otf  binary
+*.wav   binary
+*.ogg   binary
+*.opus  binary
+*.mp3   binary
+*.flac  binary
+*.ttf   binary
+*.otf   binary
+*.woff2 binary
 
-# Verify snapshot files
-*.verified.txt text  eol=lf
-*.verified.cs  text  eol=lf
-*.received.txt text  eol=lf
-*.received.cs  text  eol=lf
+# Native libraries
+*.dll binary
+*.so  binary
 
 # Others
 *.cmake    text eol=lf
+*.css      text diff=css
 *.env      text eol=lf
-*.md       text diff=markdown linguist-detectable
+*.html     text diff=html
+*.md       text diff=markdown
 codeowners text
-*.sh       text eol=lf
+*.py       text eol=lf diff=python
+*.sh       text eol=lf diff=bash
 *.json     text
 *.xml      text eol=crlf
 *.yaml     text eol=lf
 *.yml      text eol=lf
+
+# Verify snapshot files, last so they override the lines above
+*.verified.txt  text eol=lf
+*.verified.cs   text eol=lf
+*.verified.json text eol=lf
+*.verified.xml  text eol=lf
