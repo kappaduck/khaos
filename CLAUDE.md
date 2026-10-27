@@ -127,6 +127,10 @@ Internal and private code has no comments, XML or inline. Let names carry the in
 Write tests with every sketch, test first (TDD). A test name starts with the member under test and reads as a
 sentence: `FromDegreesShouldStoreTheAngleInRadians`.
 
+A test method (marked `[Test]`) always has a block body, even for a single line, never an expression body (`=>`).
+When the line gets long, put the inputs in local variables beside the call rather than switching to `=>`: a test
+should read clearly.
+
 ### Performance
 
 Hot paths should run with zero allocation. Prove it with a benchmark in `benchmarks/`, not by guessing (how
