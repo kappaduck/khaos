@@ -15,6 +15,7 @@ internal static class Descriptors
     private const string InteropEntryPointDescription = "The managed name drops the library prefix, so nothing else in the declaration says which native symbol it binds. EntryPoint is that link, and it is written even when it matches the managed name: a rename would otherwise compile and break the binding.";
     private const string InteropVoidPointerDescription = "void* is right when the native side is genuinely untyped, and wrong when the real type was simply not looked up; the two look identical in the source. [UntypedBecause] carries the sentence that tells them apart, on the method where the decision was made.";
     private const string InteropPublicPointerDescription = "A game should never hold a pointer or a native handle that Khaos owns: the lifetime is not theirs, and nothing stops them from using it after the object behind it is gone. Keep it in a private field and expose what the caller needs; a native handle that must be handed out goes through a type that represents it, such as WindowHandle.";
+    private const string InteropSDLCharDescription = "A C char is 1 byte and SDL strings are UTF-8, while a C# char is a 2-byte UTF-16 code unit. A char field shifts every field after it, and a char* reads two bytes per character. Store SDL text as byte and decode it as UTF-8.";
     private const string InteropLibraryDescription = "The other interop rules take their conventions from the area, so a binding in the wrong area is checked against the wrong ones. A library no area declares has not been decided on; add it to its area in InteropAreas first.";
 
     internal static readonly DiagnosticDescriptor InteropBoolReturn = new(
@@ -186,4 +187,64 @@ internal static class Descriptors
         true,
         InteropPublicPointerDescription,
         $"{Documentation}khi008.md");
+
+    internal static readonly DiagnosticDescriptor InteropImportOutsideArea = new(
+        "KHI009",
+        "native import outside an interop area",
+        "'{0}' imports a native function outside Interop/SDL and Interop/Win32; move it to the area of its library",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        "Every rule on native bindings takes its conventions from the area a binding lives in. A [LibraryImport] outside Interop/SDL and Interop/Win32 has no area, so none of them checks it.",
+        $"{Documentation}khi009.md");
+
+    internal static readonly DiagnosticDescriptor InteropCallbackNotBlittable = new(
+        "KHI010",
+        "bool or char in a native callback",
+        "'{0}' has {1} in a native callback signature; it is not blittable and Native AOT stops the process on it, use {2}",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        "A native callback is called without marshalling, so its signature must be blittable. bool and char compile, but Native AOT fails fast when native code calls such a method, and their native width depends on the side that calls.",
+        $"{Documentation}khi010.md");
+
+    internal static readonly DiagnosticDescriptor InteropSDLCharReturn = new(
+        "KHI011",
+        "char in Interop/SDL",
+        "The return value of '{0}' uses char; a C char is 1 byte in SDL, store it as byte",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropSDLCharDescription,
+        $"{Documentation}khi011.md");
+
+    internal static readonly DiagnosticDescriptor InteropSDLCharParameter = new(
+        "KHI011",
+        "char in Interop/SDL",
+        "Parameter '{0}' of '{1}' uses char; a C char is 1 byte in SDL, store it as byte",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropSDLCharDescription,
+        $"{Documentation}khi011.md");
+
+    internal static readonly DiagnosticDescriptor InteropSDLCharField = new(
+        "KHI011",
+        "char in Interop/SDL",
+        "Field '{0}.{1}' uses char; a C char is 1 byte in SDL, store it as byte",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropSDLCharDescription,
+        $"{Documentation}khi011.md");
+
+    internal static readonly DiagnosticDescriptor InteropSDLCharProperty = new(
+        "KHI011",
+        "char in Interop/SDL",
+        "Property '{0}.{1}' uses char; a C char is 1 byte in SDL, store it as byte",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropSDLCharDescription,
+        $"{Documentation}khi011.md");
 }

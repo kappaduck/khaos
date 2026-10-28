@@ -14,7 +14,12 @@ internal static class LibraryImports
         => compilation.GetTypeByMetadataName("System.Runtime.InteropServices.LibraryImportAttribute");
 
     internal static AttributeData? Find(IMethodSymbol method, INamedTypeSymbol libraryImport)
-        => method.GetAttributes().FirstOrDefault(attribute => SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, libraryImport));
+    {
+        if (method.PartialDefinitionPart is not null)
+            return null;
+
+        return method.GetAttributes().FirstOrDefault(attribute => SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, libraryImport));
+    }
 
     internal static TypedConstant? EntryPointOf(AttributeData libraryImport)
     {

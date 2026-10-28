@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
 
@@ -48,20 +47,13 @@ public sealed class InteropNintAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeMethod(SymbolAnalysisContext context, IMethodSymbol method)
     {
-        SyntaxNode? declaration = method.DeclaringSyntaxReferences is [var reference, ..] ? reference.GetSyntax(context.CancellationToken) : null;
-        string name = method.MethodKind == MethodKind.Constructor ? method.ContainingType.Name : method.Name;
+        string name = Signatures.NameOf(method);
 
         if (UsesNint(method.ReturnType))
-            context.ReportDiagnostic(Diagnostic.Create(Descriptors.InteropNintReturn, ReturnTypeLocationOf(declaration) ?? method.Locations[0], name));
+            context.ReportDiagnostic(Diagnostic.Create(Descriptors.InteropNintReturn, TypeLocations.OfReturn(method, context.CancellationToken), name));
 
-        foreach (IParameterSymbol parameter in method.Parameters)
-        {
-            if (!UsesNint(parameter.Type))
-                continue;
-
-            Location location = ParameterTypeLocationOf(declaration, parameter.Ordinal) ?? parameter.Locations[0];
-            context.ReportDiagnostic(Diagnostic.Create(Descriptors.InteropNintParameter, location, parameter.Name, name));
-        }
+        foreach (IParameterSymbol parameter in method.Parameters.Where(static parameter => UsesNint(parameter.Type)))
+            context.ReportDiagnostic(Diagnostic.Create(Descriptors.InteropNintParameter, TypeLocations.Of(parameter, context.CancellationToken), parameter.Name, name));
     }
 
     private static bool IsNintWrapper(INamedTypeSymbol type, INamedTypeSymbol? inlineArray)
@@ -90,24 +82,4 @@ public sealed class InteropNintAnalyzer : DiagnosticAnalyzer
 
     private static bool UsesNint(ITypeSymbol type)
         => Signatures.Contains(type, static candidate => candidate.SpecialType == SpecialType.System_IntPtr);
-
-    private static Location? ReturnTypeLocationOf(SyntaxNode? declaration) => declaration switch
-    {
-        MethodDeclarationSyntax method => method.ReturnType.GetLocation(),
-        OperatorDeclarationSyntax @operator => @operator.ReturnType.GetLocation(),
-        ConversionOperatorDeclarationSyntax conversion => conversion.Type.GetLocation(),
-        _ => null
-    };
-
-    private static Location? ParameterTypeLocationOf(SyntaxNode? declaration, int ordinal)
-    {
-        ParameterListSyntax? parameters = declaration switch
-        {
-            BaseMethodDeclarationSyntax method => method.ParameterList,
-            TypeDeclarationSyntax primary => primary.ParameterList,
-            _ => null
-        };
-
-        return parameters?.Parameters[ordinal].Type?.GetLocation();
-    }
 }

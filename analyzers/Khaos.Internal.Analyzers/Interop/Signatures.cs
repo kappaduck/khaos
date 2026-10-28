@@ -14,6 +14,9 @@ internal static class Signatures
         MethodKind: MethodKind.Ordinary or MethodKind.Constructor or MethodKind.UserDefinedOperator or MethodKind.Conversion
     };
 
+    internal static string NameOf(IMethodSymbol method)
+        => method.MethodKind == MethodKind.Constructor ? method.ContainingType.Name : method.Name;
+
     internal static bool Contains(IMethodSymbol signature, Func<ITypeSymbol, bool> match)
         => Contains(signature.ReturnType, match) || signature.Parameters.Any(parameter => Contains(parameter.Type, match));
 

@@ -18,7 +18,7 @@ public sealed class InteropVoidPointerAnalyzer : DiagnosticAnalyzer
     public override void Initialize(AnalysisContext context)
     {
         context.EnableConcurrentExecution();
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
 
         context.RegisterCompilationStartAction(static start =>
         {
@@ -34,7 +34,7 @@ public sealed class InteropVoidPointerAnalyzer : DiagnosticAnalyzer
         if (InteropAreas.Resolve(method) is null || !Signatures.HasOwn(method) || !Signatures.Contains(method, IsVoidPointer))
             return;
 
-        string name = method.MethodKind == MethodKind.Constructor ? method.ContainingType.Name : method.Name;
+        string name = Signatures.NameOf(method);
         AttributeData? reason = method.GetAttributes().FirstOrDefault(attribute => SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, untypedBecause));
 
         if (reason is null)
