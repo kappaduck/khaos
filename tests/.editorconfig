@@ -29,6 +29,18 @@ dotnet_diagnostic.IDE0022.severity = none
 # https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca2007
 dotnet_diagnostic.CA2007.severity = none
 
+# Disabled Microsoft.CodeAnalysis.Analyzers rules
+
+# RS1001: Missing diagnostic analyzer attribute
+# Reason: analyzer fixtures are created by the test harness, never loaded by the compiler
+# https://github.com/dotnet/roslyn/blob/main/src/RoslynAnalyzers/Microsoft.CodeAnalysis.Analyzers/Microsoft.CodeAnalysis.Analyzers.md
+dotnet_diagnostic.RS1001.severity = none
+
+# RS2008: Enable analyzer release tracking
+# Reason: analyzer fixtures are never shipped, so their rules have no release to track
+# https://github.com/dotnet/roslyn/blob/main/src/RoslynAnalyzers/Microsoft.CodeAnalysis.Analyzers/ReleaseTrackingAnalyzers.Help.md
+dotnet_diagnostic.RS2008.severity = none
+
 [Shared/**.cs]
 
 # IDE0130: Namespace does not match folder structure

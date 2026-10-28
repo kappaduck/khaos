@@ -31,7 +31,7 @@ docs/api/*
 [Tt]est[Rr]esults/
 
 # Verify files
-**/snapshots/*.received.*
+*.received.*
 
 # Visual Studio files
 *.lscache

@@ -4,11 +4,15 @@
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
-internal sealed record GeneratorResult(IReadOnlyDictionary<string, string> GeneratedFiles, ImmutableArray<Diagnostic> GeneratorDiagnostics, ImmutableArray<Diagnostic> CompilationDiagnostics)
+namespace KappaDuck.Khaos.Testing.Harness;
+
+internal sealed record GeneratorResult(IReadOnlyDictionary<string, string> GeneratedFiles, ImmutableArray<Diagnostic> Diagnostics, ImmutableArray<Diagnostic> CompilationDiagnostics)
 {
-    internal string CompilationErrors => string.Join(Environment.NewLine, CompilationDiagnostics.Select(static diagnostic => diagnostic.ToString()));
+    internal string CompilationErrors => DiagnosticText.Join(CompilationDiagnostics.Where(static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
 
-    internal string GeneratorDiagnosticIds => string.Join(", ", GeneratorDiagnostics.Select(static diagnostic => diagnostic.Id).OrderBy(static id => id, StringComparer.Ordinal));
+    internal string Ids => DiagnosticText.Ids(Diagnostics);
 
-    internal string Source(string hintName) => GeneratedFiles.TryGetValue(hintName, out string? value) ? value : string.Empty;
+    internal string Reported => DiagnosticText.Join(Diagnostics);
+
+    internal string Source(string hintName) => GeneratedFiles.GetValueOrDefault(hintName, string.Empty);
 }

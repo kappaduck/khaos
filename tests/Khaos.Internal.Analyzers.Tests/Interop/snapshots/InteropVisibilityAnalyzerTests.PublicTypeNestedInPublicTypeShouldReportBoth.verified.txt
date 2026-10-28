@@ -1,0 +1,44 @@
+﻿[
+  {
+    Location: /*
+
+public static class SDL3
+                    ^^^^
+{
+*/
+ Source0.cs: (2,20)-(2,24),
+    Message: 'SDL3' is visible outside the assembly; every type in Interop is internal,
+    Severity: Error,
+    Descriptor: {
+      Id: KHI005,
+      Title: type in Interop is not internal,
+      Description: Once every interop type is internal, the compiler refuses any public signature that mentions one, so the boundary holds without walking signatures. A type that has to be seen from outside does not belong in Interop.,
+      HelpLink: https://github.com/kappaduck/khaos/blob/main/docs/rules/khi005.md,
+      MessageFormat: '{0}' is visible outside the assembly; every type in Interop is internal,
+      Category: Interop,
+      DefaultSeverity: Error,
+      IsEnabledByDefault: true
+    }
+  },
+  {
+    Location: /*
+{
+    public readonly struct SDL_Window;
+                           ^^^^^^^^^^
+}
+*/
+ Source0.cs: (4,27)-(4,37),
+    Message: 'SDL_Window' is visible outside the assembly; every type in Interop is internal,
+    Severity: Error,
+    Descriptor: {
+      Id: KHI005,
+      Title: type in Interop is not internal,
+      Description: Once every interop type is internal, the compiler refuses any public signature that mentions one, so the boundary holds without walking signatures. A type that has to be seen from outside does not belong in Interop.,
+      HelpLink: https://github.com/kappaduck/khaos/blob/main/docs/rules/khi005.md,
+      MessageFormat: '{0}' is visible outside the assembly; every type in Interop is internal,
+      Category: Interop,
+      DefaultSeverity: Error,
+      IsEnabledByDefault: true
+    }
+  }
+]

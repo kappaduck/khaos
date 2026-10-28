@@ -3,30 +3,39 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
+
+namespace KappaDuck.Khaos.Testing.Harness;
 
 internal static class GeneratorRunner<TGenerator> where TGenerator : IIncrementalGenerator, new()
 {
-    internal static GeneratorResult Run(params string[] sources)
+    internal static GeneratorResult Run(params ReadOnlySpan<string> sources)
     {
-        GeneratorDriver driver = Create().RunGeneratorsAndUpdateCompilation(TestCompilation.Create(sources), out Compilation output, out _);
-
-        GeneratorDriverRunResult result = driver.GetRunResult();
-
-        ImmutableArray<Diagnostic> generatorDiagnostics = [.. result.Results.SelectMany(static generator => generator.Diagnostics)];
-        ImmutableArray<Diagnostic> compilationDiagnostics = [.. output.GetDiagnostics().Where(static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)];
+        GeneratorDriverRunResult result = Generate(TestCompilation.Create(sources), out Compilation output).GetRunResult();
 
         Dictionary<string, string> generated = result.Results
             .SelectMany(static generator => generator.GeneratedSources)
             .ToDictionary(static file => file.HintName, static file => file.SourceText.ToString(), StringComparer.Ordinal);
 
-        return new GeneratorResult(generated, generatorDiagnostics, compilationDiagnostics);
+        return new GeneratorResult(generated, [.. DiagnosticText.InSourceOrder(result.Diagnostics)], [.. output.GetDiagnostics()]);
     }
 
-    internal static Task Verify(string[] sources, [CallerFilePath] string sourceFile = "")
-        => Verifier.Verify(Create().RunGenerators(TestCompilation.Create(sources)), sourceFile: sourceFile);
+    internal static Task VerifyAsync(ReadOnlySpan<string> sources, [CallerFilePath] string sourceFile = "")
+        => Verify(Generate(TestCompilation.Create(sources), out _), sourceFile: sourceFile);
 
-    private static CSharpGeneratorDriver Create()
-        => CSharpGeneratorDriver.Create([new TGenerator().AsSourceGenerator()], parseOptions: Parsing.Preview);
+    private static GeneratorDriver Generate(CSharpCompilation compilation, out Compilation output)
+    {
+        GeneratorDriver driver = CSharpGeneratorDriver
+            .Create([new TGenerator().AsSourceGenerator()], parseOptions: Parsing.Preview)
+            .RunGeneratorsAndUpdateCompilation(compilation, out output, out _);
+
+        Exception? exception = driver.GetRunResult().Results
+            .Select(static generator => generator.Exception)
+            .FirstOrDefault(static exception => exception is not null);
+
+        if (exception is not null)
+            throw new InvalidOperationException($"{typeof(TGenerator).Name} threw during generation.", exception);
+
+        return driver;
+    }
 }
