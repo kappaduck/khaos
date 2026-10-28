@@ -16,3 +16,4 @@ KHI008 | Interop | Error | raw pointer on the public surface, [documentation](ht
 KHI009 | Interop | Error | native import outside an interop area, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi009.md)
 KHI010 | Interop | Error | bool or char in a native callback, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi010.md)
 KHI011 | Interop | Error | char in Interop/SDL, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi011.md)
+KHI012 | Interop | Error | non-copyable value used outside its using, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi012.md)
