@@ -12,6 +12,7 @@ internal static class Descriptors
     private const string InteropBoolDescription = "A native bool is 1 byte in SDL and a 4-byte BOOL in Win32, and nothing fails when the wrong width is marshalled: the value is simply wrong, sometimes. The area of the binding decides the width, written as UnmanagedType.U1 or UnmanagedType.Bool.";
     private const string InteropBoolStorageDescription = "A bool makes its struct non-blittable: passed by value, the struct needs runtime marshalling disabled, and read through a pointer, its managed layout no longer matches a 4-byte Win32 BOOL. Store a native boolean as byte in SDL and int in Win32, and convert to bool in the public wrapper.";
     private const string InteropNintDescription = "An nint compiles wherever any other handle or integer is expected, so passing the wrong one builds and fails later as a native crash. A typed pointer (SDL_Window*, or void* for untyped memory) or a struct that wraps a pointer-sized integer (LPARAM) turns the same mistake into a build error.";
+    private const string InteropEntryPointDescription = "The managed name drops the library prefix, so nothing else in the declaration says which native symbol it binds. EntryPoint is that link, and it is written even when it matches the managed name: a rename would otherwise compile and break the binding.";
     private const string InteropLibraryDescription = "The other interop rules take their conventions from the area, so a binding in the wrong area is checked against the wrong ones. A library no area declares has not been decided on; add it to its area in InteropAreas first.";
 
     internal static readonly DiagnosticDescriptor InteropBoolReturn = new(
@@ -73,6 +74,26 @@ internal static class Descriptors
         true,
         InteropNintDescription,
         $"{Documentation}khi002.md");
+
+    internal static readonly DiagnosticDescriptor InteropEntryPointMissing = new(
+        "KHI003",
+        "LibraryImport without an explicit EntryPoint",
+        "'{0}' does not set EntryPoint; name the native symbol it binds",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropEntryPointDescription,
+        $"{Documentation}khi003.md");
+
+    internal static readonly DiagnosticDescriptor InteropEntryPointEmpty = new(
+        "KHI003",
+        "LibraryImport without an explicit EntryPoint",
+        "'{0}' sets an empty EntryPoint; name the native symbol it binds",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropEntryPointDescription,
+        $"{Documentation}khi003.md");
 
     internal static readonly DiagnosticDescriptor InteropVisibility = new(
         "KHI005",

@@ -40,9 +40,9 @@ public sealed class InteropNintAnalyzer : DiagnosticAnalyzer
             if (member is IMethodSymbol method && HasOwnSignature(method))
                 AnalyzeMethod(context, method);
             else if (member is IFieldSymbol { IsConst: false, AssociatedSymbol: null } field && UsesNint(field.Type))
-                context.ReportDiagnostic(Diagnostic.Create(Descriptors.InteropNintField, TypeLocationOf(field, context.CancellationToken), type.Name, field.Name));
+                context.ReportDiagnostic(Diagnostic.Create(Descriptors.InteropNintField, TypeLocations.Of(field, context.CancellationToken), type.Name, field.Name));
             else if (member is IPropertySymbol property && UsesNint(property.Type))
-                context.ReportDiagnostic(Diagnostic.Create(Descriptors.InteropNintProperty, TypeLocationOf(property, context.CancellationToken), type.Name, property.Name));
+                context.ReportDiagnostic(Diagnostic.Create(Descriptors.InteropNintProperty, TypeLocations.Of(property, context.CancellationToken), type.Name, property.Name));
         }
     }
 
@@ -121,21 +121,5 @@ public sealed class InteropNintAnalyzer : DiagnosticAnalyzer
         };
 
         return parameters?.Parameters[ordinal].Type?.GetLocation();
-    }
-
-    private static Location TypeLocationOf(IPropertySymbol property, CancellationToken cancellationToken)
-    {
-        if (property.DeclaringSyntaxReferences is [var reference, ..] && reference.GetSyntax(cancellationToken) is BasePropertyDeclarationSyntax declaration)
-            return declaration.Type.GetLocation();
-
-        return property.Locations[0];
-    }
-
-    private static Location TypeLocationOf(IFieldSymbol field, CancellationToken cancellationToken)
-    {
-        if (field.DeclaringSyntaxReferences is [var reference, ..] && reference.GetSyntax(cancellationToken).Parent is VariableDeclarationSyntax declaration)
-            return declaration.Type.GetLocation();
-
-        return field.Locations[0];
     }
 }

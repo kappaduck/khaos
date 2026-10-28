@@ -1,0 +1,271 @@
+// Copyright (c) KappaDuck.
+// Licensed under the MIT license.
+
+using KappaDuck.Khaos.Internal.Analyzers.Interop;
+
+namespace KappaDuck.Khaos.Internal.Analyzers.Tests.Interop;
+
+internal sealed class InteropEntryPointAnalyzerTests
+{
+    [Test]
+    public async Task MissingEntryPointInSDLShouldReportKHI003()
+    {
+        const string source = """
+            using System.Runtime.InteropServices;
+
+            namespace KappaDuck.Khaos.Interop.SDL;
+
+            internal static partial class SDL3
+            {
+                [LibraryImport(nameof(SDL3))]
+                internal static partial void Quit();
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropEntryPointAnalyzer>.RunAsync(source);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Ids.Should().BeEqualTo("KHI003");
+        await result.Reported.Should().BeEqualTo("Source0.cs(7,6): error KHI003: 'Quit' does not set EntryPoint; name the native symbol it binds");
+    }
+
+    [Test]
+    public async Task MissingEntryPointInWin32ShouldReportKHI003()
+    {
+        const string source = """
+            using System.Runtime.InteropServices;
+
+            namespace KappaDuck.Khaos.Interop.Win32;
+
+            internal static partial class User32
+            {
+                [LibraryImport("user32")]
+                internal static partial int GetSystemMetrics(int nIndex);
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropEntryPointAnalyzer>.RunAsync(source);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Ids.Should().BeEqualTo("KHI003");
+        await result.Reported.Should().Contain("'GetSystemMetrics' does not set EntryPoint");
+    }
+
+    [Test]
+    public async Task EmptyEntryPointShouldReportKHI003()
+    {
+        const string source = """
+            using System.Runtime.InteropServices;
+
+            namespace KappaDuck.Khaos.Interop.SDL;
+
+            internal static partial class SDL3
+            {
+                [LibraryImport(nameof(SDL3), EntryPoint = "")]
+                internal static partial void Quit();
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropEntryPointAnalyzer>.RunAsync(source);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Ids.Should().BeEqualTo("KHI003");
+        await result.Reported.Should().BeEqualTo("Source0.cs(7,34): error KHI003: 'Quit' sets an empty EntryPoint; name the native symbol it binds");
+    }
+
+    [Test]
+    public async Task BlankEntryPointShouldReportKHI003()
+    {
+        const string source = """
+            using System.Runtime.InteropServices;
+
+            namespace KappaDuck.Khaos.Interop.SDL;
+
+            internal static partial class SDL3
+            {
+                [LibraryImport(nameof(SDL3), EntryPoint = "   ")]
+                internal static partial void Quit();
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropEntryPointAnalyzer>.RunAsync(source);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Ids.Should().BeEqualTo("KHI003");
+        await result.Reported.Should().Contain("'Quit' sets an empty EntryPoint");
+    }
+
+    [Test]
+    public async Task NullEntryPointShouldReportKHI003()
+    {
+        const string source = """
+            using System.Runtime.InteropServices;
+
+            namespace KappaDuck.Khaos.Interop.SDL;
+
+            internal static partial class SDL3
+            {
+                [LibraryImport(nameof(SDL3), EntryPoint = null)]
+                internal static partial void Quit();
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropEntryPointAnalyzer>.RunAsync(source);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Ids.Should().BeEqualTo("KHI003");
+        await result.Reported.Should().Contain("'Quit' sets an empty EntryPoint");
+    }
+
+    [Test]
+    public async Task MissingEntryPointWithItsGeneratedHalfShouldReportKHI003Once()
+    {
+        const string declaration = """
+            using System.Runtime.InteropServices;
+
+            namespace KappaDuck.Khaos.Interop.SDL;
+
+            internal static partial class SDL3
+            {
+                [LibraryImport(nameof(SDL3))]
+                internal static partial void Quit();
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropEntryPointAnalyzer>.RunAsync(declaration, GeneratedQuit);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Ids.Should().BeEqualTo("KHI003");
+        await result.Reported.Should().Contain("Source0.cs(7,6)");
+    }
+
+    [Test]
+    public async Task EntryPointNamingTheNativeSymbolShouldReportNothing()
+    {
+        const string source = """
+            using System.Runtime.InteropServices;
+
+            namespace KappaDuck.Khaos.Interop.SDL;
+
+            internal static partial class SDL3
+            {
+                [LibraryImport(nameof(SDL3), EntryPoint = "SDL_Quit")]
+                internal static partial void Quit();
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropEntryPointAnalyzer>.RunAsync(source);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Ids.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task EntryPointFromAConstantShouldReportNothing()
+    {
+        const string source = """
+            using System.Runtime.InteropServices;
+
+            namespace KappaDuck.Khaos.Interop.SDL;
+
+            internal static class Symbols
+            {
+                internal const string Quit = "SDL_Quit";
+            }
+
+            internal static partial class SDL3
+            {
+                [LibraryImport(nameof(SDL3), EntryPoint = Symbols.Quit)]
+                internal static partial void Quit();
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropEntryPointAnalyzer>.RunAsync(source);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Ids.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task LibraryImportOutsideInteropShouldReportNothing()
+    {
+        const string source = """
+            using System.Runtime.InteropServices;
+
+            namespace KappaDuck.Khaos.Windowing;
+
+            internal static partial class Native
+            {
+                [LibraryImport("SDL3")]
+                internal static partial void Quit();
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropEntryPointAnalyzer>.RunAsync(source);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Ids.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task LibraryImportInAnUnlistedInteropAreaShouldReportNothing()
+    {
+        const string source = """
+            using System.Runtime.InteropServices;
+
+            namespace KappaDuck.Khaos.Interop.Browser;
+
+            internal static partial class Native
+            {
+                [LibraryImport("khaos")]
+                internal static partial void Start();
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropEntryPointAnalyzer>.RunAsync(source);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Ids.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task MethodWithoutLibraryImportShouldReportNothing()
+    {
+        const string source = """
+            namespace KappaDuck.Khaos.Interop.SDL;
+
+            internal static class Errors
+            {
+                internal static void ThrowIfFailed(byte result)
+                {
+                }
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropEntryPointAnalyzer>.RunAsync(source);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Ids.Should().BeEmpty();
+    }
+
+    private const string GeneratedQuit = """
+        // <auto-generated/>
+        namespace KappaDuck.Khaos.Interop.SDL
+        {
+            internal static unsafe partial class SDL3
+            {
+                [global::System.Runtime.CompilerServices.SkipLocalsInitAttribute]
+                internal static partial void Quit()
+                {
+                    unsafe
+                    {
+                        __PInvoke();
+                    }
+
+                    [global::System.Runtime.InteropServices.DllImportAttribute("SDL3", EntryPoint = "Quit", ExactSpelling = true)]
+                    static extern unsafe void __PInvoke();
+                }
+            }
+        }
+        """;
+}

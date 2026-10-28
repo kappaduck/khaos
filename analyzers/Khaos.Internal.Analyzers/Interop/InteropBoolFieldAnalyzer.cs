@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
 
@@ -19,7 +18,6 @@ public sealed class InteropBoolFieldAnalyzer : DiagnosticAnalyzer
     {
         context.EnableConcurrentExecution();
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
-
         context.RegisterSymbolAction(AnalyzeType, SymbolKind.NamedType);
     }
 
@@ -38,8 +36,8 @@ public sealed class InteropBoolFieldAnalyzer : DiagnosticAnalyzer
                 continue;
 
             Diagnostic diagnostic = field.AssociatedSymbol is IPropertySymbol property
-                ? Diagnostic.Create(Descriptors.InteropBoolProperty, TypeLocationOf(property, context.CancellationToken), type.Name, property.Name, area, storage)
-                : Diagnostic.Create(Descriptors.InteropBoolField, TypeLocationOf(field, context.CancellationToken), type.Name, field.Name, area, storage);
+                ? Diagnostic.Create(Descriptors.InteropBoolProperty, TypeLocations.Of(property, context.CancellationToken), type.Name, property.Name, area, storage)
+                : Diagnostic.Create(Descriptors.InteropBoolField, TypeLocations.Of(field, context.CancellationToken), type.Name, field.Name, area, storage);
 
             context.ReportDiagnostic(diagnostic);
         }
@@ -49,21 +47,5 @@ public sealed class InteropBoolFieldAnalyzer : DiagnosticAnalyzer
     {
         ITypeSymbol stored = field is { IsFixedSizeBuffer: true, Type: IPointerTypeSymbol buffer } ? buffer.PointedAtType : field.Type;
         return stored.SpecialType == SpecialType.System_Boolean;
-    }
-
-    private static Location TypeLocationOf(IPropertySymbol property, CancellationToken cancellationToken)
-    {
-        if (property.DeclaringSyntaxReferences is [var reference, ..] && reference.GetSyntax(cancellationToken) is PropertyDeclarationSyntax declaration)
-            return declaration.Type.GetLocation();
-
-        return property.Locations[0];
-    }
-
-    private static Location TypeLocationOf(IFieldSymbol field, CancellationToken cancellationToken)
-    {
-        if (field.DeclaringSyntaxReferences is [var reference, ..] && reference.GetSyntax(cancellationToken).Parent is VariableDeclarationSyntax declaration)
-            return declaration.Type.GetLocation();
-
-        return field.Locations[0];
     }
 }
