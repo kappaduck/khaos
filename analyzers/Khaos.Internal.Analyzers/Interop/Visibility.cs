@@ -3,7 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace KappaDuck.Khaos.Internal.Analyzers;
+namespace KappaDuck.Khaos.Internal.Analyzers.Interop;
 
 internal static class Visibility
 {
