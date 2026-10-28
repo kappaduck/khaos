@@ -11,8 +11,10 @@ namespace KappaDuck.Khaos.Internal.Analyzers.Interop;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class InteropLibraryAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Descriptors.InteropLibraryWrongArea, Descriptors.InteropLibraryUnknown];
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.EnableConcurrentExecution();
@@ -20,9 +22,7 @@ public sealed class InteropLibraryAnalyzer : DiagnosticAnalyzer
 
         context.RegisterCompilationStartAction(static start =>
         {
-            INamedTypeSymbol? libraryImport = start.Compilation.GetTypeByMetadataName("System.Runtime.InteropServices.LibraryImportAttribute");
-
-            if (libraryImport is null)
+            if (LibraryImports.AttributeType(start.Compilation) is not { } libraryImport)
                 return;
 
             start.RegisterSymbolAction(context => AnalyzeMethod(context, libraryImport), SymbolKind.Method);
@@ -36,7 +36,7 @@ public sealed class InteropLibraryAnalyzer : DiagnosticAnalyzer
         if (InteropAreas.Resolve(method) is not InteropArea area)
             return;
 
-        if (FindLibraryImport(method, libraryImport) is not { ConstructorArguments: [{ Value: string library }] } attribute)
+        if (LibraryImports.Find(method, libraryImport) is not { ConstructorArguments: [{ Value: string library }] } attribute)
             return;
 
         InteropArea? owner = InteropAreas.OwnerOf(library);
@@ -52,9 +52,6 @@ public sealed class InteropLibraryAnalyzer : DiagnosticAnalyzer
 
         context.ReportDiagnostic(diagnostic);
     }
-
-    private static AttributeData? FindLibraryImport(IMethodSymbol method, INamedTypeSymbol libraryImport)
-        => method.GetAttributes().FirstOrDefault(attribute => SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, libraryImport));
 
     private static Location? LocationOfLibrary(AttributeData attribute, CancellationToken cancellationToken)
     {

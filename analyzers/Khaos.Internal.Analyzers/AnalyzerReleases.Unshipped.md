@@ -5,5 +5,6 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
+KHI001 | Interop | Error | bool does not follow the marshalling convention of its interop area, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi001.md)
 KHI005 | Interop | Error | type in an interop area is not internal, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi005.md)
 KHI006 | Interop | Error | native library does not match its interop area, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi006.md)

@@ -18,6 +18,7 @@ public sealed class InteropVisibilityAnalyzer : DiagnosticAnalyzer
     {
         context.EnableConcurrentExecution();
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
+
         context.RegisterSymbolAction(AnalyzeType, SymbolKind.NamedType);
     }
 

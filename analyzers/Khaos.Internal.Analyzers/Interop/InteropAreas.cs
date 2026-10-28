@@ -3,6 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 using System.Collections.Frozen;
+using System.Runtime.InteropServices;
 
 namespace KappaDuck.Khaos.Internal.Analyzers.Interop;
 
@@ -46,6 +47,13 @@ internal static class InteropAreas
 
     internal static InteropArea? OwnerOf(string library)
         => _libraries.TryGetValue(library, out InteropArea area) ? area : null;
+
+    internal static UnmanagedType BoolConvention(InteropArea area) => area switch
+    {
+        InteropArea.SDL => UnmanagedType.U1,
+        InteropArea.Win32 => UnmanagedType.Bool,
+        _ => throw new ArgumentOutOfRangeException(nameof(area), area, null)
+    };
 
     private static InteropArea? Parse(string? name) => name switch
     {
