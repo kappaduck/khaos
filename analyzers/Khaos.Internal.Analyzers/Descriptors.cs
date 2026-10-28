@@ -14,6 +14,7 @@ internal static class Descriptors
     private const string InteropNintDescription = "An nint compiles wherever any other handle or integer is expected, so passing the wrong one builds and fails later as a native crash. A typed pointer (SDL_Window*, or void* for untyped memory) or a struct that wraps a pointer-sized integer (LPARAM) turns the same mistake into a build error.";
     private const string InteropEntryPointDescription = "The managed name drops the library prefix, so nothing else in the declaration says which native symbol it binds. EntryPoint is that link, and it is written even when it matches the managed name: a rename would otherwise compile and break the binding.";
     private const string InteropVoidPointerDescription = "void* is right when the native side is genuinely untyped, and wrong when the real type was simply not looked up; the two look identical in the source. [UntypedBecause] carries the sentence that tells them apart, on the method where the decision was made.";
+    private const string InteropPublicPointerDescription = "A game should never hold a pointer or a native handle that Khaos owns: the lifetime is not theirs, and nothing stops them from using it after the object behind it is gone. Keep it in a private field and expose what the caller needs; a native handle that must be handed out goes through a type that represents it, such as WindowHandle.";
     private const string InteropLibraryDescription = "The other interop rules take their conventions from the area, so a binding in the wrong area is checked against the wrong ones. A library no area declares has not been decided on; add it to its area in InteropAreas first.";
 
     internal static readonly DiagnosticDescriptor InteropBoolReturn = new(
@@ -165,4 +166,24 @@ internal static class Descriptors
         true,
         InteropBoolStorageDescription,
         $"{Documentation}khi007.md");
+
+    internal static readonly DiagnosticDescriptor InteropPublicPointer = new(
+        "KHI008",
+        "raw pointer on the public surface",
+        "'{0}' exposes a raw pointer; the pointer stays behind the wrapper",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropPublicPointerDescription,
+        $"{Documentation}khi008.md");
+
+    internal static readonly DiagnosticDescriptor InteropPublicNint = new(
+        "KHI008",
+        "raw pointer on the public surface",
+        "'{0}' exposes nint; wrap the native handle in a type that represents it",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropPublicPointerDescription,
+        $"{Documentation}khi008.md");
 }
