@@ -20,6 +20,10 @@ dotnet_diagnostic.S3903.severity = none
 # Some method are trivial and should be kept as is
 dotnet_diagnostic.S4200.severity = none
 
+# S6640: Avoid using this unsafe code block.
+# Interop needs unsafe code; each unsafe block states why it is safe with a // SAFETY: comment
+dotnet_diagnostic.S6640.severity = none
+
 # S6966: Use async method instead.
 # Is a duplicate of CA1849: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1849
 dotnet_diagnostic.S6966.severity = none

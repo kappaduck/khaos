@@ -17,6 +17,7 @@ internal static class Descriptors
     private const string InteropPublicPointerDescription = "A game should never hold a pointer or a native handle that Khaos owns: the lifetime is not theirs, and nothing stops them from using it after the object behind it is gone. Keep it in a private field and expose what the caller needs; a native handle that must be handed out goes through a type that represents it, such as WindowHandle.";
     private const string InteropSDLCharDescription = "A C char is 1 byte and SDL strings are UTF-8, while a C# char is a 2-byte UTF-16 code unit. A char field shifts every field after it, and a char* reads two bytes per character. Store SDL text as byte and decode it as UTF-8.";
     private const string InteropLibraryDescription = "The other interop rules take their conventions from the area, so a binding in the wrong area is checked against the wrong ones. A library no area declares has not been decided on; add it to its area in InteropAreas first.";
+    private const string InteropNonCopyableDescription = "A [NonCopyable] value owns native memory and frees it when disposed. A second copy frees it a second time, a value no using owns is never freed, and a value disposed by hand is freed again by its using. Its using is the one owner: read it through its members, pass it by in, or return it to a caller who gives it its own using.";
 
     internal static readonly DiagnosticDescriptor InteropBoolReturn = new(
         "KHI001",
@@ -247,4 +248,34 @@ internal static class Descriptors
         true,
         InteropSDLCharDescription,
         $"{Documentation}khi011.md");
+
+    internal static readonly DiagnosticDescriptor InteropNonCopyableOutsideUsing = new(
+        "KHI012",
+        "non-copyable value used outside its using",
+        "This '{0}' has no using to own it; declare it with using, or return it to the caller",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropNonCopyableDescription,
+        $"{Documentation}khi012.md");
+
+    internal static readonly DiagnosticDescriptor InteropNonCopyableCopied = new(
+        "KHI012",
+        "non-copyable value used outside its using",
+        "'{0}' is copied; read it through its members, or pass it by in",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropNonCopyableDescription,
+        $"{Documentation}khi012.md");
+
+    internal static readonly DiagnosticDescriptor InteropNonCopyableDisposedByHand = new(
+        "KHI012",
+        "non-copyable value used outside its using",
+        "'{0}' is disposed by hand; its using already disposes it",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropNonCopyableDescription,
+        $"{Documentation}khi012.md");
 }
