@@ -3,7 +3,7 @@ name: Docs
 on:
   workflow_dispatch:
     inputs:
-      environment:
+      stage:
         description: Where to deploy
         type: choice
         options: [staging, production]
@@ -14,7 +14,7 @@ on:
         default: false
   workflow_call:
     inputs:
-      environment:
+      stage:
         description: staging or production
         type: string
         required: true
@@ -58,7 +58,7 @@ jobs:
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
     outputs:
-      environment: ${{ steps.target.outputs.environment }}
+      stage: ${{ steps.target.outputs.stage }}
 
     steps:
       - name: Checkout repository
@@ -66,16 +66,16 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Choose the environment
+      - name: Choose the stage
         id: target
         env:
-          Requested: ${{ inputs.environment }}
+          Requested: ${{ inputs.stage }}
           Event: ${{ github.event_name }}
         run: |
           case "$Event" in
-            pull_request) echo "environment=" >> "$GITHUB_OUTPUT" ;;
-            push) echo "environment=staging" >> "$GITHUB_OUTPUT" ;;
-            *) echo "environment=$Requested" >> "$GITHUB_OUTPUT" ;;
+            pull_request) echo "stage=" >> "$GITHUB_OUTPUT" ;;
+            push) echo "stage=staging" >> "$GITHUB_OUTPUT" ;;
+            *) echo "stage=$Requested" >> "$GITHUB_OUTPUT" ;;
           esac
 
       - name: Setup .NET
@@ -113,11 +113,11 @@ jobs:
         run: dotnet tool exec docfx --yes --allow-roll-forward -- docs/docfx.json
 
       - name: Install the wasm-tools workload
-        if: steps.target.outputs.environment != ''
+        if: steps.target.outputs.stage != ''
         run: dotnet workload install wasm-tools
 
       - name: Publish the games
-        if: steps.target.outputs.environment != ''
+        if: steps.target.outputs.stage != ''
         run: |
           place() {
             mkdir -p "$2"
@@ -155,25 +155,25 @@ jobs:
           done
 
       - name: Upload the site
-        if: steps.target.outputs.environment != ''
+        if: steps.target.outputs.stage != ''
         uses: actions/upload-artifact@v7
         with:
           name: docs
           path: docs/_site
 
   deploy:
-    name: Deploy to ${{ needs.build.outputs.environment }}
+    name: Deploy to docs-${{ needs.build.outputs.stage }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: build
-    if: ${{ !failure() && !cancelled() && needs.build.outputs.environment != '' }}
+    if: ${{ !failure() && !cancelled() && needs.build.outputs.stage != '' }}
     permissions:
       contents: read
     environment:
-      name: ${{ needs.build.outputs.environment }}
-      url: ${{ needs.build.outputs.environment == 'production' && 'https://khaos.kappaduck.com' || steps.deploy.outputs.pages-deployment-alias-url }}
+      name: docs-${{ needs.build.outputs.stage }}
+      url: ${{ needs.build.outputs.stage == 'production' && 'https://khaos.kappaduck.com' || steps.deploy.outputs.pages-deployment-alias-url }}
     concurrency:
-      group: docs-${{ needs.build.outputs.environment }}
+      group: docs-${{ needs.build.outputs.stage }}
       cancel-in-progress: false
 
     steps:
@@ -189,11 +189,11 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy site --project-name khaos --branch ${{ needs.build.outputs.environment }}
+          command: pages deploy site --project-name khaos --branch ${{ needs.build.outputs.stage }}
 
       - name: Summary
         env:
-          ENVIRONMENT: ${{ needs.build.outputs.environment }}
+          ENVIRONMENT: docs-${{ needs.build.outputs.stage }}
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
           ALIAS_URL: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
         run: |
