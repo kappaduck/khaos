@@ -13,6 +13,7 @@ internal static class Descriptors
     private const string InteropBoolStorageDescription = "A bool makes its struct non-blittable: passed by value, the struct needs runtime marshalling disabled, and read through a pointer, its managed layout no longer matches a 4-byte Win32 BOOL. Store a native boolean as byte in SDL and int in Win32, and convert to bool in the public wrapper.";
     private const string InteropNintDescription = "An nint compiles wherever any other handle or integer is expected, so passing the wrong one builds and fails later as a native crash. A typed pointer (SDL_Window*, or void* for untyped memory) or a struct that wraps a pointer-sized integer (LPARAM) turns the same mistake into a build error.";
     private const string InteropEntryPointDescription = "The managed name drops the library prefix, so nothing else in the declaration says which native symbol it binds. EntryPoint is that link, and it is written even when it matches the managed name: a rename would otherwise compile and break the binding.";
+    private const string InteropVoidPointerDescription = "void* is right when the native side is genuinely untyped, and wrong when the real type was simply not looked up; the two look identical in the source. [UntypedBecause] carries the sentence that tells them apart, on the method where the decision was made.";
     private const string InteropLibraryDescription = "The other interop rules take their conventions from the area, so a binding in the wrong area is checked against the wrong ones. A library no area declares has not been decided on; add it to its area in InteropAreas first.";
 
     internal static readonly DiagnosticDescriptor InteropBoolReturn = new(
@@ -94,6 +95,26 @@ internal static class Descriptors
         true,
         InteropEntryPointDescription,
         $"{Documentation}khi003.md");
+
+    internal static readonly DiagnosticDescriptor InteropVoidPointerUnexplained = new(
+        "KHI004",
+        "void* without a stated reason",
+        "'{0}' takes or returns void* without [UntypedBecause]; say why it cannot be typed",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropVoidPointerDescription,
+        $"{Documentation}khi004.md");
+
+    internal static readonly DiagnosticDescriptor InteropVoidPointerEmptyReason = new(
+        "KHI004",
+        "void* without a stated reason",
+        "'{0}' gives [UntypedBecause] an empty reason; say why it cannot be typed",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropVoidPointerDescription,
+        $"{Documentation}khi004.md");
 
     internal static readonly DiagnosticDescriptor InteropVisibility = new(
         "KHI005",

@@ -288,7 +288,7 @@ internal sealed class InteropVisibilityAnalyzerTests
         const string source = """
             namespace KappaDuck.Khaos.Interop;
 
-            public sealed class UntypedPointerAttribute(string reason) : System.Attribute
+            public sealed class UntypedBecauseAttribute(string reason) : System.Attribute
             {
                 public string Reason { get; } = reason;
             }
@@ -298,7 +298,7 @@ internal sealed class InteropVisibilityAnalyzerTests
 
         await result.CompilationErrors.Should().BeEmpty();
         await result.Ids.Should().BeEqualTo("KHI005");
-        await result.Reported.Should().Contain("'UntypedPointerAttribute' is visible outside the assembly");
+        await result.Reported.Should().Contain("'UntypedBecauseAttribute' is visible outside the assembly");
     }
 
     [Test]

@@ -37,7 +37,7 @@ public sealed class InteropNintAnalyzer : DiagnosticAnalyzer
 
         foreach (ISymbol member in type.GetMembers())
         {
-            if (member is IMethodSymbol method && HasOwnSignature(method))
+            if (member is IMethodSymbol method && Signatures.HasOwn(method))
                 AnalyzeMethod(context, method);
             else if (member is IFieldSymbol { IsConst: false, AssociatedSymbol: null } field && UsesNint(field.Type))
                 context.ReportDiagnostic(Diagnostic.Create(Descriptors.InteropNintField, TypeLocations.Of(field, context.CancellationToken), type.Name, field.Name));
@@ -88,20 +88,8 @@ public sealed class InteropNintAnalyzer : DiagnosticAnalyzer
     private static bool IsInlineArray(INamedTypeSymbol type, INamedTypeSymbol? inlineArray)
         => inlineArray is not null && type.GetAttributes().Any(attribute => SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, inlineArray));
 
-    private static bool HasOwnSignature(IMethodSymbol method) => method is
-    {
-        IsImplicitlyDeclared: false,
-        PartialDefinitionPart: null,
-        MethodKind: MethodKind.Ordinary or MethodKind.Constructor or MethodKind.UserDefinedOperator or MethodKind.Conversion
-    };
-
-    private static bool UsesNint(ITypeSymbol type) => type switch
-    {
-        { SpecialType: SpecialType.System_IntPtr } => true,
-        IPointerTypeSymbol pointer => UsesNint(pointer.PointedAtType),
-        IFunctionPointerTypeSymbol function => UsesNint(function.Signature.ReturnType) || function.Signature.Parameters.Any(static parameter => UsesNint(parameter.Type)),
-        _ => false
-    };
+    private static bool UsesNint(ITypeSymbol type)
+        => Signatures.Contains(type, static candidate => candidate.SpecialType == SpecialType.System_IntPtr);
 
     private static Location? ReturnTypeLocationOf(SyntaxNode? declaration) => declaration switch
     {
