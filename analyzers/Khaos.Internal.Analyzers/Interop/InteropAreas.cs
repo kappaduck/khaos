@@ -2,11 +2,23 @@
 // Licensed under the MIT license.
 
 using Microsoft.CodeAnalysis;
+using System.Collections.Frozen;
 
 namespace KappaDuck.Khaos.Internal.Analyzers.Interop;
 
 internal static class InteropAreas
 {
+    private static readonly FrozenDictionary<string, InteropArea> _libraries = new Dictionary<string, InteropArea>
+    {
+        { "SDL3", InteropArea.SDL },
+        { "SDL3_image", InteropArea.SDL },
+        { "SDL3_ttf", InteropArea.SDL },
+        { "SDL3_mixer", InteropArea.SDL },
+        { "user32", InteropArea.Win32 },
+        { "kernel32", InteropArea.Win32 },
+        { "gdi32", InteropArea.Win32 }
+    }.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
     internal static InteropArea? Resolve(ISymbol symbol)
     {
         string? area = null;
@@ -31,6 +43,9 @@ internal static class InteropAreas
 
         return false;
     }
+
+    internal static InteropArea? OwnerOf(string library)
+        => _libraries.TryGetValue(library, out InteropArea area) ? area : null;
 
     private static InteropArea? Parse(string? name) => name switch
     {
