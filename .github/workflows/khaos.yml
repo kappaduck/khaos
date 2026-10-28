@@ -18,16 +18,16 @@ env:
 
 jobs:
   publish:
-    name: Publish ${{ github.event_name == 'release' && !github.event.release.prerelease && 'production' || 'beta' }}
+    name: Publish ${{ github.event_name == 'release' && !github.event.release.prerelease && 'release' || 'beta' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    environment: nuget
+    environment: ${{ github.event_name == 'release' && !github.event.release.prerelease && 'nuget-release' || 'nuget-beta' }}
     permissions:
       contents: read
       id-token: write
 
     env:
-      Channel: ${{ github.event_name == 'release' && !github.event.release.prerelease && 'production' || 'beta' }}
+      Channel: ${{ github.event_name == 'release' && !github.event.release.prerelease && 'release' || 'beta' }}
 
     steps:
       - name: Checkout repository
@@ -57,7 +57,7 @@ jobs:
           fi
 
       - name: Check the release is on main
-        if: env.Channel == 'production'
+        if: env.Channel == 'release'
         run: |
           git merge-base --is-ancestor "$GITHUB_SHA" origin/main || {
             echo "::error::The release commit $GITHUB_SHA is not on main. Create the release from main, after the release PR is merged."
@@ -73,7 +73,7 @@ jobs:
           tools/resolve-version.sh KappaDuck.Khaos "$Khaos" "$Channel"
 
       - name: Test
-        if: env.Channel != 'production'
+        if: env.Channel != 'release'
         run: dotnet test --solution tests.slnf --configuration Release
 
       - name: Build
@@ -99,7 +99,7 @@ jobs:
         id: nuget
         uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841
         with:
-          user: ${{ secrets.USER }}
+          user: ${{ vars.USER }}
 
       - name: Publish to NuGet
         env:
@@ -114,8 +114,6 @@ jobs:
       contents: read
     uses: ./.github/workflows/docs.yml
     with:
-      environment: production
+      stage: production
       benchmarks: true
-    secrets:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    secrets: inherit
