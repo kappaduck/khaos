@@ -55,6 +55,13 @@ internal static class InteropAreas
         _ => throw new ArgumentOutOfRangeException(nameof(area), area, null)
     };
 
+    internal static string BoolStorage(InteropArea area) => area switch
+    {
+        InteropArea.SDL => "byte",
+        InteropArea.Win32 => "int",
+        _ => throw new ArgumentOutOfRangeException(nameof(area), area, null)
+    };
+
     private static InteropArea? Parse(string? name) => name switch
     {
         "SDL" => InteropArea.SDL,
