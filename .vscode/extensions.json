@@ -1,6 +1,8 @@
 {
   "recommendations": [
     "ms-dotnettools.csdevkit",
-    "editorconfig.editorconfig"
+    "editorconfig.editorconfig",
+    "github.vscode-github-actions",
+    "christian-kohler.path-intellisense"
   ]
 }
