@@ -25,13 +25,13 @@
   </ItemGroup>
 
   <ItemGroup Label="Hosting">
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="11.0.0-rc.2.26504.105" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.CommandLine" Version="11.0.0-rc.2.26504.105" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="11.0.0-rc.2.26504.105" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="11.0.0-rc.2.26504.105" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="11.0.0-rc.2.26504.105" />
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="11.0.0-rc.2.26504.105" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Configuration" Version="11.0.0-rc.2.26504.105" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="11.0.0-rc.3.26522.148" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.CommandLine" Version="11.0.0-rc.3.26522.148" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="11.0.0-rc.3.26522.148" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="11.0.0-rc.3.26522.148" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="11.0.0-rc.3.26522.148" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="11.0.0-rc.3.26522.148" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Configuration" Version="11.0.0-rc.3.26522.148" />
   </ItemGroup>
 
   <ItemGroup Label="Benchmarks">
