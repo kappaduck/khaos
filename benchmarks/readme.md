@@ -4,7 +4,7 @@ BenchmarkDotNet measurements of the hot paths: batching in the renderer, event d
 asset lookups. Allocation counts matter as much as time: the game loop is expected to allocate nothing.
 
 ```bash
-dotnet run -c Release --project benchmarks/Khaos.Benchmarks -- --filter '*'
+dotnet run -c Release --project benchmarks -- --filter '*'
 ```
 
 On GitHub, `.github/workflows/benchmarks.yml` runs them:

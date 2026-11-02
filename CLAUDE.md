@@ -59,6 +59,9 @@ sources in the last column.
 When designing an API or a system, check how Godot, Unity, MonoGame and raylib solve the same problem, and show
 the comparison with its sources. They are references to learn from, not models to copy.
 
+Learn from their public documentation and design, never from their code: do not copy it, even from an open
+source engine.
+
 ### .NET
 
 Khaos targets .NET 11 (release on November 10, 2026), then multi-targets .NET 12 preview from January or February
@@ -106,6 +109,10 @@ handles, no SDL types. The one exception is a native handle wrapped in a type th
 a `WindowHandle` that holds the handles SDL exposes for each platform (an HWND on Windows, the Wayland or X11
 handles on Linux).
 
+Follow the .NET [native interop best practices](https://learn.microsoft.com/dotnet/standard/native-interop/best-practices).
+Pass what the caller owns by `in`, `out` or `ref`: a blittable value is pinned, not copied. Keep a pointer only for a
+native handle stored in a field, for memory SDL owns, or where `NULL` means something.
+
 ### Documentation
 
 Everything public has XML documentation: classes, structs, enums and their values, properties, methods, events.
@@ -130,6 +137,12 @@ sentence: `FromDegreesShouldStoreTheAngleInRadians`.
 A test method (marked `[Test]`) always has a block body, even for a single line, never an expression body (`=>`).
 When the line gets long, put the inputs in local variables beside the call rather than switching to `=>`: a test
 should read clearly.
+
+### Demos
+
+Every demo is an original game: its own name, levels, art and sounds. A demo can belong to a genre (a brick
+breaker, a rocks-and-diamonds digger, a card game with traditional rules), but it never recreates a specific
+existing game, even renamed.
 
 ### Performance
 
