@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 using KappaDuck.Khaos.Interop.SDL;
+using KappaDuck.Khaos.Tests.Helpers;
 
 namespace KappaDuck.Khaos.Tests.Interop.SDL;
 

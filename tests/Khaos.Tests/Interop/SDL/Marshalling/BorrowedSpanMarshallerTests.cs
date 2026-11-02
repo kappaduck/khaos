@@ -1,6 +1,7 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
+using KappaDuck.Khaos.Interop.SDL;
 using KappaDuck.Khaos.Interop.SDL.Marshalling;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -51,7 +52,7 @@ internal sealed partial class BorrowedSpanMarshallerTests
         await offset.Should().BeZero();
     }
 
-    [LibraryImport("SDL3", EntryPoint = "SDL_GetKeyboardState")]
+    [LibraryImport(nameof(SDL3), EntryPoint = "SDL_GetKeyboardState")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalUsing(typeof(BorrowedSpanMarshaller<,>), CountElementName = nameof(count))]
     private static safe partial ReadOnlySpan<byte> GetKeyboardState(out int count);
