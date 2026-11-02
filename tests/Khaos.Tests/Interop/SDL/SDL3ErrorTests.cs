@@ -114,7 +114,7 @@ internal sealed partial class SDL3ErrorTests
 
     private static uint GetWindowIdOfNoWindow() => unsafe (GetWindowId(null));
 
-    [LibraryImport("SDL3", EntryPoint = "SDL_GetWindowID")]
+    [LibraryImport(nameof(SDL3), EntryPoint = "SDL_GetWindowID")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe partial uint GetWindowId(void* window);
 }

@@ -1,6 +1,7 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
+using KappaDuck.Khaos.Interop.SDL;
 using KappaDuck.Khaos.Interop.SDL.Marshalling;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -40,7 +41,7 @@ internal sealed partial class BorrowedUtf8StringMarshallerTests
         await platform.Should().BeEqualTo(expected);
     }
 
-    [LibraryImport("SDL3", EntryPoint = "SDL_GetPlatform")]
+    [LibraryImport(nameof(SDL3), EntryPoint = "SDL_GetPlatform")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalUsing(typeof(BorrowedUtf8StringMarshaller))]
     private static safe partial string? GetPlatform();
