@@ -8,7 +8,7 @@ using System.Text;
 
 namespace KappaDuck.Khaos.Tests.Mathematics;
 
-public sealed class PointTests
+internal sealed class PointTests
 {
     [Test]
     public async Task SubtractingTwoPointsShouldGiveTheDisplacementBetweenThem()

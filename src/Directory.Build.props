@@ -37,7 +37,7 @@
 
   <ItemGroup Label="Internals">
     <InternalsVisibleTo Include="$(AssemblyName).Tests" />
-    <InternalsVisibleTo Include="$(AssemblyName).Benchmarks" />
+    <InternalsVisibleTo Include="Benchmarks" />
   </ItemGroup>
 
   <ItemGroup Label="Framework analyzers" Condition="'$(MSBuildProjectName)' != 'Khaos.Templates'">

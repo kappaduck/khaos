@@ -7,7 +7,7 @@ using System.Numerics;
 
 namespace KappaDuck.Khaos.Tests.Mathematics;
 
-public sealed class PointITests
+internal sealed class PointITests
 {
     [Test]
     public async Task SubtractingTwoPointsShouldGiveAVector2()
