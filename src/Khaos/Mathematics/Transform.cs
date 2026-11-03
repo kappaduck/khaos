@@ -6,11 +6,11 @@ using System.Numerics;
 namespace KappaDuck.Khaos.Mathematics;
 
 /// <summary>
-/// Represents a 2D affine transform: any combination of translation, rotation, scale and shear.
+/// Represents a 2D affine transform, which is any combination of translation, rotation, scale and shear.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Transforms combine with <c>*</c> and apply <b>right to left</b>: in <c>a * b</c>, <c>b</c> is applied to a
+/// Transforms combine with <c>*</c> and apply <b>right to left</b>. In <c>a * b</c>, <c>b</c> is applied to a
 /// point first, then <c>a</c>.
 /// </para>
 /// <para>
@@ -71,7 +71,7 @@ public readonly struct Transform(Matrix3x2 matrix) :
     /// Applies this transform to a displacement, ignoring the translation.
     /// </summary>
     /// <remarks>
-    /// A displacement has no position, so moving it does nothing: only the rotation, scale and shear apply.
+    /// A displacement has no position, so moving it does nothing. Only the rotation, scale and shear apply.
     /// Use it for velocities and directions.
     /// </remarks>
     /// <param name="vector">The displacement.</param>
@@ -84,9 +84,9 @@ public readonly struct Transform(Matrix3x2 matrix) :
     /// <remarks>
     /// <para>
     /// Any transform from <see cref="Create"/>, <see cref="Translation"/>, a single <see cref="Rotation(Angle)"/>
-    /// or <see cref="Scaling(Vector2)"/> decomposes. A product of transforms may not: a non-uniform scale applied
-    /// <b>after</b> a rotation, such as <c>Scaling(new(2, 1)) * Rotation(angle)</c>, shears, and a shear has no
-    /// rotation-then-scale equivalent.
+    /// or <see cref="Scaling(Vector2)"/> decomposes. A product of transforms may not, because a non-uniform scale
+    /// applied <b>after</b> a rotation, such as <c>Scaling(new(2, 1)) * Rotation(angle)</c>, shears, and a shear has
+    /// no rotation-then-scale equivalent.
     /// </para>
     /// <para>
     /// A mirror comes out as a negative vertical scale, which can be drawn as a vertical flip. A horizontal
@@ -127,7 +127,7 @@ public readonly struct Transform(Matrix3x2 matrix) :
     /// Computes the transform that undoes this one.
     /// </summary>
     /// <remarks>
-    /// Fails when the transform flattens space, such as a scale of zero on an axis: many points land on the
+    /// Fails when the transform flattens space, such as a scale of zero on an axis. Many points land on the
     /// same spot, so there is no way back.
     /// </remarks>
     /// <param name="inverse">When this method returns <see langword="true"/>, the inverse; otherwise, <see cref="Identity"/>.</param>
@@ -145,7 +145,7 @@ public readonly struct Transform(Matrix3x2 matrix) :
     }
 
     /// <summary>
-    /// Creates the transform that places an object: scaled, then rotated, then moved to its position, with
+    /// Creates the transform that scales an object, rotates it, then moves it to its position, with
     /// <paramref name="origin"/> as the pivot of both the scale and the rotation.
     /// </summary>
     /// <param name="position">Where the object's origin lands.</param>

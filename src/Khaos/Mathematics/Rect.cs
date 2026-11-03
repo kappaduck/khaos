@@ -77,7 +77,7 @@ public readonly struct Rect(float x, float y, float width, float height) :
     /// Gets a value indicating whether the width or the height is negative or not a number.
     /// </summary>
     /// <remarks>
-    /// A width or a height of zero is not empty: a rectangle of size zero is a point, and it still counts in a
+    /// A width or a height of zero is not empty. A rectangle of size zero is a point, and it still counts in a
     /// union or a bounding box. <see cref="RectI.IsEmpty"/> differs, because a rectangle of whole cells with no
     /// width covers no cell.
     /// </remarks>
@@ -161,11 +161,6 @@ public readonly struct Rect(float x, float y, float width, float height) :
     /// <summary>
     /// Determines whether every point is inside the rectangle.
     /// </summary>
-    /// <remarks>
-    /// Arrays and <see cref="List{T}"/> are read without enumerating them. Prefer the
-    /// <see cref="ContainsAll(ReadOnlySpan{Point})"/> overload in code that runs every frame: enumerating any
-    /// other sequence allocates.
-    /// </remarks>
     /// <param name="points">The points to test.</param>
     /// <returns><see langword="true"/> if every point is inside, or if there is no point; otherwise, <see langword="false"/>.</returns>
     public bool ContainsAll(IEnumerable<Point> points)
@@ -190,11 +185,6 @@ public readonly struct Rect(float x, float y, float width, float height) :
     /// <summary>
     /// Determines whether at least one point is inside the rectangle.
     /// </summary>
-    /// <remarks>
-    /// Arrays and <see cref="List{T}"/> are read without enumerating them. Prefer the
-    /// <see cref="ContainsAny(ReadOnlySpan{Point})"/> overload in code that runs every frame: enumerating any
-    /// other sequence allocates.
-    /// </remarks>
     /// <param name="points">The points to test.</param>
     /// <returns><see langword="true"/> if at least one point is inside; otherwise, <see langword="false"/>.</returns>
     public bool ContainsAny(IEnumerable<Point> points)
@@ -333,10 +323,6 @@ public readonly struct Rect(float x, float y, float width, float height) :
     /// <summary>
     /// Computes the smallest rectangle containing a sequence of points.
     /// </summary>
-    /// <remarks>
-    /// Same result as <see cref="TryEnclose(ReadOnlySpan{Point}, out Rect)"/>. Arrays and <see cref="List{T}"/>
-    /// are read without enumerating them; enumerating any other sequence allocates.
-    /// </remarks>
     /// <param name="points">The points to enclose.</param>
     /// <param name="bounds">When this method returns <see langword="true"/>, the enclosing rectangle; otherwise, <see cref="Zero"/>.</param>
     /// <returns><see langword="true"/> if <paramref name="points"/> is not empty; otherwise, <see langword="false"/>.</returns>

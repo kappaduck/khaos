@@ -152,11 +152,6 @@ public readonly struct RectI(int x, int y, int width, int height) :
     /// <summary>
     /// Determines whether every cell is inside the rectangle.
     /// </summary>
-    /// <remarks>
-    /// Arrays and <see cref="List{T}"/> are read without enumerating them. Prefer the
-    /// <see cref="ContainsAll(ReadOnlySpan{PointI})"/> overload in code that runs every frame: enumerating any
-    /// other sequence allocates.
-    /// </remarks>
     /// <param name="points">The points to test.</param>
     /// <returns><see langword="true"/> if every cell is inside, or if there is no cell; otherwise, <see langword="false"/>.</returns>
     public bool ContainsAll(IEnumerable<PointI> points)
@@ -181,11 +176,6 @@ public readonly struct RectI(int x, int y, int width, int height) :
     /// <summary>
     /// Determines whether at least one cell is inside the rectangle.
     /// </summary>
-    /// <remarks>
-    /// Arrays and <see cref="List{T}"/> are read without enumerating them. Prefer the
-    /// <see cref="ContainsAny(ReadOnlySpan{PointI})"/> overload in code that runs every frame: enumerating any
-    /// other sequence allocates.
-    /// </remarks>
     /// <param name="points">The points to test.</param>
     /// <returns><see langword="true"/> if at least one cell is inside; otherwise, <see langword="false"/>.</returns>
     public bool ContainsAny(IEnumerable<PointI> points)
@@ -275,10 +265,6 @@ public readonly struct RectI(int x, int y, int width, int height) :
     /// <summary>
     /// Computes the smallest rectangle containing a sequence of points.
     /// </summary>
-    /// <remarks>
-    /// Same result as <see cref="TryEnclose(ReadOnlySpan{PointI}, out RectI)"/>. Arrays and <see cref="List{T}"/>
-    /// are read without enumerating them; enumerating any other sequence allocates.
-    /// </remarks>
     /// <param name="points">The points to enclose.</param>
     /// <param name="bounds">When this method returns <see langword="true"/>, the enclosing rectangle; otherwise, <see cref="Zero"/>.</param>
     /// <returns><see langword="true"/> if <paramref name="points"/> is not empty; otherwise, <see langword="false"/>.</returns>

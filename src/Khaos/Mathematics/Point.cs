@@ -96,7 +96,7 @@ public readonly struct Point(float x, float y) :
     /// Computes the squared distance between two points.
     /// </summary>
     /// <remarks>
-    /// Cheaper than <see cref="Distance(Point, Point)"/>: compare it to a squared radius to test a range
+    /// Cheaper than <see cref="Distance(Point, Point)"/>. Compare it to a squared radius to test a range
     /// without a square root.
     /// </remarks>
     /// <param name="from">The first point.</param>
@@ -108,7 +108,7 @@ public readonly struct Point(float x, float y) :
     /// Interpolates linearly between two points.
     /// </summary>
     /// <remarks>
-    /// Not clamped, like <see cref="Vector2.Lerp(Vector2, Vector2, float)"/>: an <paramref name="amount"/>
+    /// Not clamped, like <see cref="Vector2.Lerp(Vector2, Vector2, float)"/>, so an <paramref name="amount"/>
     /// of 2 lands as far past <paramref name="to"/> as <paramref name="from"/> is before it.
     /// </remarks>
     /// <param name="from">The point at <paramref name="amount"/> 0.</param>
