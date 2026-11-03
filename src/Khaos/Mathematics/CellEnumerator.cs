@@ -37,6 +37,11 @@ public ref struct CellEnumerator : IEnumerator<PointI>
     /// <inheritdoc/>
     readonly object IEnumerator.Current => Current;
 
+    /// <inheritdoc/>
+    public readonly void Dispose()
+    {
+    }
+
     /// <summary>
     /// Returns this enumerator.
     /// </summary>
@@ -66,10 +71,5 @@ public ref struct CellEnumerator : IEnumerator<PointI>
     {
         _x = _left - 1;
         _y = _top;
-    }
-
-    /// <inheritdoc/>
-    public readonly void Dispose()
-    {
     }
 }

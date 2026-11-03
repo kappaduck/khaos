@@ -20,11 +20,6 @@ public readonly struct Size(float width, float height) :
     IUtf8SpanFormattable
 {
     /// <summary>
-    /// Gets the size (0, 0).
-    /// </summary>
-    public static Size Zero { get; }
-
-    /// <summary>
     /// Gets the width.
     /// </summary>
     public float Width { get; init; } = width;
@@ -49,10 +44,9 @@ public readonly struct Size(float width, float height) :
     public bool IsEmpty => Width < 0f || Height < 0f || float.IsNaN(Width) || float.IsNaN(Height);
 
     /// <summary>
-    /// Returns the size with each dimension rounded down.
+    /// Gets the size (0, 0).
     /// </summary>
-    /// <returns>The rounded size.</returns>
-    public SizeI Floor() => new((int)MathF.Floor(Width), (int)MathF.Floor(Height));
+    public static Size Zero { get; }
 
     /// <summary>
     /// Returns the size with each dimension rounded up.
@@ -62,6 +56,28 @@ public readonly struct Size(float width, float height) :
     /// </remarks>
     /// <returns>The rounded size.</returns>
     public SizeI Ceiling() => new((int)MathF.Ceiling(Width), (int)MathF.Ceiling(Height));
+
+    /// <summary>
+    /// Deconstructs the size into its dimensions.
+    /// </summary>
+    /// <param name="width">The width.</param>
+    /// <param name="height">The height.</param>
+    public void Deconstruct(out float width, out float height) => (width, height) = (Width, Height);
+
+    /// <summary>
+    /// Returns the size with each dimension rounded down.
+    /// </summary>
+    /// <returns>The rounded size.</returns>
+    public SizeI Floor() => new((int)MathF.Floor(Width), (int)MathF.Floor(Height));
+
+    /// <summary>
+    /// Determines whether this size is within <paramref name="tolerance"/> of another in both dimensions.
+    /// </summary>
+    /// <param name="other">The size to compare with.</param>
+    /// <param name="tolerance">The largest difference allowed on each dimension.</param>
+    /// <returns><see langword="true"/> if both dimensions are within <paramref name="tolerance"/>; otherwise, <see langword="false"/>.</returns>
+    public bool IsApproximately(Size other, float tolerance)
+        => MathF.Abs(Width - other.Width) <= tolerance && MathF.Abs(Height - other.Height) <= tolerance;
 
     /// <summary>
     /// Returns the size with each dimension rounded to the nearest integer, halves away from zero.
@@ -75,22 +91,6 @@ public readonly struct Size(float width, float height) :
     /// </summary>
     /// <returns>The truncated size.</returns>
     public SizeI Truncate() => new((int)Width, (int)Height);
-
-    /// <summary>
-    /// Determines whether this size is within <paramref name="tolerance"/> of another in both dimensions.
-    /// </summary>
-    /// <param name="other">The size to compare with.</param>
-    /// <param name="tolerance">The largest difference allowed on each dimension.</param>
-    /// <returns><see langword="true"/> if both dimensions are within <paramref name="tolerance"/>; otherwise, <see langword="false"/>.</returns>
-    public bool IsApproximately(Size other, float tolerance)
-        => MathF.Abs(Width - other.Width) <= tolerance && MathF.Abs(Height - other.Height) <= tolerance;
-
-    /// <summary>
-    /// Deconstructs the size into its dimensions.
-    /// </summary>
-    /// <param name="width">The width.</param>
-    /// <param name="height">The height.</param>
-    public void Deconstruct(out float width, out float height) => (width, height) = (Width, Height);
 
     /// <inheritdoc/>
     /// <remarks>

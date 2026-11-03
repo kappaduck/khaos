@@ -33,17 +33,15 @@ public readonly struct Angle :
 
     private Angle(float radians) => Radians = radians;
 
-    private static ReadOnlySpan<byte> DegreeSignUtf8 => "°"u8;
-
-    /// <summary>
-    /// Gets an angle of zero.
-    /// </summary>
-    public static Angle Zero { get; }
-
     /// <summary>
     /// Gets the angle in radians.
     /// </summary>
     public float Radians { get; }
+
+    /// <summary>
+    /// Gets the cosine of the angle.
+    /// </summary>
+    public float Cos => MathF.Cos(Radians);
 
     /// <summary>
     /// Gets the angle in degrees.
@@ -56,28 +54,32 @@ public readonly struct Angle :
     public float Sin => MathF.Sin(Radians);
 
     /// <summary>
-    /// Gets the cosine of the angle.
-    /// </summary>
-    public float Cos => MathF.Cos(Radians);
-
-    /// <summary>
     /// Gets the tangent of the angle.
     /// </summary>
     public float Tan => MathF.Tan(Radians);
 
     /// <summary>
-    /// Creates an angle from a value in degrees.
+    /// Gets an angle of zero.
     /// </summary>
-    /// <param name="degrees">The angle in degrees.</param>
-    /// <returns>The angle.</returns>
-    public static Angle FromDegrees(float degrees) => new(float.DegreesToRadians(degrees));
+    public static Angle Zero { get; }
+
+    private static ReadOnlySpan<byte> DegreeSignUtf8 => "°"u8;
+
+    /// <inheritdoc/>
+    public int CompareTo(Angle other) => Radians.CompareTo(other.Radians);
 
     /// <summary>
-    /// Creates an angle from a value in radians.
+    /// Determines whether this angle points in approximately the same direction as another.
     /// </summary>
-    /// <param name="radians">The angle in radians.</param>
-    /// <returns>The angle.</returns>
-    public static Angle FromRadians(float radians) => new(radians);
+    /// <remarks>
+    /// The comparison wraps around: 359.9° and 0.1° are 0.2° apart, and 720° is the same direction as 0°.
+    /// Compare <see cref="Radians"/> directly to tell full turns apart.
+    /// </remarks>
+    /// <param name="other">The angle to compare with.</param>
+    /// <param name="tolerance">The largest difference still considered equal.</param>
+    /// <returns><see langword="true"/> if the two directions are within <paramref name="tolerance"/>; otherwise, <see langword="false"/>.</returns>
+    public bool IsApproximately(Angle other, Angle tolerance)
+        => MathF.Abs((this - other).NormalizeSigned().Radians) <= MathF.Abs(tolerance.Radians);
 
     /// <summary>
     /// Wraps the angle into the range [0°, 360°).
@@ -108,20 +110,18 @@ public readonly struct Angle :
     }
 
     /// <summary>
-    /// Determines whether this angle points in approximately the same direction as another.
+    /// Creates an angle from a value in degrees.
     /// </summary>
-    /// <remarks>
-    /// The comparison wraps around: 359.9° and 0.1° are 0.2° apart, and 720° is the same direction as 0°.
-    /// Compare <see cref="Radians"/> directly to tell full turns apart.
-    /// </remarks>
-    /// <param name="other">The angle to compare with.</param>
-    /// <param name="tolerance">The largest difference still considered equal.</param>
-    /// <returns><see langword="true"/> if the two directions are within <paramref name="tolerance"/>; otherwise, <see langword="false"/>.</returns>
-    public bool IsApproximately(Angle other, Angle tolerance)
-        => MathF.Abs((this - other).NormalizeSigned().Radians) <= MathF.Abs(tolerance.Radians);
+    /// <param name="degrees">The angle in degrees.</param>
+    /// <returns>The angle.</returns>
+    public static Angle FromDegrees(float degrees) => new(float.DegreesToRadians(degrees));
 
-    /// <inheritdoc/>
-    public int CompareTo(Angle other) => Radians.CompareTo(other.Radians);
+    /// <summary>
+    /// Creates an angle from a value in radians.
+    /// </summary>
+    /// <param name="radians">The angle in radians.</param>
+    /// <returns>The angle.</returns>
+    public static Angle FromRadians(float radians) => new(radians);
 
     /// <inheritdoc/>
     /// <remarks>

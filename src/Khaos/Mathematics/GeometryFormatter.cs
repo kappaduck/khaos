@@ -30,11 +30,11 @@ internal static class GeometryFormatter
         return handler.ToStringAndClear();
     }
 
-    internal static bool TryFormat<T>(Span<char> destination, out int charsWritten, ReadOnlySpan<T> components, ReadOnlySpan<char> format, IFormatProvider? provider) where T : ISpanFormattable
+    internal static bool TryFormat<T>(Span<char> destination, out int charsWritten, ReadOnlySpan<T> components, ReadOnlySpan<char> format, IFormatProvider? provider)
+        where T : ISpanFormattable
     {
-        string seperator = Separator(provider);
+        string separator = Separator(provider);
         Span<int> separatorStarts = components.Length <= StackSeparators ? stackalloc int[StackSeparators] : new int[components.Length];
-
         bool componentHasComma = false;
         int written = 0;
 
@@ -47,7 +47,7 @@ internal static class GeometryFormatter
             {
                 separatorStarts[i - 1] = written;
 
-                if (!TryAppend(destination, ref written, seperator))
+                if (!TryAppend(destination, ref written, separator))
                     return Fail(out charsWritten);
             }
 
@@ -68,11 +68,11 @@ internal static class GeometryFormatter
         return true;
     }
 
-    internal static bool TryFormat<T>(Span<byte> destination, out int bytesWritten, ReadOnlySpan<T> components, ReadOnlySpan<char> format, IFormatProvider? provider) where T : IUtf8SpanFormattable
+    internal static bool TryFormat<T>(Span<byte> destination, out int bytesWritten, ReadOnlySpan<T> components, ReadOnlySpan<char> format, IFormatProvider? provider)
+        where T : IUtf8SpanFormattable
     {
         string separator = Separator(provider);
         Span<int> separatorStarts = components.Length <= StackSeparators ? stackalloc int[StackSeparators] : new int[components.Length];
-
         bool componentHasComma = false;
         int written = 0;
 

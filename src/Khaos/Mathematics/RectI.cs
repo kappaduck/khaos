@@ -29,11 +29,6 @@ public readonly struct RectI(int x, int y, int width, int height) :
     }
 
     /// <summary>
-    /// Gets the rectangle (0, 0, 0, 0).
-    /// </summary>
-    public static RectI Zero { get; }
-
-    /// <summary>
     /// Gets the x-coordinate of the left edge.
     /// </summary>
     public int X { get; init; } = x;
@@ -59,47 +54,9 @@ public readonly struct RectI(int x, int y, int width, int height) :
     public long Area => (long)Width * Height;
 
     /// <summary>
-    /// Gets a value indicating whether the width or the height is zero or negative.
-    /// </summary>
-    public bool IsEmpty => Width <= 0 || Height <= 0;
-
-    /// <summary>
-    /// Gets the top-left corner.
-    /// </summary>
-    public PointI Position => new(X, Y);
-
-    /// <summary>
-    /// Gets the size.
-    /// </summary>
-    public SizeI Size => new(Width, Height);
-
-    /// <summary>
-    /// Gets the x-coordinate of the left edge, the first column inside. Same as <see cref="X"/>.
-    /// </summary>
-    public int Left => X;
-
-    /// <summary>
-    /// Gets the y-coordinate of the top edge, the first row inside. Same as <see cref="Y"/>.
-    /// </summary>
-    public int Top => Y;
-
-    /// <summary>
-    /// Gets the x-coordinate of the right edge, the first column outside.
-    /// </summary>
-    public int Right => X + Width;
-
-    /// <summary>
     /// Gets the y-coordinate of the bottom edge, the first row outside.
     /// </summary>
     public int Bottom => Y + Height;
-
-    /// <summary>
-    /// Gets the center.
-    /// </summary>
-    /// <remarks>
-    /// A <see cref="Point"/>, because the center of a rectangle with an odd size falls between two cells.
-    /// </remarks>
-    public Point Center => new(X + (Width * 0.5f), Y + (Height * 0.5f));
 
     /// <summary>
     /// Gets every cell inside the rectangle, row by row from the top-left one.
@@ -110,6 +67,166 @@ public readonly struct RectI(int x, int y, int width, int height) :
     /// sharing an edge do not intersect.
     /// </remarks>
     public CellEnumerator Cells => new(this);
+
+    /// <summary>
+    /// Gets the center.
+    /// </summary>
+    /// <remarks>
+    /// A <see cref="Point"/>, because the center of a rectangle with an odd size falls between two cells.
+    /// </remarks>
+    public Point Center => new(X + (Width * 0.5f), Y + (Height * 0.5f));
+
+    /// <summary>
+    /// Gets a value indicating whether the width or the height is zero or negative.
+    /// </summary>
+    public bool IsEmpty => Width <= 0 || Height <= 0;
+
+    /// <summary>
+    /// Gets the x-coordinate of the left edge, the first column inside. Same as <see cref="X"/>.
+    /// </summary>
+    public int Left => X;
+
+    /// <summary>
+    /// Gets the top-left corner.
+    /// </summary>
+    public PointI Position => new(X, Y);
+
+    /// <summary>
+    /// Gets the x-coordinate of the right edge, the first column outside.
+    /// </summary>
+    public int Right => X + Width;
+
+    /// <summary>
+    /// Gets the size.
+    /// </summary>
+    public SizeI Size => new(Width, Height);
+
+    /// <summary>
+    /// Gets the y-coordinate of the top edge, the first row inside. Same as <see cref="Y"/>.
+    /// </summary>
+    public int Top => Y;
+
+    /// <summary>
+    /// Gets the rectangle (0, 0, 0, 0).
+    /// </summary>
+    public static RectI Zero { get; }
+
+    /// <summary>
+    /// Determines whether a cell is inside the rectangle.
+    /// </summary>
+    /// <remarks>
+    /// The right and bottom edges are outside.
+    /// </remarks>
+    /// <param name="point">The cell to test.</param>
+    /// <returns><see langword="true"/> if the cell is inside; otherwise, <see langword="false"/>.</returns>
+    public bool Contains(PointI point) => point.X >= X && point.X < Right && point.Y >= Y && point.Y < Bottom;
+
+    /// <summary>
+    /// Determines whether another rectangle is entirely inside this one.
+    /// </summary>
+    /// <param name="other">The rectangle to test.</param>
+    /// <returns><see langword="true"/> if neither rectangle is empty and every cell of <paramref name="other"/> is inside; otherwise, <see langword="false"/>.</returns>
+    public bool Contains(RectI other)
+    {
+        return !IsEmpty && !other.IsEmpty
+            && other.Left >= Left && other.Right <= Right
+            && other.Top >= Top && other.Bottom <= Bottom;
+    }
+
+    /// <summary>
+    /// Determines whether every cell is inside the rectangle.
+    /// </summary>
+    /// <param name="points">The cells to test.</param>
+    /// <returns><see langword="true"/> if every cell is inside, or if there is no cell; otherwise, <see langword="false"/>.</returns>
+    public bool ContainsAll(ReadOnlySpan<PointI> points)
+    {
+        foreach (PointI point in points)
+        {
+            if (!Contains(point))
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Determines whether every cell is inside the rectangle.
+    /// </summary>
+    /// <remarks>
+    /// Arrays and <see cref="List{T}"/> are read without enumerating them. Prefer the
+    /// <see cref="ContainsAll(ReadOnlySpan{PointI})"/> overload in code that runs every frame: enumerating any
+    /// other sequence allocates.
+    /// </remarks>
+    /// <param name="points">The points to test.</param>
+    /// <returns><see langword="true"/> if every cell is inside, or if there is no cell; otherwise, <see langword="false"/>.</returns>
+    public bool ContainsAll(IEnumerable<PointI> points)
+        => TryGetSpan(points, out ReadOnlySpan<PointI> span) ? ContainsAll(span) : points.All(Contains);
+
+    /// <summary>
+    /// Determines whether at least one cell is inside the rectangle.
+    /// </summary>
+    /// <param name="points">The cells to test.</param>
+    /// <returns><see langword="true"/> if at least one cell is inside; otherwise, <see langword="false"/>.</returns>
+    public bool ContainsAny(ReadOnlySpan<PointI> points)
+    {
+        foreach (PointI point in points)
+        {
+            if (Contains(point))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Determines whether at least one cell is inside the rectangle.
+    /// </summary>
+    /// <remarks>
+    /// Arrays and <see cref="List{T}"/> are read without enumerating them. Prefer the
+    /// <see cref="ContainsAny(ReadOnlySpan{PointI})"/> overload in code that runs every frame: enumerating any
+    /// other sequence allocates.
+    /// </remarks>
+    /// <param name="points">The points to test.</param>
+    /// <returns><see langword="true"/> if at least one cell is inside; otherwise, <see langword="false"/>.</returns>
+    public bool ContainsAny(IEnumerable<PointI> points)
+        => TryGetSpan(points, out ReadOnlySpan<PointI> span) ? ContainsAny(span) : points.Any(Contains);
+
+    /// <summary>
+    /// Deconstructs the rectangle into its components.
+    /// </summary>
+    /// <param name="x">The x-coordinate of the left edge.</param>
+    /// <param name="y">The y-coordinate of the top edge.</param>
+    /// <param name="width">The width.</param>
+    /// <param name="height">The height.</param>
+    public void Deconstruct(out int x, out int y, out int width, out int height)
+    {
+        x = X;
+        y = Y;
+        width = Width;
+        height = Height;
+    }
+
+    /// <summary>
+    /// Determines whether this rectangle and another share at least one cell.
+    /// </summary>
+    /// <remarks>
+    /// Rectangles sharing only an edge do not intersect.
+    /// </remarks>
+    /// <param name="other">The other rectangle.</param>
+    /// <returns><see langword="true"/> if the rectangles intersect; otherwise, <see langword="false"/>.</returns>
+    public bool Intersects(RectI other)
+    {
+        return Math.Min(Right, other.Right) > Math.Max(Left, other.Left)
+            && Math.Min(Bottom, other.Bottom) > Math.Max(Top, other.Top);
+    }
+
+    /// <summary>
+    /// Returns this rectangle moved by a whole number of cells on each axis.
+    /// </summary>
+    /// <param name="dx">The horizontal offset.</param>
+    /// <param name="dy">The vertical offset.</param>
+    /// <returns>The moved rectangle.</returns>
+    public RectI Offset(int dx, int dy) => new(X + dx, Y + dy, Width, Height);
 
     /// <summary>
     /// Creates a rectangle from the coordinates of its edges.
@@ -244,123 +361,6 @@ public readonly struct RectI(int x, int y, int width, int height) :
     /// <returns>The union of the rectangle and the cell.</returns>
     public static RectI Union(RectI rect, PointI point) => Union(rect, new RectI(point.X, point.Y, 1, 1));
 
-    /// <summary>
-    /// Determines whether a cell is inside the rectangle.
-    /// </summary>
-    /// <remarks>
-    /// The right and bottom edges are outside.
-    /// </remarks>
-    /// <param name="point">The cell to test.</param>
-    /// <returns><see langword="true"/> if the cell is inside; otherwise, <see langword="false"/>.</returns>
-    public bool Contains(PointI point) => point.X >= X && point.X < Right && point.Y >= Y && point.Y < Bottom;
-
-    /// <summary>
-    /// Determines whether another rectangle is entirely inside this one.
-    /// </summary>
-    /// <param name="other">The rectangle to test.</param>
-    /// <returns><see langword="true"/> if neither rectangle is empty and every cell of <paramref name="other"/> is inside; otherwise, <see langword="false"/>.</returns>
-    public bool Contains(RectI other)
-    {
-        return !IsEmpty && !other.IsEmpty
-            && other.Left >= Left && other.Right <= Right
-            && other.Top >= Top && other.Bottom <= Bottom;
-    }
-
-    /// <summary>
-    /// Determines whether every cell is inside the rectangle.
-    /// </summary>
-    /// <param name="points">The cells to test.</param>
-    /// <returns><see langword="true"/> if every cell is inside, or if there is no cell; otherwise, <see langword="false"/>.</returns>
-    public bool ContainsAll(ReadOnlySpan<PointI> points)
-    {
-        foreach (PointI point in points)
-        {
-            if (!Contains(point))
-                return false;
-        }
-
-        return true;
-    }
-
-    /// <summary>
-    /// Determines whether every cell is inside the rectangle.
-    /// </summary>
-    /// <remarks>
-    /// Arrays and <see cref="List{T}"/> are read without enumerating them. Prefer the
-    /// <see cref="ContainsAll(ReadOnlySpan{PointI})"/> overload in code that runs every frame: enumerating any
-    /// other sequence allocates.
-    /// </remarks>
-    /// <param name="points">The points to test.</param>
-    /// <returns><see langword="true"/> if every cell is inside, or if there is no cell; otherwise, <see langword="false"/>.</returns>
-    public bool ContainsAll(IEnumerable<PointI> points)
-        => TryGetSpan(points, out ReadOnlySpan<PointI> span) ? ContainsAll(span) : points.All(Contains);
-
-    /// <summary>
-    /// Determines whether at least one cell is inside the rectangle.
-    /// </summary>
-    /// <param name="points">The cells to test.</param>
-    /// <returns><see langword="true"/> if at least one cell is inside; otherwise, <see langword="false"/>.</returns>
-    public bool ContainsAny(ReadOnlySpan<PointI> points)
-    {
-        foreach (PointI point in points)
-        {
-            if (Contains(point))
-                return true;
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Determines whether at least one cell is inside the rectangle.
-    /// </summary>
-    /// <remarks>
-    /// Arrays and <see cref="List{T}"/> are read without enumerating them. Prefer the
-    /// <see cref="ContainsAny(ReadOnlySpan{PointI})"/> overload in code that runs every frame: enumerating any
-    /// other sequence allocates.
-    /// </remarks>
-    /// <param name="points">The points to test.</param>
-    /// <returns><see langword="true"/> if at least one cell is inside; otherwise, <see langword="false"/>.</returns>
-    public bool ContainsAny(IEnumerable<PointI> points)
-        => TryGetSpan(points, out ReadOnlySpan<PointI> span) ? ContainsAny(span) : points.Any(Contains);
-
-    /// <summary>
-    /// Determines whether this rectangle and another share at least one cell.
-    /// </summary>
-    /// <remarks>
-    /// Rectangles sharing only an edge do not intersect.
-    /// </remarks>
-    /// <param name="other">The other rectangle.</param>
-    /// <returns><see langword="true"/> if the rectangles intersect; otherwise, <see langword="false"/>.</returns>
-    public bool Intersects(RectI other)
-    {
-        return Math.Min(Right, other.Right) > Math.Max(Left, other.Left)
-            && Math.Min(Bottom, other.Bottom) > Math.Max(Top, other.Top);
-    }
-
-    /// <summary>
-    /// Returns this rectangle moved by a whole number of cells on each axis.
-    /// </summary>
-    /// <param name="dx">The horizontal offset.</param>
-    /// <param name="dy">The vertical offset.</param>
-    /// <returns>The moved rectangle.</returns>
-    public RectI Offset(int dx, int dy) => new(X + dx, Y + dy, Width, Height);
-
-    /// <summary>
-    /// Deconstructs the rectangle into its components.
-    /// </summary>
-    /// <param name="x">The x-coordinate of the left edge.</param>
-    /// <param name="y">The y-coordinate of the top edge.</param>
-    /// <param name="width">The width.</param>
-    /// <param name="height">The height.</param>
-    public void Deconstruct(out int x, out int y, out int width, out int height)
-    {
-        x = X;
-        y = Y;
-        width = Width;
-        height = Height;
-    }
-
     /// <inheritdoc/>
     public bool Equals(RectI other) => X == other.X && Y == other.Y && Width == other.Width && Height == other.Height;
 
@@ -388,24 +388,6 @@ public readonly struct RectI(int x, int y, int width, int height) :
     public bool TryFormat(Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
         => GeometryFormatter.TryFormat(utf8Destination, out bytesWritten, [X, Y, Width, Height], format, provider);
 
-    private static bool TryGetSpan(IEnumerable<PointI> points, out ReadOnlySpan<PointI> span)
-    {
-        if (points is PointI[] array)
-        {
-            span = array;
-            return true;
-        }
-
-        if (points is List<PointI> list)
-        {
-            span = CollectionsMarshal.AsSpan(list);
-            return true;
-        }
-
-        span = default;
-        return false;
-    }
-
     /// <summary>
     /// Determines whether two rectangles are equal.
     /// </summary>
@@ -427,4 +409,22 @@ public readonly struct RectI(int x, int y, int width, int height) :
     /// </summary>
     /// <param name="rect">The rectangle to convert.</param>
     public static implicit operator Rect(RectI rect) => new(rect.X, rect.Y, rect.Width, rect.Height);
+
+    private static bool TryGetSpan(IEnumerable<PointI> points, out ReadOnlySpan<PointI> span)
+    {
+        if (points is PointI[] array)
+        {
+            span = array;
+            return true;
+        }
+
+        if (points is List<PointI> list)
+        {
+            span = CollectionsMarshal.AsSpan(list);
+            return true;
+        }
+
+        span = default;
+        return false;
+    }
 }

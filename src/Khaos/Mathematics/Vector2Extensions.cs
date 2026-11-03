@@ -17,11 +17,6 @@ public static class Vector2Extensions
     extension(Vector2)
     {
         /// <summary>
-        /// Gets the unit vector pointing up on screen, (0, -1).
-        /// </summary>
-        public static Vector2 Up => new(0f, -1f);
-
-        /// <summary>
         /// Gets the unit vector pointing down on screen, (0, 1).
         /// </summary>
         public static Vector2 Down => new(0f, 1f);
@@ -37,6 +32,20 @@ public static class Vector2Extensions
         public static Vector2 Right => new(1f, 0f);
 
         /// <summary>
+        /// Gets the unit vector pointing up on screen, (0, -1).
+        /// </summary>
+        public static Vector2 Up => new(0f, -1f);
+
+        /// <summary>
+        /// Computes the signed angle that turns one vector onto the direction of another.
+        /// </summary>
+        /// <param name="from">The starting direction.</param>
+        /// <param name="to">The target direction.</param>
+        /// <returns>The angle in [-180°, 180°], positive when turning clockwise on screen.</returns>
+        public static Angle AngleBetween(Vector2 from, Vector2 to)
+            => Angle.FromRadians(MathF.Atan2(Vector2.Cross(from, to), Vector2.Dot(from, to)));
+
+        /// <summary>
         /// Creates the vector of a given length pointing in a direction.
         /// </summary>
         /// <param name="direction">The direction, clockwise on screen from <c>Vector2.Right</c>.</param>
@@ -47,15 +56,6 @@ public static class Vector2Extensions
             (float sin, float cos) = MathF.SinCos(direction.Radians);
             return new(cos * length, sin * length);
         }
-
-        /// <summary>
-        /// Computes the signed angle that turns one vector onto the direction of another.
-        /// </summary>
-        /// <param name="from">The starting direction.</param>
-        /// <param name="to">The target direction.</param>
-        /// <returns>The angle in [-180°, 180°], positive when turning clockwise on screen.</returns>
-        public static Angle AngleBetween(Vector2 from, Vector2 to)
-            => Angle.FromRadians(MathF.Atan2(Vector2.Cross(from, to), Vector2.Dot(from, to)));
     }
 
     extension(Vector2 vector)
@@ -74,31 +74,6 @@ public static class Vector2Extensions
         /// Gets the vector turned a quarter turn counter-clockwise on screen.
         /// </summary>
         public Vector2 PerpendicularCounterClockwise => new(vector.Y, -vector.X);
-
-        /// <summary>
-        /// Returns the vector turned by an angle.
-        /// </summary>
-        /// <param name="angle">The angle, clockwise on screen.</param>
-        /// <returns>The rotated vector.</returns>
-        public Vector2 Rotate(Angle angle)
-        {
-            (float sin, float cos) = MathF.SinCos(angle.Radians);
-            return new((vector.X * cos) - (vector.Y * sin), (vector.X * sin) + (vector.Y * cos));
-        }
-
-        /// <summary>
-        /// Returns the vector with a length of one, or <see cref="Vector2.Zero"/> if it has no length.
-        /// </summary>
-        /// <remarks>
-        /// <see cref="Vector2.Normalize(Vector2)"/> returns NaN for a zero vector, which then spreads through every
-        /// position it touches. Use this one for input directions, which are zero whenever nothing is pressed.
-        /// </remarks>
-        /// <returns>The normalized vector, or <see cref="Vector2.Zero"/>.</returns>
-        public Vector2 NormalizeOrZero()
-        {
-            float length = vector.Length();
-            return length > 0f ? vector / length : Vector2.Zero;
-        }
 
         /// <summary>
         /// Returns the vector shortened to a maximum length, keeping its direction.
@@ -139,6 +114,31 @@ public static class Vector2Extensions
                 return target;
 
             return vector + (delta * (maxDistance / distance));
+        }
+
+        /// <summary>
+        /// Returns the vector with a length of one, or <see cref="Vector2.Zero"/> if it has no length.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="Vector2.Normalize(Vector2)"/> returns NaN for a zero vector, which then spreads through every
+        /// position it touches. Use this one for input directions, which are zero whenever nothing is pressed.
+        /// </remarks>
+        /// <returns>The normalized vector, or <see cref="Vector2.Zero"/>.</returns>
+        public Vector2 NormalizeOrZero()
+        {
+            float length = vector.Length();
+            return length > 0f ? vector / length : Vector2.Zero;
+        }
+
+        /// <summary>
+        /// Returns the vector turned by an angle.
+        /// </summary>
+        /// <param name="angle">The angle, clockwise on screen.</param>
+        /// <returns>The rotated vector.</returns>
+        public Vector2 Rotate(Angle angle)
+        {
+            (float sin, float cos) = MathF.SinCos(angle.Radians);
+            return new((vector.X * cos) - (vector.Y * sin), (vector.X * sin) + (vector.Y * cos));
         }
     }
 }

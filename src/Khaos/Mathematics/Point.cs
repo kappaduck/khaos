@@ -25,11 +25,6 @@ public readonly struct Point(float x, float y) :
     IUtf8SpanFormattable
 {
     /// <summary>
-    /// Gets the point at (0, 0).
-    /// </summary>
-    public static Point Origin { get; }
-
-    /// <summary>
     /// Gets the x-coordinate.
     /// </summary>
     public float X { get; init; } = x;
@@ -38,6 +33,56 @@ public readonly struct Point(float x, float y) :
     /// Gets the y-coordinate.
     /// </summary>
     public float Y { get; init; } = y;
+
+    /// <summary>
+    /// Gets the point at (0, 0).
+    /// </summary>
+    public static Point Origin { get; }
+
+    /// <summary>
+    /// Returns the point with each coordinate rounded up.
+    /// </summary>
+    /// <returns>The rounded point.</returns>
+    public PointI Ceiling() => new((int)MathF.Ceiling(X), (int)MathF.Ceiling(Y));
+
+    /// <summary>
+    /// Deconstructs the point into its coordinates.
+    /// </summary>
+    /// <param name="x">The x-coordinate.</param>
+    /// <param name="y">The y-coordinate.</param>
+    public void Deconstruct(out float x, out float y) => (x, y) = (X, Y);
+
+    /// <summary>
+    /// Returns the point with each coordinate rounded down.
+    /// </summary>
+    /// <returns>The rounded point.</returns>
+    public PointI Floor() => new((int)MathF.Floor(X), (int)MathF.Floor(Y));
+
+    /// <summary>
+    /// Determines whether this point is within <paramref name="tolerance"/> of another on both axes.
+    /// </summary>
+    /// <param name="other">The point to compare with.</param>
+    /// <param name="tolerance">The largest difference allowed on each axis.</param>
+    /// <returns><see langword="true"/> if both coordinates are within <paramref name="tolerance"/>; otherwise, <see langword="false"/>.</returns>
+    public bool IsApproximately(Point other, float tolerance)
+        => MathF.Abs(X - other.X) <= tolerance && MathF.Abs(Y - other.Y) <= tolerance;
+
+    /// <summary>
+    /// Returns the point with each coordinate rounded to the nearest integer, halves away from zero.
+    /// </summary>
+    /// <remarks>
+    /// Halves go away from zero (0.5 → 1, 1.5 → 2, 2.5 → 3) rather than to the nearest even integer, so
+    /// snapping to pixels does not alternate direction from one coordinate to the next.
+    /// </remarks>
+    /// <returns>The rounded point.</returns>
+    public PointI Round()
+        => new((int)MathF.Round(X, MidpointRounding.AwayFromZero), (int)MathF.Round(Y, MidpointRounding.AwayFromZero));
+
+    /// <summary>
+    /// Returns the point with each coordinate truncated toward zero.
+    /// </summary>
+    /// <returns>The truncated point.</returns>
+    public PointI Truncate() => new((int)X, (int)Y);
 
     /// <summary>
     /// Computes the distance between two points.
@@ -71,51 +116,6 @@ public readonly struct Point(float x, float y) :
     /// <param name="amount">The interpolation factor.</param>
     /// <returns>The interpolated point.</returns>
     public static Point Lerp(Point from, Point to, float amount) => from + ((to - from) * amount);
-
-    /// <summary>
-    /// Returns the point with each coordinate rounded down.
-    /// </summary>
-    /// <returns>The rounded point.</returns>
-    public PointI Floor() => new((int)MathF.Floor(X), (int)MathF.Floor(Y));
-
-    /// <summary>
-    /// Returns the point with each coordinate rounded up.
-    /// </summary>
-    /// <returns>The rounded point.</returns>
-    public PointI Ceiling() => new((int)MathF.Ceiling(X), (int)MathF.Ceiling(Y));
-
-    /// <summary>
-    /// Returns the point with each coordinate rounded to the nearest integer, halves away from zero.
-    /// </summary>
-    /// <remarks>
-    /// Halves go away from zero (0.5 → 1, 1.5 → 2, 2.5 → 3) rather than to the nearest even integer, so
-    /// snapping to pixels does not alternate direction from one coordinate to the next.
-    /// </remarks>
-    /// <returns>The rounded point.</returns>
-    public PointI Round()
-        => new((int)MathF.Round(X, MidpointRounding.AwayFromZero), (int)MathF.Round(Y, MidpointRounding.AwayFromZero));
-
-    /// <summary>
-    /// Returns the point with each coordinate truncated toward zero.
-    /// </summary>
-    /// <returns>The truncated point.</returns>
-    public PointI Truncate() => new((int)X, (int)Y);
-
-    /// <summary>
-    /// Determines whether this point is within <paramref name="tolerance"/> of another on both axes.
-    /// </summary>
-    /// <param name="other">The point to compare with.</param>
-    /// <param name="tolerance">The largest difference allowed on each axis.</param>
-    /// <returns><see langword="true"/> if both coordinates are within <paramref name="tolerance"/>; otherwise, <see langword="false"/>.</returns>
-    public bool IsApproximately(Point other, float tolerance)
-        => MathF.Abs(X - other.X) <= tolerance && MathF.Abs(Y - other.Y) <= tolerance;
-
-    /// <summary>
-    /// Deconstructs the point into its coordinates.
-    /// </summary>
-    /// <param name="x">The x-coordinate.</param>
-    /// <param name="y">The y-coordinate.</param>
-    public void Deconstruct(out float x, out float y) => (x, y) = (X, Y);
 
     /// <inheritdoc/>
     /// <remarks>

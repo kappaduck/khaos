@@ -29,11 +29,6 @@ public readonly struct Rect(float x, float y, float width, float height) :
     }
 
     /// <summary>
-    /// Gets the rectangle (0, 0, 0, 0).
-    /// </summary>
-    public static Rect Zero { get; }
-
-    /// <summary>
     /// Gets the x-coordinate of the left edge.
     /// </summary>
     public float X { get; init; } = x;
@@ -59,6 +54,26 @@ public readonly struct Rect(float x, float y, float width, float height) :
     public float Area => Width * Height;
 
     /// <summary>
+    /// Gets the y-coordinate of the bottom edge.
+    /// </summary>
+    public float Bottom => Y + Height;
+
+    /// <summary>
+    /// Gets the bottom-left corner.
+    /// </summary>
+    public Point BottomLeft => new(Left, Bottom);
+
+    /// <summary>
+    /// Gets the bottom-right corner.
+    /// </summary>
+    public Point BottomRight => new(Right, Bottom);
+
+    /// <summary>
+    /// Gets the center.
+    /// </summary>
+    public Point Center => new(X + (Width * 0.5f), Y + (Height * 0.5f));
+
+    /// <summary>
     /// Gets a value indicating whether the width or the height is negative or not a number.
     /// </summary>
     /// <remarks>
@@ -69,24 +84,14 @@ public readonly struct Rect(float x, float y, float width, float height) :
     public bool IsEmpty => Width < 0f || Height < 0f || float.IsNaN(Width) || float.IsNaN(Height);
 
     /// <summary>
-    /// Gets the top-left corner.
-    /// </summary>
-    public Point Position => new(X, Y);
-
-    /// <summary>
-    /// Gets the size.
-    /// </summary>
-    public Size Size => new(Width, Height);
-
-    /// <summary>
     /// Gets the x-coordinate of the left edge. Same as <see cref="X"/>.
     /// </summary>
     public float Left => X;
 
     /// <summary>
-    /// Gets the y-coordinate of the top edge. Same as <see cref="Y"/>.
+    /// Gets the top-left corner.
     /// </summary>
-    public float Top => Y;
+    public Point Position => new(X, Y);
 
     /// <summary>
     /// Gets the x-coordinate of the right edge.
@@ -94,14 +99,14 @@ public readonly struct Rect(float x, float y, float width, float height) :
     public float Right => X + Width;
 
     /// <summary>
-    /// Gets the y-coordinate of the bottom edge.
+    /// Gets the size.
     /// </summary>
-    public float Bottom => Y + Height;
+    public Size Size => new(Width, Height);
 
     /// <summary>
-    /// Gets the center.
+    /// Gets the y-coordinate of the top edge. Same as <see cref="Y"/>.
     /// </summary>
-    public Point Center => new(X + (Width * 0.5f), Y + (Height * 0.5f));
+    public float Top => Y;
 
     /// <summary>
     /// Gets the top-left corner.
@@ -114,14 +119,172 @@ public readonly struct Rect(float x, float y, float width, float height) :
     public Point TopRight => new(Right, Top);
 
     /// <summary>
-    /// Gets the bottom-left corner.
+    /// Gets the rectangle (0, 0, 0, 0).
     /// </summary>
-    public Point BottomLeft => new(Left, Bottom);
+    public static Rect Zero { get; }
 
     /// <summary>
-    /// Gets the bottom-right corner.
+    /// Determines whether a point is inside the rectangle, edges included.
     /// </summary>
-    public Point BottomRight => new(Right, Bottom);
+    /// <param name="point">The point to test.</param>
+    /// <returns><see langword="true"/> if the point is inside or on an edge; otherwise, <see langword="false"/>.</returns>
+    public bool Contains(Point point) => point.X >= X && point.X <= Right && point.Y >= Y && point.Y <= Bottom;
+
+    /// <summary>
+    /// Determines whether another rectangle is entirely inside this one, edges included.
+    /// </summary>
+    /// <param name="other">The rectangle to test.</param>
+    /// <returns><see langword="true"/> if neither rectangle is empty and <paramref name="other"/> is inside; otherwise, <see langword="false"/>.</returns>
+    public bool Contains(Rect other)
+    {
+        return !IsEmpty && !other.IsEmpty
+            && other.Left >= Left && other.Right <= Right
+            && other.Top >= Top && other.Bottom <= Bottom;
+    }
+
+    /// <summary>
+    /// Determines whether every point is inside the rectangle.
+    /// </summary>
+    /// <param name="points">The points to test.</param>
+    /// <returns><see langword="true"/> if every point is inside, or if there is no point; otherwise, <see langword="false"/>.</returns>
+    public bool ContainsAll(ReadOnlySpan<Point> points)
+    {
+        foreach (Point point in points)
+        {
+            if (!Contains(point))
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Determines whether every point is inside the rectangle.
+    /// </summary>
+    /// <remarks>
+    /// Arrays and <see cref="List{T}"/> are read without enumerating them. Prefer the
+    /// <see cref="ContainsAll(ReadOnlySpan{Point})"/> overload in code that runs every frame: enumerating any
+    /// other sequence allocates.
+    /// </remarks>
+    /// <param name="points">The points to test.</param>
+    /// <returns><see langword="true"/> if every point is inside, or if there is no point; otherwise, <see langword="false"/>.</returns>
+    public bool ContainsAll(IEnumerable<Point> points)
+        => TryGetSpan(points, out ReadOnlySpan<Point> span) ? ContainsAll(span) : points.All(Contains);
+
+    /// <summary>
+    /// Determines whether at least one point is inside the rectangle.
+    /// </summary>
+    /// <param name="points">The points to test.</param>
+    /// <returns><see langword="true"/> if at least one point is inside; otherwise, <see langword="false"/>.</returns>
+    public bool ContainsAny(ReadOnlySpan<Point> points)
+    {
+        foreach (Point point in points)
+        {
+            if (Contains(point))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Determines whether at least one point is inside the rectangle.
+    /// </summary>
+    /// <remarks>
+    /// Arrays and <see cref="List{T}"/> are read without enumerating them. Prefer the
+    /// <see cref="ContainsAny(ReadOnlySpan{Point})"/> overload in code that runs every frame: enumerating any
+    /// other sequence allocates.
+    /// </remarks>
+    /// <param name="points">The points to test.</param>
+    /// <returns><see langword="true"/> if at least one point is inside; otherwise, <see langword="false"/>.</returns>
+    public bool ContainsAny(IEnumerable<Point> points)
+        => TryGetSpan(points, out ReadOnlySpan<Point> span) ? ContainsAny(span) : points.Any(Contains);
+
+    /// <summary>
+    /// Deconstructs the rectangle into its components.
+    /// </summary>
+    /// <param name="x">The x-coordinate of the left edge.</param>
+    /// <param name="y">The y-coordinate of the top edge.</param>
+    /// <param name="width">The width.</param>
+    /// <param name="height">The height.</param>
+    public void Deconstruct(out float x, out float y, out float width, out float height)
+    {
+        x = X;
+        y = Y;
+        width = Width;
+        height = Height;
+    }
+
+    /// <summary>
+    /// Determines whether this rectangle and another share at least one point.
+    /// </summary>
+    /// <remarks>
+    /// Rectangles sharing only an edge intersect.
+    /// </remarks>
+    /// <param name="other">The other rectangle.</param>
+    /// <returns><see langword="true"/> if the rectangles intersect; otherwise, <see langword="false"/>.</returns>
+    public bool Intersects(Rect other)
+    {
+        return MathF.Min(Right, other.Right) >= MathF.Max(Left, other.Left)
+            && MathF.Min(Bottom, other.Bottom) >= MathF.Max(Top, other.Top);
+    }
+
+    /// <summary>
+    /// Determines whether this rectangle is within <paramref name="tolerance"/> of another on every component.
+    /// </summary>
+    /// <param name="other">The rectangle to compare with.</param>
+    /// <param name="tolerance">The largest difference allowed on each of x, y, width and height.</param>
+    /// <returns><see langword="true"/> if every component is within <paramref name="tolerance"/>; otherwise, <see langword="false"/>.</returns>
+    public bool IsApproximately(Rect other, float tolerance)
+    {
+        return MathF.Abs(X - other.X) <= tolerance
+            && MathF.Abs(Y - other.Y) <= tolerance
+            && MathF.Abs(Width - other.Width) <= tolerance
+            && MathF.Abs(Height - other.Height) <= tolerance;
+    }
+
+    /// <summary>
+    /// Returns this rectangle moved by a displacement.
+    /// </summary>
+    /// <param name="displacement">The displacement.</param>
+    /// <returns>The moved rectangle.</returns>
+    public Rect Offset(Vector2 displacement) => new(X + displacement.X, Y + displacement.Y, Width, Height);
+
+    /// <summary>
+    /// Returns the integer rectangle whose edges are this rectangle's edges rounded to the nearest integer.
+    /// </summary>
+    /// <remarks>
+    /// Rounds the edges, not the position and the size separately, so two rectangles sharing an edge still
+    /// share it once rounded. Halves go away from zero.
+    /// </remarks>
+    /// <returns>The rounded rectangle.</returns>
+    public RectI Round()
+    {
+        return RectI.FromEdges(
+            RoundToInt(Left),
+            RoundToInt(Top),
+            RoundToInt(Right),
+            RoundToInt(Bottom));
+
+        static int RoundToInt(float value) => (int)MathF.Round(value, MidpointRounding.AwayFromZero);
+    }
+
+    /// <summary>
+    /// Returns the smallest integer rectangle that covers this rectangle entirely.
+    /// </summary>
+    /// <remarks>
+    /// The left and top edges are rounded down, the right and bottom edges up. Use it to find every pixel or
+    /// tile a rectangle touches, such as the tiles visible through a camera.
+    /// </remarks>
+    /// <returns>The covering rectangle.</returns>
+    public RectI RoundOut()
+    {
+        return RectI.FromEdges(
+            (int)MathF.Floor(Left),
+            (int)MathF.Floor(Top),
+            (int)MathF.Ceiling(Right),
+            (int)MathF.Ceiling(Bottom));
+    }
 
     /// <summary>
     /// Creates a rectangle from the coordinates of its edges.
@@ -267,169 +430,6 @@ public readonly struct Rect(float x, float y, float width, float height) :
             MathF.Max(rect.Bottom, point.Y));
     }
 
-    /// <summary>
-    /// Determines whether a point is inside the rectangle, edges included.
-    /// </summary>
-    /// <param name="point">The point to test.</param>
-    /// <returns><see langword="true"/> if the point is inside or on an edge; otherwise, <see langword="false"/>.</returns>
-    public bool Contains(Point point) => point.X >= X && point.X <= Right && point.Y >= Y && point.Y <= Bottom;
-
-    /// <summary>
-    /// Determines whether another rectangle is entirely inside this one, edges included.
-    /// </summary>
-    /// <param name="other">The rectangle to test.</param>
-    /// <returns><see langword="true"/> if neither rectangle is empty and <paramref name="other"/> is inside; otherwise, <see langword="false"/>.</returns>
-    public bool Contains(Rect other)
-    {
-        return !IsEmpty && !other.IsEmpty
-            && other.Left >= Left && other.Right <= Right
-            && other.Top >= Top && other.Bottom <= Bottom;
-    }
-
-    /// <summary>
-    /// Determines whether every point is inside the rectangle.
-    /// </summary>
-    /// <param name="points">The points to test.</param>
-    /// <returns><see langword="true"/> if every point is inside, or if there is no point; otherwise, <see langword="false"/>.</returns>
-    public bool ContainsAll(ReadOnlySpan<Point> points)
-    {
-        foreach (Point point in points)
-        {
-            if (!Contains(point))
-                return false;
-        }
-
-        return true;
-    }
-
-    /// <summary>
-    /// Determines whether every point is inside the rectangle.
-    /// </summary>
-    /// <remarks>
-    /// Arrays and <see cref="List{T}"/> are read without enumerating them. Prefer the
-    /// <see cref="ContainsAll(ReadOnlySpan{Point})"/> overload in code that runs every frame: enumerating any
-    /// other sequence allocates.
-    /// </remarks>
-    /// <param name="points">The points to test.</param>
-    /// <returns><see langword="true"/> if every point is inside, or if there is no point; otherwise, <see langword="false"/>.</returns>
-    public bool ContainsAll(IEnumerable<Point> points)
-        => TryGetSpan(points, out ReadOnlySpan<Point> span) ? ContainsAll(span) : points.All(Contains);
-
-    /// <summary>
-    /// Determines whether at least one point is inside the rectangle.
-    /// </summary>
-    /// <param name="points">The points to test.</param>
-    /// <returns><see langword="true"/> if at least one point is inside; otherwise, <see langword="false"/>.</returns>
-    public bool ContainsAny(ReadOnlySpan<Point> points)
-    {
-        foreach (Point point in points)
-        {
-            if (Contains(point))
-                return true;
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Determines whether at least one point is inside the rectangle.
-    /// </summary>
-    /// <remarks>
-    /// Arrays and <see cref="List{T}"/> are read without enumerating them. Prefer the
-    /// <see cref="ContainsAny(ReadOnlySpan{Point})"/> overload in code that runs every frame: enumerating any
-    /// other sequence allocates.
-    /// </remarks>
-    /// <param name="points">The points to test.</param>
-    /// <returns><see langword="true"/> if at least one point is inside; otherwise, <see langword="false"/>.</returns>
-    public bool ContainsAny(IEnumerable<Point> points)
-        => TryGetSpan(points, out ReadOnlySpan<Point> span) ? ContainsAny(span) : points.Any(Contains);
-
-    /// <summary>
-    /// Determines whether this rectangle and another share at least one point.
-    /// </summary>
-    /// <remarks>
-    /// Rectangles sharing only an edge intersect.
-    /// </remarks>
-    /// <param name="other">The other rectangle.</param>
-    /// <returns><see langword="true"/> if the rectangles intersect; otherwise, <see langword="false"/>.</returns>
-    public bool Intersects(Rect other)
-    {
-        return MathF.Min(Right, other.Right) >= MathF.Max(Left, other.Left)
-            && MathF.Min(Bottom, other.Bottom) >= MathF.Max(Top, other.Top);
-    }
-
-    /// <summary>
-    /// Returns this rectangle moved by a displacement.
-    /// </summary>
-    /// <param name="displacement">The displacement.</param>
-    /// <returns>The moved rectangle.</returns>
-    public Rect Offset(Vector2 displacement) => new(X + displacement.X, Y + displacement.Y, Width, Height);
-
-    /// <summary>
-    /// Returns the integer rectangle whose edges are this rectangle's edges rounded to the nearest integer.
-    /// </summary>
-    /// <remarks>
-    /// Rounds the edges, not the position and the size separately, so two rectangles sharing an edge still
-    /// share it once rounded. Halves go away from zero.
-    /// </remarks>
-    /// <returns>The rounded rectangle.</returns>
-    public RectI Round()
-    {
-        return RectI.FromEdges(
-            RoundToInt(Left),
-            RoundToInt(Top),
-            RoundToInt(Right),
-            RoundToInt(Bottom));
-
-        static int RoundToInt(float value) => (int)MathF.Round(value, MidpointRounding.AwayFromZero);
-    }
-
-    /// <summary>
-    /// Returns the smallest integer rectangle that covers this rectangle entirely.
-    /// </summary>
-    /// <remarks>
-    /// The left and top edges are rounded down, the right and bottom edges up. Use it to find every pixel or
-    /// tile a rectangle touches, such as the tiles visible through a camera.
-    /// </remarks>
-    /// <returns>The covering rectangle.</returns>
-    public RectI RoundOut()
-    {
-        return RectI.FromEdges(
-            (int)MathF.Floor(Left),
-            (int)MathF.Floor(Top),
-            (int)MathF.Ceiling(Right),
-            (int)MathF.Ceiling(Bottom));
-    }
-
-    /// <summary>
-    /// Determines whether this rectangle is within <paramref name="tolerance"/> of another on every component.
-    /// </summary>
-    /// <param name="other">The rectangle to compare with.</param>
-    /// <param name="tolerance">The largest difference allowed on each of x, y, width and height.</param>
-    /// <returns><see langword="true"/> if every component is within <paramref name="tolerance"/>; otherwise, <see langword="false"/>.</returns>
-    public bool IsApproximately(Rect other, float tolerance)
-    {
-        return MathF.Abs(X - other.X) <= tolerance
-            && MathF.Abs(Y - other.Y) <= tolerance
-            && MathF.Abs(Width - other.Width) <= tolerance
-            && MathF.Abs(Height - other.Height) <= tolerance;
-    }
-
-    /// <summary>
-    /// Deconstructs the rectangle into its components.
-    /// </summary>
-    /// <param name="x">The x-coordinate of the left edge.</param>
-    /// <param name="y">The y-coordinate of the top edge.</param>
-    /// <param name="width">The width.</param>
-    /// <param name="height">The height.</param>
-    public void Deconstruct(out float x, out float y, out float width, out float height)
-    {
-        x = X;
-        y = Y;
-        width = Width;
-        height = Height;
-    }
-
     /// <inheritdoc/>
     /// <remarks>
     /// The comparison is exact. To compare computed values with a tolerance, use
@@ -464,6 +464,22 @@ public readonly struct Rect(float x, float y, float width, float height) :
     public bool TryFormat(Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
         => GeometryFormatter.TryFormat(utf8Destination, out bytesWritten, [X, Y, Width, Height], format, provider);
 
+    /// <summary>
+    /// Determines whether two rectangles are exactly equal.
+    /// </summary>
+    /// <param name="left">The first rectangle.</param>
+    /// <param name="right">The second rectangle.</param>
+    /// <returns><see langword="true"/> if the rectangles are equal; otherwise, <see langword="false"/>.</returns>
+    public static bool operator ==(Rect left, Rect right) => left.Equals(right);
+
+    /// <summary>
+    /// Determines whether two rectangles differ.
+    /// </summary>
+    /// <param name="left">The first rectangle.</param>
+    /// <param name="right">The second rectangle.</param>
+    /// <returns><see langword="true"/> if the rectangles differ; otherwise, <see langword="false"/>.</returns>
+    public static bool operator !=(Rect left, Rect right) => !left.Equals(right);
+
     private static bool TryGetSpan(IEnumerable<Point> points, out ReadOnlySpan<Point> span)
     {
         if (points is Point[] array)
@@ -481,20 +497,4 @@ public readonly struct Rect(float x, float y, float width, float height) :
         span = default;
         return false;
     }
-
-    /// <summary>
-    /// Determines whether two rectangles are exactly equal.
-    /// </summary>
-    /// <param name="left">The first rectangle.</param>
-    /// <param name="right">The second rectangle.</param>
-    /// <returns><see langword="true"/> if the rectangles are equal; otherwise, <see langword="false"/>.</returns>
-    public static bool operator ==(Rect left, Rect right) => left.Equals(right);
-
-    /// <summary>
-    /// Determines whether two rectangles differ.
-    /// </summary>
-    /// <param name="left">The first rectangle.</param>
-    /// <param name="right">The second rectangle.</param>
-    /// <returns><see langword="true"/> if the rectangles differ; otherwise, <see langword="false"/>.</returns>
-    public static bool operator !=(Rect left, Rect right) => !left.Equals(right);
 }

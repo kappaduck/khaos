@@ -25,11 +25,6 @@ public readonly struct PointI(int x, int y) :
     IUtf8SpanFormattable
 {
     /// <summary>
-    /// Gets the point at (0, 0).
-    /// </summary>
-    public static PointI Origin { get; }
-
-    /// <summary>
     /// Gets the x-coordinate.
     /// </summary>
     public int X { get; init; } = x;
@@ -38,6 +33,26 @@ public readonly struct PointI(int x, int y) :
     /// Gets the y-coordinate.
     /// </summary>
     public int Y { get; init; } = y;
+
+    /// <summary>
+    /// Gets the point at (0, 0).
+    /// </summary>
+    public static PointI Origin { get; }
+
+    /// <summary>
+    /// Deconstructs the point into its coordinates.
+    /// </summary>
+    /// <param name="x">The x-coordinate.</param>
+    /// <param name="y">The y-coordinate.</param>
+    public void Deconstruct(out int x, out int y) => (x, y) = (X, Y);
+
+    /// <summary>
+    /// Returns this point moved by a whole number of units on each axis.
+    /// </summary>
+    /// <param name="dx">The horizontal offset.</param>
+    /// <param name="dy">The vertical offset.</param>
+    /// <returns>The moved point.</returns>
+    public PointI Offset(int dx, int dy) => new(X + dx, Y + dy);
 
     /// <summary>
     /// Computes the distance between two points.
@@ -49,21 +64,6 @@ public readonly struct PointI(int x, int y) :
     /// <param name="to">The second point.</param>
     /// <returns>The distance between the two points.</returns>
     public static float Distance(PointI from, PointI to) => (to - from).Length();
-
-    /// <summary>
-    /// Returns this point moved by a whole number of units on each axis.
-    /// </summary>
-    /// <param name="dx">The horizontal offset.</param>
-    /// <param name="dy">The vertical offset.</param>
-    /// <returns>The moved point.</returns>
-    public PointI Offset(int dx, int dy) => new(X + dx, Y + dy);
-
-    /// <summary>
-    /// Deconstructs the point into its coordinates.
-    /// </summary>
-    /// <param name="x">The x-coordinate.</param>
-    /// <param name="y">The y-coordinate.</param>
-    public void Deconstruct(out int x, out int y) => (x, y) = (X, Y);
 
     /// <inheritdoc/>
     public bool Equals(PointI other) => X == other.X && Y == other.Y;
