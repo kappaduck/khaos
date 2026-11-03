@@ -60,13 +60,13 @@ public sealed class InteropBoolMarshallingAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static bool IsBool(ITypeSymbol type) => type.SpecialType == SpecialType.System_Boolean;
-
     private static bool Follows(ImmutableArray<AttributeData> attributes, INamedTypeSymbol marshalAs, UnmanagedType expected)
     {
         AttributeData? marshalling = attributes.FirstOrDefault(attribute => SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, marshalAs));
         return marshalling is { ConstructorArguments: [{ Value: var value }] } && KindOf(value) == expected;
     }
+
+    private static bool IsBool(ITypeSymbol type) => type.SpecialType == SpecialType.System_Boolean;
 
     private static UnmanagedType? KindOf(object? value) => value switch
     {

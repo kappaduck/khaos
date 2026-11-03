@@ -6,6 +6,7 @@ using KappaDuck.Khaos.Tests.Helpers;
 
 namespace KappaDuck.Khaos.Tests.Interop.SDL;
 
+[Category(Categories.Integration)]
 internal sealed class OwnedBufferTests
 {
     [Test]

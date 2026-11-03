@@ -20,11 +20,6 @@ public readonly struct SizeI(int width, int height) :
     IUtf8SpanFormattable
 {
     /// <summary>
-    /// Gets the size (0, 0).
-    /// </summary>
-    public static SizeI Zero { get; }
-
-    /// <summary>
     /// Gets the width.
     /// </summary>
     public int Width { get; init; } = width;
@@ -46,6 +41,11 @@ public readonly struct SizeI(int width, int height) :
     /// Gets a value indicating whether the width or the height is zero or negative.
     /// </summary>
     public bool IsEmpty => Width <= 0 || Height <= 0;
+
+    /// <summary>
+    /// Gets the size (0, 0).
+    /// </summary>
+    public static SizeI Zero { get; }
 
     /// <summary>
     /// Deconstructs the size into its dimensions.

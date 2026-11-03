@@ -19,7 +19,7 @@ internal static class BorrowedSpanMarshaller<T, TUnmanagedElement> where T : unm
         return unsafe (new ReadOnlySpan<T>(unmanaged, numElements));
     }
 
-    public static ReadOnlySpan<TUnmanagedElement> GetUnmanagedValuesSource(TUnmanagedElement* _, int _1) => [];
-
     public static Span<T> GetManagedValuesDestination(ReadOnlySpan<T> _) => [];
+
+    public static ReadOnlySpan<TUnmanagedElement> GetUnmanagedValuesSource(TUnmanagedElement* _, int _1) => [];
 }

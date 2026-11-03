@@ -1,8 +1,6 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
-using KappaDuck.Khaos.Interop.SDL.Primitives;
-
 namespace KappaDuck.Khaos.Interop.SDL;
 
 internal static partial class SDL3

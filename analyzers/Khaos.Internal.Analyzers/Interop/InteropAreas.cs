@@ -20,19 +20,19 @@ internal static class InteropAreas
         { "gdi32", InteropArea.Win32 }
     }.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
-    internal static InteropArea? Resolve(ISymbol symbol)
+    internal static UnmanagedType BoolConvention(InteropArea area) => area switch
     {
-        string? area = null;
-        for (INamespaceSymbol current = symbol.ContainingNamespace; current is { IsGlobalNamespace: false }; current = current.ContainingNamespace)
-        {
-            if (IsInteropRoot(current))
-                return Parse(area);
+        InteropArea.SDL => UnmanagedType.U1,
+        InteropArea.Win32 => UnmanagedType.Bool,
+        _ => throw new ArgumentOutOfRangeException(nameof(area), area, null)
+    };
 
-            area = current.Name;
-        }
-
-        return null;
-    }
+    internal static string BoolStorage(InteropArea area) => area switch
+    {
+        InteropArea.SDL => "byte",
+        InteropArea.Win32 => "int",
+        _ => throw new ArgumentOutOfRangeException(nameof(area), area, null)
+    };
 
     internal static bool IsInInterop(ISymbol symbol)
     {
@@ -48,19 +48,22 @@ internal static class InteropAreas
     internal static InteropArea? OwnerOf(string library)
         => _libraries.TryGetValue(library, out InteropArea area) ? area : null;
 
-    internal static UnmanagedType BoolConvention(InteropArea area) => area switch
+    internal static InteropArea? Resolve(ISymbol symbol)
     {
-        InteropArea.SDL => UnmanagedType.U1,
-        InteropArea.Win32 => UnmanagedType.Bool,
-        _ => throw new ArgumentOutOfRangeException(nameof(area), area, null)
-    };
+        string? area = null;
+        for (INamespaceSymbol current = symbol.ContainingNamespace; current is { IsGlobalNamespace: false }; current = current.ContainingNamespace)
+        {
+            if (IsInteropRoot(current))
+                return Parse(area);
 
-    internal static string BoolStorage(InteropArea area) => area switch
-    {
-        InteropArea.SDL => "byte",
-        InteropArea.Win32 => "int",
-        _ => throw new ArgumentOutOfRangeException(nameof(area), area, null)
-    };
+            area = current.Name;
+        }
+
+        return null;
+    }
+
+    private static bool IsInteropRoot(INamespaceSymbol candidate)
+        => candidate is { Name: "Interop", ContainingNamespace: { Name: "Khaos", ContainingNamespace: { Name: "KappaDuck", ContainingNamespace.IsGlobalNamespace: true } } };
 
     private static InteropArea? Parse(string? name) => name switch
     {
@@ -68,7 +71,4 @@ internal static class InteropAreas
         "Win32" => InteropArea.Win32,
         _ => null
     };
-
-    private static bool IsInteropRoot(INamespaceSymbol candidate)
-        => candidate is { Name: "Interop", ContainingNamespace: { Name: "Khaos", ContainingNamespace: { Name: "KappaDuck", ContainingNamespace.IsGlobalNamespace: true } } };
 }

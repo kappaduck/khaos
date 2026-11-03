@@ -27,6 +27,17 @@ public sealed class InteropNintAnalyzer : DiagnosticAnalyzer
         });
     }
 
+    private static void AnalyzeMethod(SymbolAnalysisContext context, IMethodSymbol method)
+    {
+        string name = Signatures.NameOf(method);
+
+        if (UsesNint(method.ReturnType))
+            context.ReportDiagnostic(Diagnostic.Create(Descriptors.InteropNintReturn, TypeLocations.OfReturn(method, context.CancellationToken), name));
+
+        foreach (IParameterSymbol parameter in method.Parameters.Where(static parameter => UsesNint(parameter.Type)))
+            context.ReportDiagnostic(Diagnostic.Create(Descriptors.InteropNintParameter, TypeLocations.Of(parameter, context.CancellationToken), parameter.Name, name));
+    }
+
     private static void AnalyzeType(SymbolAnalysisContext context, INamedTypeSymbol? inlineArray)
     {
         INamedTypeSymbol type = (INamedTypeSymbol)context.Symbol;
@@ -45,16 +56,8 @@ public sealed class InteropNintAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static void AnalyzeMethod(SymbolAnalysisContext context, IMethodSymbol method)
-    {
-        string name = Signatures.NameOf(method);
-
-        if (UsesNint(method.ReturnType))
-            context.ReportDiagnostic(Diagnostic.Create(Descriptors.InteropNintReturn, TypeLocations.OfReturn(method, context.CancellationToken), name));
-
-        foreach (IParameterSymbol parameter in method.Parameters.Where(static parameter => UsesNint(parameter.Type)))
-            context.ReportDiagnostic(Diagnostic.Create(Descriptors.InteropNintParameter, TypeLocations.Of(parameter, context.CancellationToken), parameter.Name, name));
-    }
+    private static bool IsInlineArray(INamedTypeSymbol type, INamedTypeSymbol? inlineArray)
+        => inlineArray is not null && type.GetAttributes().Any(attribute => SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, inlineArray));
 
     private static bool IsNintWrapper(INamedTypeSymbol type, INamedTypeSymbol? inlineArray)
     {
@@ -76,9 +79,6 @@ public sealed class InteropNintAnalyzer : DiagnosticAnalyzer
 
         return wrapped?.Type.SpecialType == SpecialType.System_IntPtr;
     }
-
-    private static bool IsInlineArray(INamedTypeSymbol type, INamedTypeSymbol? inlineArray)
-        => inlineArray is not null && type.GetAttributes().Any(attribute => SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, inlineArray));
 
     private static bool UsesNint(ITypeSymbol type)
         => Signatures.Contains(type, static candidate => candidate.SpecialType == SpecialType.System_IntPtr);

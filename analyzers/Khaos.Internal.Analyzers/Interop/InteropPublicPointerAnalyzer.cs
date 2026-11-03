@@ -52,15 +52,6 @@ public sealed class InteropPublicPointerAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static void Report(SymbolAnalysisContext context, ISymbol symbol, string name, Exposure exposure)
-    {
-        if (exposure == Exposure.None)
-            return;
-
-        DiagnosticDescriptor descriptor = exposure == Exposure.Pointer ? Descriptors.InteropPublicPointer : Descriptors.InteropPublicNint;
-        context.ReportDiagnostic(Diagnostic.Create(descriptor, symbol.Locations[0], name));
-    }
-
     private static Exposure ExposureOf(IMethodSymbol signature)
         => Worst(ExposureOf(signature.ReturnType), ExposureOf(signature.Parameters));
 
@@ -98,6 +89,15 @@ public sealed class InteropPublicPointerAnalyzer : DiagnosticAnalyzer
             default:
                 return Exposure.None;
         }
+    }
+
+    private static void Report(SymbolAnalysisContext context, ISymbol symbol, string name, Exposure exposure)
+    {
+        if (exposure == Exposure.None)
+            return;
+
+        DiagnosticDescriptor descriptor = exposure == Exposure.Pointer ? Descriptors.InteropPublicPointer : Descriptors.InteropPublicNint;
+        context.ReportDiagnostic(Diagnostic.Create(descriptor, symbol.Locations[0], name));
     }
 
     private static Exposure Worst(Exposure first, Exposure second) => first > second ? first : second;

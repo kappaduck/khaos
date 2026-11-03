@@ -84,22 +84,14 @@ public sealed class InteropNonCopyableAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    private static bool IsDispose(IMethodSymbol method) => method is { Name: "Dispose", Parameters.IsEmpty: true };
+
     private static bool IsNonCopyable(ITypeSymbol? type, INamedTypeSymbol nonCopyable)
     {
         if (type is not INamedTypeSymbol named)
             return false;
 
         return named.OriginalDefinition.GetAttributes().Any(attribute => SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, nonCopyable));
-    }
-
-    private static IOperation OutermostOf(IOperation operation)
-    {
-        IOperation current = operation;
-
-        while (current.Parent is IConversionOperation { IsImplicit: true } or IParenthesizedOperation)
-            current = current.Parent;
-
-        return current;
     }
 
     private static bool IsOwnedByUsing(IOperation? parent)
@@ -113,12 +105,20 @@ public sealed class InteropNonCopyableAnalyzer : DiagnosticAnalyzer
         return group.Parent is IUsingDeclarationOperation or IUsingOperation;
     }
 
-    private static bool IsDispose(IMethodSymbol method) => method is { Name: "Dispose", Parameters.IsEmpty: true };
-
     private static string NameOf(IOperation reference) => reference switch
     {
         ILocalReferenceOperation local => local.Local.Name,
         IParameterReferenceOperation parameter => parameter.Parameter.Name,
         _ => reference.Syntax.ToString()
     };
+
+    private static IOperation OutermostOf(IOperation operation)
+    {
+        IOperation current = operation;
+
+        while (current.Parent is IConversionOperation { IsImplicit: true } or IParenthesizedOperation)
+            current = current.Parent;
+
+        return current;
+    }
 }

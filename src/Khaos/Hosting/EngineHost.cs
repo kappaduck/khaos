@@ -1,20 +1,17 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
-using KappaDuck.Khaos.Interop.SDL;
-using KappaDuck.Khaos.Interop.SDL.Primitives;
-
 namespace KappaDuck.Khaos.Hosting;
 
 internal sealed class EngineHost : IDisposable
 {
-    private const string AppMetadataNameProperty = "SDL.app.metadata.name";
-    private const string AppMetadataVersionProperty = "SDL.app.metadata.version";
-    private const string AppMetadataIdentifierProperty = "SDL.app.metadata.identifier";
-    private const string AppMetadataCreatorProperty = "SDL.app.metadata.creator";
     private const string AppMetadataCopyrightProperty = "SDL.app.metadata.copyright";
-    private const string AppMetadataUrlProperty = "SDL.app.metadata.url";
+    private const string AppMetadataCreatorProperty = "SDL.app.metadata.creator";
+    private const string AppMetadataIdentifierProperty = "SDL.app.metadata.identifier";
+    private const string AppMetadataNameProperty = "SDL.app.metadata.name";
     private const string AppMetadataTypeProperty = "SDL.app.metadata.type";
+    private const string AppMetadataUrlProperty = "SDL.app.metadata.url";
+    private const string AppMetadataVersionProperty = "SDL.app.metadata.version";
 
     private const SDL_Subsystems Subsystems = SDL_Subsystems.Video;
 

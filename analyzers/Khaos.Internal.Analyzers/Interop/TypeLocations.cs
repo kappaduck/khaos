@@ -8,21 +8,6 @@ namespace KappaDuck.Khaos.Internal.Analyzers.Interop;
 
 internal static class TypeLocations
 {
-    internal static Location OfReturn(IMethodSymbol method, CancellationToken cancellationToken)
-    {
-        SyntaxNode? declaration = method.DeclaringSyntaxReferences is [var reference, ..] ? reference.GetSyntax(cancellationToken) : null;
-
-        Location? location = declaration switch
-        {
-            MethodDeclarationSyntax ordinary => ordinary.ReturnType.GetLocation(),
-            OperatorDeclarationSyntax @operator => @operator.ReturnType.GetLocation(),
-            ConversionOperatorDeclarationSyntax conversion => conversion.Type.GetLocation(),
-            _ => null
-        };
-
-        return location ?? method.Locations[0];
-    }
-
     internal static Location Of(IParameterSymbol parameter, CancellationToken cancellationToken)
     {
         if (parameter.DeclaringSyntaxReferences is [var reference, ..] && reference.GetSyntax(cancellationToken) is ParameterSyntax { Type: { } type })
@@ -45,5 +30,20 @@ internal static class TypeLocations
             return declaration.Type.GetLocation();
 
         return field.Locations[0];
+    }
+
+    internal static Location OfReturn(IMethodSymbol method, CancellationToken cancellationToken)
+    {
+        SyntaxNode? declaration = method.DeclaringSyntaxReferences is [var reference, ..] ? reference.GetSyntax(cancellationToken) : null;
+
+        Location? location = declaration switch
+        {
+            MethodDeclarationSyntax ordinary => ordinary.ReturnType.GetLocation(),
+            OperatorDeclarationSyntax @operator => @operator.ReturnType.GetLocation(),
+            ConversionOperatorDeclarationSyntax conversion => conversion.Type.GetLocation(),
+            _ => null
+        };
+
+        return location ?? method.Locations[0];
     }
 }

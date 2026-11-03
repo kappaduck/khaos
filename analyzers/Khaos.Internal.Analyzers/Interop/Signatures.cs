@@ -7,16 +7,6 @@ namespace KappaDuck.Khaos.Internal.Analyzers.Interop;
 
 internal static class Signatures
 {
-    internal static bool HasOwn(IMethodSymbol method) => method is
-    {
-        IsImplicitlyDeclared: false,
-        PartialDefinitionPart: null,
-        MethodKind: MethodKind.Ordinary or MethodKind.Constructor or MethodKind.UserDefinedOperator or MethodKind.Conversion
-    };
-
-    internal static string NameOf(IMethodSymbol method)
-        => method.MethodKind == MethodKind.Constructor ? method.ContainingType.Name : method.Name;
-
     internal static bool Contains(IMethodSymbol signature, Func<ITypeSymbol, bool> match)
         => Contains(signature.ReturnType, match) || signature.Parameters.Any(parameter => Contains(parameter.Type, match));
 
@@ -32,4 +22,14 @@ internal static class Signatures
             _ => false
         };
     }
+
+    internal static bool HasOwn(IMethodSymbol method) => method is
+    {
+        IsImplicitlyDeclared: false,
+        PartialDefinitionPart: null,
+        MethodKind: MethodKind.Ordinary or MethodKind.Constructor or MethodKind.UserDefinedOperator or MethodKind.Conversion
+    };
+
+    internal static string NameOf(IMethodSymbol method)
+        => method.MethodKind == MethodKind.Constructor ? method.ContainingType.Name : method.Name;
 }

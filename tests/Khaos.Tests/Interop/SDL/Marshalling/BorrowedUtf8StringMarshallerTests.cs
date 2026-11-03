@@ -3,12 +3,14 @@
 
 using KappaDuck.Khaos.Interop.SDL;
 using KappaDuck.Khaos.Interop.SDL.Marshalling;
+using KappaDuck.Khaos.Tests.Helpers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 
 namespace KappaDuck.Khaos.Tests.Interop.SDL.Marshalling;
 
+[Category(Categories.Integration)]
 internal sealed partial class BorrowedUtf8StringMarshallerTests
 {
     [Test]

@@ -23,10 +23,10 @@ internal readonly ref struct OwnedBuffer<T> : IDisposable where T : unmanaged
     [UnscopedRef]
     internal ReadOnlySpan<T> Span => SpanOf(in this);
 
+    public void Dispose() => SDL3.Free(_pointer);
+
     [UnscopedRef]
     public ReadOnlySpan<T>.Enumerator GetEnumerator() => Span.GetEnumerator();
-
-    public void Dispose() => SDL3.Free(_pointer);
 
     [DoesNotReturn]
     private static void FreeAndThrows(T* pointer, int length)

@@ -7,8 +7,8 @@ namespace KappaDuck.Khaos.Analyzers.Shared;
 
 internal sealed class SourceBuilder
 {
-    private const char NewLine = '\n';
     private const int IndentSize = 4;
+    private const char NewLine = '\n';
 
     private readonly StringBuilder _builder = new();
 
