@@ -32,7 +32,7 @@ static libraries under `wasm/<tfm>/deps/`, linked into the game with the four.
 
 | Library   | Version  |
 | :-------- | :------: |
-| SDL3      | `3.4.18` |
+| SDL3      | `3.4.20` |
 | SDL_image | `3.4.8`  |
 | SDL_ttf   | `3.2.2`  |
 | SDL_mixer | `3.2.4`  |
