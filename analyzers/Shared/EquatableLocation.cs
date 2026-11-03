@@ -21,6 +21,11 @@ namespace KappaDuck.Khaos.Analyzers.Shared;
 /// <param name="Line">The line and character span within the source text.</param>
 internal sealed record EquatableLocation(string FilePath, TextSpan Text, LinePositionSpan Line)
 {
+    internal Diagnostic ToDiagnostic(DiagnosticDescriptor descriptor, params object?[] arguments)
+        => Diagnostic.Create(descriptor, ToLocation(), arguments);
+
+    internal Location ToLocation() => Location.Create(FilePath, Text, Line);
+
     internal static EquatableLocation? From(Location? location)
     {
         if (location?.SourceTree is null)
@@ -44,9 +49,4 @@ internal sealed record EquatableLocation(string FilePath, TextSpan Text, LinePos
 
     internal static EquatableLocation? From(ISymbol? symbol)
         => From(symbol?.Locations.FirstOrDefault(static location => location.IsInSource));
-
-    internal Location ToLocation() => Location.Create(FilePath, Text, Line);
-
-    internal Diagnostic ToDiagnostic(DiagnosticDescriptor descriptor, params object?[] arguments)
-        => Diagnostic.Create(descriptor, ToLocation(), arguments);
 }

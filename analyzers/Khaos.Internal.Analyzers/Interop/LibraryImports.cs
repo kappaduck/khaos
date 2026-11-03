@@ -13,12 +13,15 @@ internal static class LibraryImports
     internal static INamedTypeSymbol? AttributeType(Compilation compilation)
         => compilation.GetTypeByMetadataName("System.Runtime.InteropServices.LibraryImportAttribute");
 
-    internal static AttributeData? Find(IMethodSymbol method, INamedTypeSymbol libraryImport)
+    internal static MethodDeclarationSyntax? DeclarationOf(AttributeData libraryImport, CancellationToken cancellationToken)
+        => libraryImport.ApplicationSyntaxReference?.GetSyntax(cancellationToken).Parent?.Parent as MethodDeclarationSyntax;
+
+    internal static AttributeArgumentSyntax? EntryPointArgumentOf(AttributeData libraryImport, CancellationToken cancellationToken)
     {
-        if (method.PartialDefinitionPart is not null)
+        if (libraryImport.ApplicationSyntaxReference?.GetSyntax(cancellationToken) is not AttributeSyntax { ArgumentList: { } arguments })
             return null;
 
-        return method.GetAttributes().FirstOrDefault(attribute => SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, libraryImport));
+        return arguments.Arguments.FirstOrDefault(static argument => argument.NameEquals?.Name.Identifier.ValueText == EntryPoint);
     }
 
     internal static TypedConstant? EntryPointOf(AttributeData libraryImport)
@@ -32,14 +35,11 @@ internal static class LibraryImports
         return null;
     }
 
-    internal static AttributeArgumentSyntax? EntryPointArgumentOf(AttributeData libraryImport, CancellationToken cancellationToken)
+    internal static AttributeData? Find(IMethodSymbol method, INamedTypeSymbol libraryImport)
     {
-        if (libraryImport.ApplicationSyntaxReference?.GetSyntax(cancellationToken) is not AttributeSyntax { ArgumentList: { } arguments })
+        if (method.PartialDefinitionPart is not null)
             return null;
 
-        return arguments.Arguments.FirstOrDefault(static argument => argument.NameEquals?.Name.Identifier.ValueText == EntryPoint);
+        return method.GetAttributes().FirstOrDefault(attribute => SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, libraryImport));
     }
-
-    internal static MethodDeclarationSyntax? DeclarationOf(AttributeData libraryImport, CancellationToken cancellationToken)
-        => libraryImport.ApplicationSyntaxReference?.GetSyntax(cancellationToken).Parent?.Parent as MethodDeclarationSyntax;
 }
