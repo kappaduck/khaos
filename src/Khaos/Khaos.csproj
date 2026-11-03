@@ -10,6 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup Label="Global usings">
+    <Using Include="KappaDuck.Khaos.Interop" />
+    <Using Include="KappaDuck.Khaos.Interop.SDL" />
+    <Using Include="KappaDuck.Khaos.Interop.SDL.Primitives" />
     <Using Include="System.Diagnostics.CodeAnalysis" />
     <Using Include="System.Runtime.CompilerServices" />
     <Using Include="System.Runtime.InteropServices" />

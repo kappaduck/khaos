@@ -15,7 +15,23 @@ internal static partial class SDL3
             Throw(call);
     }
 
+    internal static T ThrowIfNegative<T>(T result, [CallerArgumentExpression(nameof(result))] string call = "") where T : INumberBase<T>
+    {
+        if (T.IsNegative(result))
+            Throw(call);
+
+        return result;
+    }
+
     internal static T* ThrowIfNull<T>(T* result, [CallerArgumentExpression(nameof(result))] string call = "") where T : unmanaged
+    {
+        if (result is null)
+            Throw(call);
+
+        return result;
+    }
+
+    internal static string ThrowIfNull(string? result, [CallerArgumentExpression(nameof(result))] string call = "")
     {
         if (result is null)
             Throw(call);
@@ -31,20 +47,12 @@ internal static partial class SDL3
         return result;
     }
 
-    internal static T ThrowIfNegative<T>(T result, [CallerArgumentExpression(nameof(result))] string call = "") where T : INumberBase<T>
-    {
-        if (T.IsNegative(result))
-            Throw(call);
-
-        return result;
-    }
-
-    [DoesNotReturn]
-    [StackTraceHidden]
-    private static void Throw(string call) => throw new PlatformException($"{call} failed: {GetError()}");
-
     [LibraryImport(nameof(SDL3), EntryPoint = "SDL_GetError")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalUsing(typeof(BorrowedUtf8StringMarshaller))]
     private static safe partial string? GetError();
+
+    [DoesNotReturn]
+    [StackTraceHidden]
+    private static void Throw(string call) => throw new PlatformException($"{call} failed: {GetError()}");
 }
