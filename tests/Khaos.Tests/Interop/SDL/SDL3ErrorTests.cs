@@ -2,11 +2,13 @@
 // Licensed under the MIT license.
 
 using KappaDuck.Khaos.Interop.SDL;
+using KappaDuck.Khaos.Tests.Helpers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace KappaDuck.Khaos.Tests.Interop.SDL;
 
+[Category(Categories.Integration)]
 internal sealed partial class SDL3ErrorTests
 {
     [Test]
@@ -43,6 +45,24 @@ internal sealed partial class SDL3ErrorTests
     public async Task ThrowIfNullShouldThrowWhenThePointerIsNull()
     {
         Action check = static () => SDL3.ThrowIfNull<int>(null);
+
+        await check.Should().ThrowExactly<PlatformException>();
+    }
+
+    [Test]
+    public async Task ThrowIfNullShouldReturnTheTextWhenItIsNotNull()
+    {
+        const string? name = "DELL U2720Q";
+
+        string text = SDL3.ThrowIfNull(name);
+
+        await text.Should().BeEqualTo("DELL U2720Q");
+    }
+
+    [Test]
+    public async Task ThrowIfNullShouldThrowWhenTheTextIsNull()
+    {
+        Action check = static () => SDL3.ThrowIfNull(null);
 
         await check.Should().ThrowExactly<PlatformException>();
     }

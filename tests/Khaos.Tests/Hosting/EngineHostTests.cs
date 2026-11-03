@@ -8,7 +8,8 @@ using KappaDuck.Khaos.Tests.Helpers;
 
 namespace KappaDuck.Khaos.Tests.Hosting;
 
-[NotInParallel("NativeLifecycle")]
+[Category(Categories.Integration)]
+[NotInParallel(Sequential.Engine)]
 internal sealed class EngineHostTests
 {
     private const SDL_Subsystems InitializedSubsystems = SDL_Subsystems.Video | SDL_Subsystems.Events;
