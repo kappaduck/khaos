@@ -24,7 +24,7 @@
 // Every one is optional: a page with only a canvas runs the game, without
 // screens, and its errors stay in the console.
 //
-// The game follows the canvas's CSS size, so a game with GameSettings.Resizable and
+// The game follows the canvas's CSS size, so a game with window:resizable and
 // a scaling mode fills whatever box the page gives it, letterboxed.
 import { dotnet } from '../_framework/dotnet';
 import type { LoadBootResourceCallback, RuntimeAPI, WebAssemblyBootResourceType } from '../_framework/dotnet'
