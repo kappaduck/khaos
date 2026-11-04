@@ -8,6 +8,9 @@ updates:
       day: thursday
       time: '11:30'
       timezone: America/Toronto
+    cooldown:
+      default-days: 1
+      exclude: ['*']
     labels: [dependencies]
     assignees: [beauchama]
     commit-message:
@@ -20,6 +23,9 @@ updates:
       day: thursday
       time: '11:30'
       timezone: America/Toronto
+    cooldown:
+      default-days: 1
+      exclude: ['*']
     labels: [dependencies]
     assignees: [beauchama]
     open-pull-requests-limit: 10

@@ -17,7 +17,7 @@ assets. They are measured on every release, so you can see that a new version di
 From a clone of the [Khaos repository](https://github.com/kappaduck/khaos):
 
 ```bash
-dotnet run -c Release --project benchmarks/Khaos.Benchmarks -- --filter '*'
+dotnet run -c Release --project benchmarks -- --filter '*'
 ```
 
 It takes a few minutes and prints the same tables, measured on your own hardware.

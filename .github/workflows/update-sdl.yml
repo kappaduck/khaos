@@ -38,10 +38,20 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: dotnet native/auto-update.cs
 
+      - name: Create app token
+        if: steps.sdl.outputs.updated == 'true'
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Create pull request
         if: steps.sdl.outputs.updated == 'true'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
         with:
+          token: ${{ steps.app-token.outputs.token }}
+          sign-commits: true
           branch: dependencies/sdl
           delete-branch: true
           add-paths: |
