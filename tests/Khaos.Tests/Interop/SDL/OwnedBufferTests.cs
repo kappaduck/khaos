@@ -67,5 +67,41 @@ internal sealed class OwnedBufferTests
         await visited.SequenceEqual(expected).Should().BeTrue();
     }
 
+    [Test]
+    public async Task IndexerShouldReadTheElementAtThatIndex()
+    {
+        using OwnedBuffer<int> buffer = AllocateNative([7, 8, 9]);
+
+        int value = buffer[1];
+
+        await value.Should().BeEqualTo(8);
+    }
+
+    [Test]
+    public async Task IndexerShouldRejectAnIndexPastTheEnd()
+    {
+        await Assert.That(static () =>
+        {
+            using OwnedBuffer<int> buffer = AllocateNative([7, 8, 9]);
+            _ = buffer[3];
+        }).Throws<IndexOutOfRangeException>();
+    }
+
+    [Test]
+    public async Task LengthShouldBeTheLengthItWasGiven()
+    {
+        using OwnedBuffer<int> buffer = AllocateNative([7, 8, 9]);
+
+        await buffer.Length.Should().BeEqualTo(3);
+    }
+
+    [Test]
+    public async Task LengthShouldBe0WhenThePointerIsNull()
+    {
+        using OwnedBuffer<int> buffer = new(null, 5);
+
+        await buffer.Length.Should().BeEqualTo(0);
+    }
+
     private static OwnedBuffer<int> AllocateNative(ReadOnlySpan<int> values) => new(SDLMemory.Copy(values), values.Length);
 }
