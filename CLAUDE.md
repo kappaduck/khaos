@@ -126,6 +126,13 @@ Both are written for the people who use Khaos:
 Be technical, but not too much. Do not mention SDL: it is an implementation detail. Naming it is acceptable only
 in purely technical content, when the context calls for it.
 
+XML docs are a quick reference: one or two sentences on what the member does, its unit and its default. Add a
+condition only when it changes what the developer does: two screens can share a name, so use `Key` to tell them
+apart; in the browser, the game always has a single screen. Everything else goes in the guides under `docs/`: code
+samples, workflows that tie members together (save a value, read it back), edge cases such as `default` values, and
+how Khaos works inside (allocations, caching, performance tips). A short value inline (`2560 × 1440`) is fine.
+Write plain sentences without colons ("To move a maximized window, use `Restore` first").
+
 Internal and private code has no comments, XML or inline. Let names carry the intent:
 `if (HasTwoSwords())` rather than a comment above the `if`.
 
@@ -137,6 +144,10 @@ sentence: `FromDegreesShouldStoreTheAngleInRadians`.
 A test method (marked `[Test]`) always has a block body, even for a single line, never an expression body (`=>`).
 When the line gets long, put the inputs in local variables beside the call rather than switching to `=>`: a test
 should read clearly.
+
+A test never skips itself from its body (`Skip.Unless`, `Skip.When`, an early `return`): that hides the condition.
+Put it on the method as an attribute, so it shows beside `[Test]`: TUnit's `[RunOn(OS.Windows)]`, or one of ours
+in `tests/Khaos.Tests/Helpers/` (`[OffscreenOnly]`, `[RealScreenOnly]`, `[MultipleScreensOnly]`).
 
 ### Demos
 
