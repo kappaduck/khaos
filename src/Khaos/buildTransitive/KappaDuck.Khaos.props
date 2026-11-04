@@ -5,6 +5,7 @@
 
     <EnableTrimAnalyzer Condition="'$(EnableTrimAnalyzer)' == ''">true</EnableTrimAnalyzer>
     <EnableAotAnalyzer Condition="'$(EnableAotAnalyzer)' == ''">true</EnableAotAnalyzer>
+    <EnableConfigurationBindingGenerator Condition="'$(EnableConfigurationBindingGenerator)' == ''">true</EnableConfigurationBindingGenerator>
 
     <KhaosAssetsDirectory Condition="'$(KhaosAssetsDirectory)' == ''">assets/</KhaosAssetsDirectory>
   </PropertyGroup>

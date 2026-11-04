@@ -15,9 +15,7 @@ internal sealed class EngineHostTests
     private const SDL_Subsystems InitializedSubsystems = SDL_Subsystems.Video | SDL_Subsystems.Events;
     private const string MissingDriver = "khaos-missing";
 
-    private static readonly AppMetadata _game = new() { Name = "Duck Quest" };
-
-    private static readonly AppMetadata _completeGame = new()
+    private static readonly AppMetadata _metadata = new()
     {
         Name = "Duck Quest",
         Version = "1.0.0",
@@ -30,7 +28,7 @@ internal sealed class EngineHostTests
     [Test]
     public async Task StartShouldInitializeVideoAndEvents()
     {
-        using EngineHost _ = EngineHost.Start(_game);
+        using EngineHost _ = EngineHost.Start(_metadata);
 
         SDL_Subsystems started = SDL3.WasInit(InitializedSubsystems);
 
@@ -41,7 +39,7 @@ internal sealed class EngineHostTests
     [NamedVideoDriverOnly]
     public async Task StartShouldUseTheVideoDriverOfTheSession()
     {
-        using EngineHost _ = EngineHost.Start(_game);
+        using EngineHost _ = EngineHost.Start(_metadata);
 
         string? driver = SDLVideo.GetCurrentVideoDriver();
 
@@ -51,7 +49,7 @@ internal sealed class EngineHostTests
     [Test]
     public async Task StartShouldSetTheAppMetadata()
     {
-        using EngineHost _ = EngineHost.Start(_completeGame);
+        using EngineHost _ = EngineHost.Start(_metadata);
 
         string? name = SDLAppMetadata.Get(SDLAppMetadata.Name);
         string? version = SDLAppMetadata.Get(SDLAppMetadata.Version);
@@ -61,11 +59,11 @@ internal sealed class EngineHostTests
         string? url = SDLAppMetadata.Get(SDLAppMetadata.Url);
         string? type = SDLAppMetadata.Get(SDLAppMetadata.Type);
 
-        await name.Should().BeEqualTo(_completeGame.Name);
-        await version.Should().BeEqualTo(_completeGame.Version);
-        await identifier.Should().BeEqualTo(_completeGame.Identifier);
-        await creator.Should().BeEqualTo(_completeGame.Creator);
-        await copyright.Should().BeEqualTo(_completeGame.Copyright);
+        await name.Should().BeEqualTo(_metadata.Name);
+        await version.Should().BeEqualTo(_metadata.Version);
+        await identifier.Should().BeEqualTo(_metadata.Identifier);
+        await creator.Should().BeEqualTo(_metadata.Creator);
+        await copyright.Should().BeEqualTo(_metadata.Copyright);
         await url.Should().BeEqualTo("https://github.com/kappaduck/duck-quest");
         await type.Should().BeEqualTo("game");
     }
@@ -73,7 +71,7 @@ internal sealed class EngineHostTests
     [Test]
     public async Task StartShouldLeaveUnsetMetadataEmpty()
     {
-        using EngineHost _ = EngineHost.Start(_game);
+        using EngineHost _ = EngineHost.Start(_metadata with { Version = null });
 
         string? version = SDLAppMetadata.Get(SDLAppMetadata.Version);
 
@@ -83,11 +81,11 @@ internal sealed class EngineHostTests
     [Test]
     public async Task StartShouldThrowWhenTheEngineHostIsAlreadyStarted()
     {
-        using EngineHost _ = EngineHost.Start(_game);
+        using EngineHost _ = EngineHost.Start(_metadata);
 
         Action startAgain = static () =>
         {
-            using EngineHost _ = EngineHost.Start(_game);
+            using EngineHost _ = EngineHost.Start(_metadata);
         };
 
         await startAgain.Should().ThrowExactly<InvalidOperationException>();
@@ -100,7 +98,7 @@ internal sealed class EngineHostTests
 
         PlatformException exception = Assert.Throws<PlatformException>(static () =>
         {
-            using EngineHost _ = EngineHost.Start(_game);
+            using EngineHost _ = EngineHost.Start(_metadata);
         });
 
         await exception.Message.Should().EndWith($" failed: {MissingDriver} not available");
@@ -112,7 +110,7 @@ internal sealed class EngineHostTests
         SDLHints.ForceVideoDriver(MissingDriver);
         _ = Assert.Throws<PlatformException>(static () =>
         {
-            using EngineHost _ = EngineHost.Start(_game);
+            using EngineHost _ = EngineHost.Start(_metadata);
         });
 
         SDL_Subsystems started = SDL3.WasInit(SDL_Subsystems.None);
@@ -126,10 +124,10 @@ internal sealed class EngineHostTests
         SDLHints.ForceVideoDriver(MissingDriver);
         _ = Assert.Throws<PlatformException>(static () =>
         {
-            using EngineHost _ = EngineHost.Start(_game);
+            using EngineHost _ = EngineHost.Start(_metadata);
         });
 
-        using EngineHost engine = EngineHost.Start(_game);
+        using EngineHost engine = EngineHost.Start(_metadata);
 
         SDL_Subsystems started = SDL3.WasInit(InitializedSubsystems);
         await started.Should().BeEqualTo(InitializedSubsystems);
@@ -138,7 +136,7 @@ internal sealed class EngineHostTests
     [Test]
     public async Task DisposeShouldQuitEverySubsystem()
     {
-        EngineHost engine = EngineHost.Start(_game);
+        EngineHost engine = EngineHost.Start(_metadata);
 
         engine.Dispose();
 
@@ -149,7 +147,7 @@ internal sealed class EngineHostTests
     [Test]
     public async Task DisposeShouldBeSafeToCallTwice()
     {
-        EngineHost engine = EngineHost.Start(_game);
+        EngineHost engine = EngineHost.Start(_metadata);
         engine.Dispose();
 
         await Assert.That(engine.Dispose).ThrowsNothing();
@@ -158,10 +156,10 @@ internal sealed class EngineHostTests
     [Test]
     public async Task DisposeShouldNotStopAnEngineHostStartedAfterIt()
     {
-        EngineHost first = EngineHost.Start(_game);
+        EngineHost first = EngineHost.Start(_metadata);
         first.Dispose();
 
-        using EngineHost second = EngineHost.Start(_game);
+        using EngineHost second = EngineHost.Start(_metadata);
         first.Dispose();
 
         SDL_Subsystems started = SDL3.WasInit(InitializedSubsystems);

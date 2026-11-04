@@ -72,7 +72,7 @@ public readonly struct Angle :
     /// Determines whether this angle points in approximately the same direction as another.
     /// </summary>
     /// <remarks>
-    /// The comparison wraps around: 359.9° and 0.1° are 0.2° apart, and 720° is the same direction as 0°.
+    /// The comparison wraps around, so 359.9° and 0.1° are 0.2° apart, and 720° is the same direction as 0°.
     /// Compare <see cref="Radians"/> directly to tell full turns apart.
     /// </remarks>
     /// <param name="other">The angle to compare with.</param>
@@ -99,7 +99,7 @@ public readonly struct Angle :
     /// Wraps the angle into the range [-180°, 180°).
     /// </summary>
     /// <remarks>
-    /// Useful to know which way to turn: a negative result turns counter-clockwise on screen, a positive
+    /// Useful to know which way to turn. A negative result turns counter-clockwise on screen, a positive
     /// one clockwise, and the magnitude is never more than half a turn.
     /// </remarks>
     /// <returns>The equivalent angle within [-180°, 180°).</returns>
@@ -226,7 +226,7 @@ public readonly struct Angle :
     /// Divides an angle by a scalar.
     /// </summary>
     /// <remarks>
-    /// Follows floating-point rules: dividing by zero gives an infinite or NaN angle, it does not throw.
+    /// Follows floating-point rules, so dividing by zero gives an infinite or NaN angle and does not throw.
     /// </remarks>
     /// <param name="left">The angle.</param>
     /// <param name="right">The scalar.</param>

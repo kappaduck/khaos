@@ -9,7 +9,7 @@ namespace KappaDuck.Khaos.Mathematics;
 /// Adds to <see cref="Vector2"/> what a 2D game needs and <see cref="System.Numerics"/> does not provide.
 /// </summary>
 /// <remarks>
-/// Directions follow the screen: the Y axis points down, so <c>Vector2.Up</c> is (0, -1) and positive
+/// Directions follow the screen. The Y axis points down, so <c>Vector2.Up</c> is (0, -1) and positive
 /// angles turn clockwise.
 /// </remarks>
 public static class Vector2Extensions

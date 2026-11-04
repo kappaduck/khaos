@@ -38,8 +38,9 @@ public readonly struct Size(float width, float height) :
     /// Gets a value indicating whether the width or the height is negative or not a number.
     /// </summary>
     /// <remarks>
-    /// A width or a height of zero is not empty, as with <see cref="Rect.IsEmpty"/>: a size of zero is the size of a
-    /// point. <see cref="SizeI.IsEmpty"/> differs, because a size of whole cells with no width covers no cell.
+    /// A width or a height of zero is not empty, as with <see cref="Rect.IsEmpty"/>, because a size of zero is the
+    /// size of a point. <see cref="SizeI.IsEmpty"/> differs, because a size of whole cells with no width covers no
+    /// cell.
     /// </remarks>
     public bool IsEmpty => Width < 0f || Height < 0f || float.IsNaN(Width) || float.IsNaN(Height);
 

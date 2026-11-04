@@ -13,9 +13,9 @@ rebuilding: a volume, a difficulty, a log level.
 
 ```json
 {
-  "Game": {
-    "StartingLives": 3,
-    "MusicVolume": 0.8
+  "game": {
+    "startingLives": 3,
+    "musicVolume": 0.8
   }
 }
 ```
@@ -23,7 +23,7 @@ rebuilding: a volume, a difficulty, a log level.
 Read a value anywhere you have the configuration:
 
 ```csharp
-int lives = builder.Configuration.GetValue<int>("Game:StartingLives");
+int lives = builder.Configuration.GetValue<int>("game:startingLives");
 ```
 
 For more than a couple of values, describe the section as a class and let .NET fill it in: that is the
@@ -37,15 +37,63 @@ browser. You read it the same way everywhere.
 A setting can be overridden without touching the file, which is handy for testing:
 
 ```bash
-dotnet run --project MyGame.Desktop -- --Game:StartingLives 99
+dotnet run --project MyGame.Desktop -- --game:startingLives 99
 ```
 
 From strongest to weakest, Khaos reads:
 
-1. the command line (`--Game:StartingLives 99`), or the page address in the browser (`?arg=--Game:StartingLives&arg=99`)
+1. the command line (`--game:startingLives 99`), or the page address in the browser (`?arg=--game:startingLives&arg=99`)
 2. environment variables that start with `KHAOS_`, with `__` in place of `:` (`KHAOS_GAME__STARTINGLIVES=99`)
 3. `appsettings.<environment>.json`, explained below
 4. `appsettings.json`
+
+### The window
+
+The `window` section sets how the game window opens. Each value replaces the one your game gives in its code; leave
+out what you keep.
+
+```json
+{
+  "window": {
+    "title": "Ball",
+    "width": 1280,
+    "height": 720,
+    "fullscreen": false,
+    "resizable": true,
+    "borderless": false
+  }
+}
+```
+
+| Setting           | What it does                                                                                                            | Default                |
+| :---------------- | :---------------------------------------------------------------------------------------------------------------------- | :--------------------- |
+| `title`           | The text in the title bar                                                                                               | The title of your game |
+| `width`, `height` | The size of the inside of the window, in logical units: 1280 × 720 looks the same size on a screen at 100 % or at 200 % | The size of your game  |
+| `fullscreen`      | Opens the game over the whole screen                                                                                    | `false`                |
+| `resizable`       | Lets the player resize the window by dragging its edges                                                                 | `false`                |
+| `borderless`      | Opens the window without a title bar or borders                                                                         | `false`                |
+
+Setting names are not case-sensitive: Khaos writes them in camelCase, and `--window:fullscreen true` on the command
+line works too, handy to try a fullscreen run:
+
+```bash
+dotnet run --project MyGame.Desktop -- --window:fullscreen true
+```
+
+Your game gives its own values in `Program.cs`, with the [options pattern](https://learn.microsoft.com/dotnet/core/extensions/options).
+The `window` section always wins over them, so a player can still change the window without rebuilding:
+
+```csharp
+builder.Services.Configure<WindowOptions>(window =>
+{
+    window.Title = "Ball";
+    window.Resizable = true;
+});
+```
+
+While the game runs, change the same things through its `Window`: `Window.Title`, `Window.Size`,
+`Window.Fullscreen`, and more. These settings are for the desktop: in the browser, the page decides the size of the
+game.
 
 ## Environments
 
