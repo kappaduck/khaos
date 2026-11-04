@@ -24,6 +24,15 @@ dotnet test --solution khaos.slnx -- --test-parameter video-driver=default    # 
 Tests run headless by default, on SDL's `dummy` video driver. A change to windowing or input also needs a run with
 real windows. An `SDL_VIDEODRIVER` variable that is already set wins over the test parameter.
 
+Pull requests also measure line coverage on Linux and on Windows, then merge both runs into one report, so a line
+counts as covered when either platform runs it. The check fails below 85%. A comment on the pull request sums up
+the coverage of each assembly, and the full report is in the run's `coverage-report` artifact. To measure coverage
+on your machine, add `--coverage`.
+
+```bash
+dotnet test --solution khaos.slnx -- --coverage --coverage-output-format cobertura
+```
+
 ## The sandbox
 
 `sandbox/` is a scratch game with one file, `Program.cs`, compiled by a desktop app and a browser app. It is
