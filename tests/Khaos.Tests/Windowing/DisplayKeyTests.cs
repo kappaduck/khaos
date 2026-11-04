@@ -113,6 +113,16 @@ internal sealed class DisplayKeyTests
     }
 
     [Test]
+    public async Task RankShouldBeTheSameWithoutTheScreenItselfInTheList()
+    {
+        RectI[] others = [_right, _left];
+
+        int rank = DisplayKey.Rank(_middle, others);
+
+        await rank.Should().BeEqualTo(2);
+    }
+
+    [Test]
     public async Task RankShouldPutTheScreenAboveFirstWhenTwoShareTheSameX()
     {
         RectI below = new(0, 1080, 1920, 1080);

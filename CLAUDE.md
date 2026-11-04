@@ -145,6 +145,9 @@ A test method (marked `[Test]`) always has a block body, even for a single line,
 When the line gets long, put the inputs in local variables beside the call rather than switching to `=>`: a test
 should read clearly.
 
+A test has no loop (`foreach`, `for`, `while`): state what holds for every element with `All(…)` or `SequenceEqual`
+in one readable line. The exception is a test of an enumerator, where the loop is what is tested.
+
 A test never skips itself from its body (`Skip.Unless`, `Skip.When`, an early `return`): that hides the condition.
 Put it on the method as an attribute, so it shows beside `[Test]`: TUnit's `[RunOn(OS.Windows)]`, or one of ours
 in `tests/Khaos.Tests/Helpers/` (`[OffscreenOnly]`, `[RealScreenOnly]`, `[MultipleScreensOnly]`).

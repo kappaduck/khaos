@@ -1,0 +1,206 @@
+// Copyright (c) KappaDuck.
+// Licensed under the MIT license.
+
+using KappaDuck.Khaos.Hosting;
+using KappaDuck.Khaos.Mathematics;
+using KappaDuck.Khaos.Tests.Helpers;
+using KappaDuck.Khaos.Windowing;
+
+namespace KappaDuck.Khaos.Tests.Windowing;
+
+[Category(Categories.Integration)]
+[NotInParallel(Sequential.Engine)]
+internal sealed class DisplayTests
+{
+    private const int OffscreenHeight = 768;
+    private const int OffscreenWidth = 1024;
+    private const int UnpluggedId = 0xFFF;
+
+    private EngineHost _host = null!;
+
+    [Before(Test)]
+    public void StartEngine() => _host = EngineHost.Start(new AppMetadata { Name = "Display " });
+
+    [After(Test)]
+    public void StopEngine() => _host.Dispose();
+
+    [Test]
+    public async Task ConnectedShouldBeFalseForAScreenThatIsNotConnected()
+    {
+        Display unplugged = new(UnpluggedId);
+
+        await unplugged.Connected.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task ConnectedShouldBeTrueForThePrimaryScreen()
+    {
+        Display display = Display.Primary;
+
+        await display.Connected.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task NameShouldNotBeEmpty()
+    {
+        Display display = Display.Primary;
+
+        await display.Name.Should().NotBeEmpty();
+    }
+
+    [Test]
+    public async Task NameShouldThrowForAScreenThatIsNotConnected()
+    {
+        Display unplugged = new(UnpluggedId);
+
+        await Assert.That(() => unplugged.Name).Throws<PlatformException>();
+    }
+
+    [Test]
+    [OffscreenOnly]
+    public async Task KeyShouldBeTheNameForASingleScreen()
+    {
+        Display primary = Display.Primary;
+
+        await primary.Key.Should().BeEqualTo(primary.Name);
+    }
+
+    [Test]
+    [OffscreenOnly]
+    public async Task RefreshRateShouldBe0WhenTheSystemDoesNotSay()
+    {
+        Display display = Display.Primary;
+
+        await display.RefreshRate.Should().BeEqualTo(0f);
+    }
+
+    [Test]
+    [OffscreenOnly]
+    public async Task ScaleShouldBe1()
+    {
+        Display display = Display.Primary;
+
+        await display.Scale.Should().BeEqualTo(1f);
+    }
+
+    [Test]
+    [OffscreenOnly]
+    public async Task SizeInPixelsShouldBeTheSizeAtAScaleOf1()
+    {
+        SizeI pixels = Display.Primary.SizeInPixels;
+
+        await pixels.Should().BeEqualTo(new SizeI(OffscreenWidth, OffscreenHeight));
+    }
+
+    [Test]
+    [OffscreenOnly]
+    public async Task SizeShouldBeTheSizeOfTheScreen()
+    {
+        SizeI size = Display.Primary.Size;
+
+        await size.Should().BeEqualTo(new SizeI(OffscreenWidth, OffscreenHeight));
+    }
+
+    [Test]
+    [OffscreenOnly]
+    public async Task UsableAreaShouldBeTheWholeScreenWhenTheSystemDoesNotSay()
+    {
+        RectI area = Display.Primary.UsableArea;
+
+        await area.Should().BeEqualTo(new RectI(0, 0, OffscreenWidth, OffscreenHeight));
+    }
+
+    [Test]
+    public async Task UsableAreaShouldFitInsideEveryScreen()
+    {
+        IReadOnlyList<Display> screens = Display.All;
+
+        bool everyAreaFits = screens.All(static screen => FitsInside(screen.UsableArea, screen.Size));
+
+        await everyAreaFits.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task AllShouldContainThePrimaryScreen()
+    {
+        bool found = Display.All.Contains(Display.Primary);
+
+        await found.Should().BeTrue();
+    }
+
+    [Test]
+    [OffscreenOnly]
+    public async Task AllShouldHoldOnlyThePrimaryScreen()
+    {
+        IReadOnlyList<Display> all = Display.All;
+
+        await all.Count.Should().BeEqualTo(1);
+        await all[0].Should().BeEqualTo(Display.Primary);
+    }
+
+    [Test]
+    public async Task PrimaryShouldThrowWhenTheEngineIsNotStarted()
+    {
+        _host.Dispose();
+
+        await Assert.That(static () => Display.Primary).Throws<PlatformException>();
+    }
+
+    [Test]
+    public async Task EqualsShouldMatchTheSameScreen()
+    {
+        Display first = Display.Primary;
+        Display again = Display.Primary;
+
+        bool equal = first == again;
+
+        await equal.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task FindShouldGiveBackEveryScreenFromItsKey()
+    {
+        IReadOnlyList<Display> screens = Display.All;
+
+        bool everyKeyFindsItsScreen = screens.All(static screen => Display.Find(screen.Key) == screen);
+
+        await everyKeyFindsItsScreen.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task FindShouldGiveNullForAnUnknownName()
+    {
+        Display? display = Display.Find("No Such Screen");
+
+        await display.Should().BeNull();
+    }
+
+    [Test]
+    [OffscreenOnly]
+    public async Task FindShouldGiveTheRemainingScreenWhenTheSecondIsGone()
+    {
+        Display primary = Display.Primary;
+
+        bool found = Display.Find($"{primary.Name} #2") == primary;
+
+        await found.Should().BeTrue();
+    }
+
+    [Test]
+    [OffscreenOnly]
+    public async Task UsableAreaShouldLeaveOutWhatTheSystemReserves()
+    {
+        const string TaskbarOf40 = "0,0,1024,728";
+        const string UsableBoundsHint = "SDL_DISPLAY_USABLE_BOUNDS";
+
+        SDLHints.Set(UsableBoundsHint, TaskbarOf40);
+
+        RectI area = Display.Primary.UsableArea;
+
+        await area.Should().BeEqualTo(new RectI(0, 0, OffscreenWidth, OffscreenHeight - 40));
+
+        SDLHints.Reset(UsableBoundsHint);
+    }
+
+    private static bool FitsInside(RectI area, SizeI screen) => new RectI(PointI.Origin, screen).Contains(area);
+}
