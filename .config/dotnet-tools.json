@@ -10,7 +10,7 @@
       "rollForward": true
     },
     "tunit.reporting.tool": {
-      "version": "1.76.45",
+      "version": "1.79.0",
       "commands": [
         "tunit-report"
       ],
