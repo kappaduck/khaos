@@ -55,7 +55,6 @@ internal sealed partial class BorrowedSpanMarshallerTests
     }
 
     [LibraryImport(nameof(SDL3), EntryPoint = "SDL_GetKeyboardState")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalUsing(typeof(BorrowedSpanMarshaller<,>), CountElementName = nameof(count))]
     private static safe partial ReadOnlySpan<byte> GetKeyboardState(out int count);
 }

@@ -3,7 +3,6 @@
 
 using KappaDuck.Khaos.Interop.SDL;
 using KappaDuck.Khaos.Interop.SDL.Marshalling;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 
@@ -20,7 +19,6 @@ internal static partial class SDLAppMetadata
     internal const string Type = "SDL.app.metadata.type";
 
     [LibraryImport(nameof(SDL3), EntryPoint = "SDL_GetAppMetadataProperty", StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalUsing(typeof(BorrowedUtf8StringMarshaller))]
     internal static safe partial string? Get(string name);
 }

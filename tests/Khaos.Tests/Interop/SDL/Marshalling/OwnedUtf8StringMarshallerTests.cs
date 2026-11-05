@@ -4,7 +4,6 @@
 using KappaDuck.Khaos.Interop.SDL;
 using KappaDuck.Khaos.Interop.SDL.Marshalling;
 using KappaDuck.Khaos.Tests.Helpers;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 
@@ -41,7 +40,6 @@ internal sealed partial class OwnedUtf8StringMarshallerTests
     }
 
     [LibraryImport(nameof(SDL3), EntryPoint = "SDL_strdup", StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalUsing(typeof(OwnedUtf8StringMarshaller))]
     private static safe partial string? Duplicate(string text);
 }

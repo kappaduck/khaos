@@ -4,7 +4,6 @@
 using KappaDuck.Khaos.Interop.SDL;
 using KappaDuck.Khaos.Interop.SDL.Marshalling;
 using KappaDuck.Khaos.Tests.Helpers;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 
@@ -44,7 +43,6 @@ internal sealed partial class BorrowedUtf8StringMarshallerTests
     }
 
     [LibraryImport(nameof(SDL3), EntryPoint = "SDL_GetPlatform")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalUsing(typeof(BorrowedUtf8StringMarshaller))]
     private static safe partial string? GetPlatform();
 }

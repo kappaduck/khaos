@@ -18,7 +18,6 @@ internal static partial class SDL3
     }
 
     [LibraryImport(nameof(SDL3), EntryPoint = "SDL_free")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [UntypedBecause("SDL_free releases any allocation SDL handed out, whatever its element type")]
     private static unsafe partial void NativeFree(void* memory);
 }

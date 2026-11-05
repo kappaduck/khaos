@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 using KappaDuck.Khaos.Interop.SDL;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace KappaDuck.Khaos.Tests.Helpers;
@@ -24,6 +23,5 @@ internal static partial class SDLMemory
     }
 
     [LibraryImport(nameof(SDL3), EntryPoint = "SDL_malloc")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe partial void* Malloc(nuint size);
 }
