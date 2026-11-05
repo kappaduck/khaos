@@ -3,7 +3,6 @@
 
 using KappaDuck.Khaos.Interop.SDL;
 using KappaDuck.Khaos.Tests.Helpers;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace KappaDuck.Khaos.Tests.Interop.SDL;
@@ -135,6 +134,5 @@ internal sealed partial class SDL3ErrorTests
     private static uint GetWindowIdOfNoWindow() => unsafe (GetWindowId(null));
 
     [LibraryImport(nameof(SDL3), EntryPoint = "SDL_GetWindowID")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe partial uint GetWindowId(void* window);
 }
