@@ -70,9 +70,8 @@ internal sealed class MyGame() : Game2D("Ball", 1280, 720)
         // Where the ball is right now, between its last two positions.
         Vector2 drawn = Vector2.Lerp(_previous, _position, frame.Alpha);
 
-        renderer.Clear(Color.Slate);
+        renderer.Clear(Color.Teal);
         // Draw the ball at `drawn`.
-        renderer.Present();
     }
 }
 ```
@@ -89,17 +88,30 @@ On the desktop, you can change that in your [settings](configuration.md), for ex
 
 ```json
 {
-  "Graphics": {
-    "VSync": true,
-    "MaxFrameRate": 60
+  "graphics": {
+    "vsync": true,
+    "maxFrameRate": 60
   }
 }
 ```
 
 | Setting        | What it does                                                                                                                                    | Default |
 | :------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- | :------ |
-| `VSync`        | Waits for the screen before showing each frame. Turned off, the game draws as fast as it can, which can tear the picture and keep the fans busy | `true`  |
-| `MaxFrameRate` | Never draws more frames per second than this. `0` means no limit                                                                                | `0`     |
+| `vsync`        | Waits for the screen before showing each frame. Turned off, the game draws as fast as it can, which can tear the picture and keep the fans busy | `true`  |
+| `maxFrameRate` | Never draws more frames per second than this. `0` means no limit                                                                                | `0`     |
+
+`vsync` takes one of these values:
+
+| Value        | The game shows a frame                                                                          |
+| :----------- | :---------------------------------------------------------------------------------------------- |
+| `true`       | Each time the screen refreshes                                                                  |
+| `false`      | As soon as it is drawn, as fast as it can                                                       |
+| `"adaptive"` | Each time the screen refreshes, but right away when it is late, so it does not stutter          |
+| `2`, `3`, …  | Every 2 or 3 refreshes: 30 or 20 frames per second on a 60 Hz screen, to save even more battery |
+
+Not every graphics card supports `"adaptive"` or a number; where it does not, the game waits for each refresh, as with
+`true`. In code, set `GraphicsOptions.VSync` to `VSync.Enabled`, `VSync.Disabled`, `VSync.Adaptive` or
+`VSync.Every(2)`.
 
 In the browser, the page always draws at the screen's rate: browsers decide, and these settings do nothing there.
 
@@ -133,6 +145,9 @@ Your game can also send events of its own, such as "level finished", and receive
 
 The `Renderer` you draw with is handed to `Draw`, and only there. You cannot draw from `Update` or from somewhere else
 by mistake: keep your drawing code in `Draw`, and everything else outside it.
+
+When `Draw` returns, Khaos shows what you drew on the screen: there is nothing to call at the end. Each frame starts
+from nothing, so begin `Draw` with `renderer.Clear`.
 
 ## Starting the game with Program.cs
 

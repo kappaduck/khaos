@@ -40,8 +40,7 @@ internal sealed class MyGame() : Game2D("My Khaos Game", 1280, 720)
 {
     protected override void Draw(Renderer renderer, in Frame frame)
     {
-        renderer.Clear(Color.Slate);   // fill the window with one color
-        renderer.Present();            // show what was drawn
+        renderer.Clear(Color.Teal);   // fill the window with one color, Khaos shows it after Draw
     }
 }
 ```
