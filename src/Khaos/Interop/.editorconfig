@@ -1,0 +1,9 @@
+[*.cs]
+
+# IDE0380: Remove unnecessary unsafe modifier
+# The rule still follows the original memory model: it reports `unsafe` on a member with no unsafe operation in its
+# body. Under the updated memory safety rules, `unsafe` on a LibraryImport marks it requires-unsafe, because native
+# code dereferences its pointers, marshalling or not; the documentation's own strlen(byte*) example is unsafe.
+# https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0380
+# https://learn.microsoft.com/dotnet/csharp/language-reference/unsafe-code#the-updated-memory-safety-model-preview
+dotnet_diagnostic.IDE0380.severity = none

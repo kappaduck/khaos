@@ -290,20 +290,13 @@ internal sealed class DisplayTests
     {
         const string TaskbarOf40 = "0,0,1024,728";
         const string UsableBoundsHint = "SDL_DISPLAY_USABLE_BOUNDS";
-
         SDLHints.Set(UsableBoundsHint, TaskbarOf40);
-        RectI area;
 
-        try
-        {
-            area = Display.Primary.UsableArea;
-        }
-        finally
-        {
-            SDLHints.Reset(UsableBoundsHint);
-        }
+        RectI area = Display.Primary.UsableArea;
 
         await area.Should().BeEqualTo(new RectI(0, 0, OffscreenWidth, OffscreenHeight - 40));
+
+        SDLHints.Reset(UsableBoundsHint);
     }
 
     private static bool FitsInside(RectI area, SizeI screen) => new RectI(PointI.Origin, screen).Contains(area);
