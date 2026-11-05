@@ -4,6 +4,7 @@
   <PropertyGroup>
     <TUnitVersion>1.80.0</TUnitVersion>
   </PropertyGroup>
+
   <ItemGroup Label="Test packages">
     <PackageVersion Include="Basic.Reference.Assemblies.Net110" Version="1.8.14" />
     <PackageVersion Include="TUnit" Version="$(TUnitVersion)" />
