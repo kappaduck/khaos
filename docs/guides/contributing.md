@@ -130,12 +130,54 @@ To add a rule:
 4. Write the tests, including one with the shape the code has **after** the source generators have run: a test
    compilation runs no generator.
 
+## Patch releases
+
+A fix for a version that is already out ships as a patch (`0.1.1`) from a `release/x.y` branch, while `main` moves
+on to the next minor. The branch starts from the release tag the first time a patch is needed, and serves every
+patch of that minor. Only the latest minor gets patches: `release/0.1` stops when `0.2.0` ships.
+
+A fix lands on `main` first, then is copied to the release branch with `git cherry-pick -x`, which records the
+original commit in the message. Nothing is merged back from a release branch: the code is already on `main`, and
+only the changelog follows.
+
+1. Fix the bug on `main` with a pull request, as usual, and note the commit it was squashed into.
+2. The first time, create the branch from the tag and push it.
+
+   ```bash
+   git switch -c release/0.1 v0.1.0
+   git push -u origin release/0.1
+   ```
+
+3. Copy the fix on a branch of its own. The first fix of a patch also opens its `[Unreleased]` section.
+
+   ```bash
+   git switch -c backport/42-window-title origin/release/0.1
+   dotnet tools/prepare-release.cs --next 0.1.1    # first fix of the patch only
+   git commit -am "Opened 0.1.1"
+   git cherry-pick -x 7f3c9e1
+   ```
+
+   `changelog.md` usually conflicts, since the entry was written under the next minor on `main`. Move it to the
+   `[Unreleased]` section of the patch, then run `git add changelog.md` and `git cherry-pick --continue`. To start
+   over, run `git cherry-pick --abort`.
+
+4. Open the pull request against `release/0.1`, with the line in its title (`[0.1] Fixed Window.Title with accents`)
+   and a link to the original pull request in its description.
+5. When the patch is ready, run `dotnet tools/prepare-release.cs` on a branch of `release/0.1` and merge its pull
+   request.
+6. Draft a GitHub release with the tag `v0.1.1`, targeting `release/0.1`. If a later minor is already out, clear
+   **Set as the latest release**. The workflow publishes the packages, and leaves the documentation site on the
+   latest version.
+7. On `main`, move the entry from the `[Unreleased]` section of `changelog.md` to a `0.1.1` section, and add the
+   `0.1.1` row of the compatibility table in `readme.md`.
+
 ## Conventions
 
 - **The C# of the framework is written by hand.** AI may help with design exploration, documentation, build scripts
   and CI, and reviews; a commit with AI-written changes says so with a `Co-Authored-By` line (see the readme's AI
   disclosure).
-- One branch, `main`. Changes arrive by pull request, with the template in `.github/`. Titles are short and in the
+- Work happens on `main`, and the patches of a released version on `release/x.y` (see
+  [Patch releases](#patch-releases)). Changes arrive by pull request, with the template in `.github/`. Titles are short and in the
   past tense: `Added Mathematics module`.
 - The style is enforced by the build (`.editorconfig`, `rules/`, `AnalysisLevel=preview-all`): explicit types, no
   `var`, file-scoped namespaces, the copyright header on every `.cs` file, XML documentation on every public member.

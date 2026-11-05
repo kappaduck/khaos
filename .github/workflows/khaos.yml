@@ -26,6 +26,9 @@ jobs:
       contents: read
       id-token: write
 
+    outputs:
+      latest: ${{ steps.latest.outputs.latest }}
+
     env:
       Channel: ${{ github.event_name == 'release' && !github.event.release.prerelease && 'release' || 'beta' }}
 
@@ -56,13 +59,37 @@ jobs:
             exit 1
           fi
 
-      - name: Check the release is on main
+      - name: Check the release branch
         if: env.Channel == 'release'
+        env:
+          Tag: ${{ github.event.release.tag_name }}
         run: |
-          git merge-base --is-ancestor "$GITHUB_SHA" origin/main || {
-            echo "::error::The release commit $GITHUB_SHA is not on main. Create the release from main, after the release PR is merged."
+          version="${Tag#v}"
+          line="${version%.*}"
+          if git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "The release commit is on main."
+          elif git rev-parse --verify --quiet "origin/release/$line" > /dev/null \
+            && git merge-base --is-ancestor "$GITHUB_SHA" "origin/release/$line"; then
+            echo "The release commit is on release/$line."
+          else
+            echo "::error::The release commit $GITHUB_SHA is on neither main nor release/$line. Create the release from main, or from release/$line for a patch, after the release PR is merged."
             exit 1
-          }
+          fi
+
+      - name: Check the release is the latest
+        id: latest
+        if: env.Channel == 'release'
+        env:
+          Tag: ${{ github.event.release.tag_name }}
+        run: |
+          version="${Tag#v}"
+          highest=$(git tag --list | sed 's/^v//' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
+          if [[ "$version" == "$highest" ]]; then
+            echo "latest=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::$version is older than $highest, so the documentation site stays on $highest."
+            echo "latest=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Resolve version
         id: package
@@ -109,7 +136,7 @@ jobs:
   docs:
     name: Documentation
     needs: publish
-    if: github.event_name == 'release' && !github.event.release.prerelease
+    if: github.event_name == 'release' && !github.event.release.prerelease && needs.publish.outputs.latest == 'true'
     permissions:
       contents: read
     uses: ./.github/workflows/docs.yml
