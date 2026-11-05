@@ -417,4 +417,23 @@ internal sealed class InteropLibraryAnalyzerTests
         await result.CompilationErrors.Should().BeEmpty();
         await result.Ids.Should().BeEmpty();
     }
+
+    [Test]
+    public async Task CompilationWithoutLibraryImportShouldReportNothing()
+    {
+        const string source = """
+            namespace KappaDuck.Khaos.Interop.SDL;
+
+            internal static partial class SDL3
+            {
+                [System.Runtime.InteropServices.LibraryImport("user32", EntryPoint = "GetWindowTextLengthW")]
+                internal static partial int GetWindowTextLength();
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropLibraryAnalyzer>.RunAsync(TestCompilation.WithoutReferences(source));
+
+        await result.Ids.Should().BeEmpty();
+    }
+
 }

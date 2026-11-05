@@ -3,6 +3,7 @@
 
 namespace KappaDuck.Khaos.Interop;
 
+[ExcludeFromCodeCoverage]
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor, Inherited = false)]
 internal sealed class UntypedBecauseAttribute(string reason) : Attribute
 {

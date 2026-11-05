@@ -27,27 +27,29 @@ internal sealed class EquatableLocationTests
     }
 
     [Test]
-    public async Task LocationsFromEquivalentTreesShouldBeEqual()
+    public async Task EqualsShouldReturnTrueForLocationsFromEquivalentTrees()
     {
         EquatableLocation? left = EquatableLocation.From(Declaration());
         EquatableLocation? right = EquatableLocation.From(Declaration());
 
         bool result = left.Equals(right);
+
         await result.Should().BeTrue();
     }
 
     [Test]
-    public async Task RoslynLocationsFromEquivalentTreesShouldNotBeEqual()
+    public async Task RoslynLocationEqualsShouldReturnFalseForLocationsFromEquivalentTrees()
     {
         Location left = Declaration().GetLocation();
         Location right = Declaration().GetLocation();
 
         bool result = left.Equals(right);
+
         await result.Should().BeFalse();
     }
 
     [Test]
-    public async Task LocationdPreserveTheLineSpan()
+    public async Task ToLocationShouldPreserveTheLineSpan()
     {
         ClassDeclarationSyntax declaration = Declaration();
 
@@ -55,6 +57,7 @@ internal sealed class EquatableLocationTests
         Location restored = EquatableLocation.From(declaration).ToLocation();
 
         string line = restored.GetLineSpan().ToString();
+
         await line.Should().BeEqualTo(original.GetLineSpan().ToString());
     }
 
@@ -74,7 +77,58 @@ internal sealed class EquatableLocationTests
         Diagnostic diagnostic = EquatableLocation.From(Declaration()).ToDiagnostic(descriptor);
 
         FileLinePositionSpan line = diagnostic.Location.GetLineSpan();
+
         await line.Path.Should().BeEqualTo("Window.cs");
+    }
+
+
+    [Test]
+    public async Task FromLocationShouldReturnNullForNoLocation()
+    {
+        EquatableLocation? location = EquatableLocation.From((Location?)null);
+
+        await location.Should().BeNull();
+    }
+
+    [Test]
+    public async Task FromSyntaxNodeShouldReturnNullForNoNode()
+    {
+        EquatableLocation? location = EquatableLocation.From((SyntaxNode?)null);
+
+        await location.Should().BeNull();
+    }
+
+    [Test]
+    public async Task FromSyntaxReferenceShouldReturnNullForNoReference()
+    {
+        EquatableLocation? location = EquatableLocation.From((SyntaxReference?)null);
+
+        await location.Should().BeNull();
+    }
+
+    [Test]
+    public async Task FromSyntaxReferenceShouldCaptureTheSpanOfTheDeclaration()
+    {
+        SyntaxReference reference = Window().DeclaringSyntaxReferences[0];
+
+        EquatableLocation? location = EquatableLocation.From(reference);
+
+        await location.Text.Should().BeEqualTo(reference.Span);
+    }
+
+    [Test]
+    public async Task FromSymbolShouldCaptureItsSourceFile()
+    {
+        EquatableLocation? location = EquatableLocation.From(Window());
+
+        string? path = location?.FilePath;
+
+        await path.Should().BeEqualTo("Source0.cs");
+    }
+
+    private static INamedTypeSymbol Window()
+    {
+        return TestCompilation.Create(Source).GetTypeByMetadataName("KappaDuck.Khaos.Window")!;
     }
 
     private static ClassDeclarationSyntax Declaration()

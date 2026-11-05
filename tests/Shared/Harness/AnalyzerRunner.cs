@@ -18,6 +18,9 @@ internal static class AnalyzerRunner<TAnalyzer> where TAnalyzer : DiagnosticAnal
     internal static Task<AnalyzerResult> RunAsync(IReadOnlyDictionary<string, string> options, params ReadOnlySpan<string> sources)
         => AnalyzeAsync(options, TestCompilation.Create(sources));
 
+    internal static Task<AnalyzerResult> RunAsync(CSharpCompilation compilation)
+        => AnalyzeAsync(ImmutableDictionary<string, string>.Empty, compilation);
+
     internal static Task VerifyAsync(ReadOnlySpan<string> sources, [CallerFilePath] string sourceFile = "")
         => VerifyAsync(TestCompilation.Create(sources), sourceFile);
 

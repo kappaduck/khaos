@@ -11,16 +11,9 @@ namespace KappaDuck.Khaos.Testing.Harness;
 
 internal static class TestCompilation
 {
-    internal static CSharpCompilation Create(params ReadOnlySpan<string> sources)
-    {
-        SyntaxTree[] trees = new SyntaxTree[sources.Length];
+    internal static CSharpCompilation Create(params ReadOnlySpan<string> sources) => Compile(sources, Net110.References.All);
 
-        for (int i = 0; i < sources.Length; i++)
-            trees[i] = CSharpSyntaxTree.ParseText(sources[i], Parsing.Preview, $"Source{i}.cs");
-
-        CSharpCompilationOptions options = new(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true, nullableContextOptions: NullableContextOptions.Enable);
-        return CSharpCompilation.Create("KappaDuck.Khaos.Testing.Compilation", trees, Net110.References.All, options);
-    }
+    internal static CSharpCompilation WithoutReferences(params ReadOnlySpan<string> sources) => Compile(sources, []);
 
     internal static CSharpCompilation Edit(CSharpCompilation compilation, params ReadOnlySpan<string> edited)
     {
@@ -38,5 +31,16 @@ internal static class TestCompilation
         }
 
         return result;
+    }
+
+    private static CSharpCompilation Compile(ReadOnlySpan<string> sources, IEnumerable<MetadataReference> references)
+    {
+        SyntaxTree[] trees = new SyntaxTree[sources.Length];
+
+        for (int i = 0; i < sources.Length; i++)
+            trees[i] = CSharpSyntaxTree.ParseText(sources[i], Parsing.Preview, $"Source{i}.cs");
+
+        CSharpCompilationOptions options = new(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true, nullableContextOptions: NullableContextOptions.Enable);
+        return CSharpCompilation.Create("KappaDuck.Khaos.Testing.Compilation", trees, references, options);
     }
 }

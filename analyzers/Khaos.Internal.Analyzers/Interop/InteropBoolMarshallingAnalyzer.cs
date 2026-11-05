@@ -39,23 +39,20 @@ public sealed class InteropBoolMarshallingAnalyzer : DiagnosticAnalyzer
         if (InteropAreas.Resolve(method) is not InteropArea area)
             return;
 
-        if (LibraryImports.Find(method, libraryImport) is not { } attribute)
-            return;
-
-        if (LibraryImports.DeclarationOf(attribute, context.CancellationToken) is not { } declaration)
+        if (LibraryImports.Find(method, libraryImport) is null)
             return;
 
         UnmanagedType expected = InteropAreas.BoolConvention(area);
 
         if (IsBool(method.ReturnType) && !Follows(method.GetReturnTypeAttributes(), marshalAs, expected))
-            context.ReportDiagnostic(Diagnostic.Create(Descriptors.InteropBoolReturn, declaration.ReturnType.GetLocation(), method.Name, area, expected));
+            context.ReportDiagnostic(Diagnostic.Create(Descriptors.InteropBoolReturn, TypeLocations.OfReturn(method, context.CancellationToken), method.Name, area, expected));
 
         foreach (IParameterSymbol parameter in method.Parameters)
         {
             if (!IsBool(parameter.Type) || Follows(parameter.GetAttributes(), marshalAs, expected))
                 continue;
 
-            Location location = declaration.ParameterList.Parameters[parameter.Ordinal].Type?.GetLocation() ?? parameter.Locations[0];
+            Location location = TypeLocations.Of(parameter, context.CancellationToken);
             context.ReportDiagnostic(Diagnostic.Create(Descriptors.InteropBoolParameter, location, parameter.Name, method.Name, area, expected));
         }
     }

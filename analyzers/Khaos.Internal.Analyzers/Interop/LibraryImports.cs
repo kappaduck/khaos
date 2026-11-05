@@ -13,9 +13,6 @@ internal static class LibraryImports
     internal static INamedTypeSymbol? AttributeType(Compilation compilation)
         => compilation.GetTypeByMetadataName("System.Runtime.InteropServices.LibraryImportAttribute");
 
-    internal static MethodDeclarationSyntax? DeclarationOf(AttributeData libraryImport, CancellationToken cancellationToken)
-        => libraryImport.ApplicationSyntaxReference?.GetSyntax(cancellationToken).Parent?.Parent as MethodDeclarationSyntax;
-
     internal static AttributeArgumentSyntax? EntryPointArgumentOf(AttributeData libraryImport, CancellationToken cancellationToken)
     {
         if (libraryImport.ApplicationSyntaxReference?.GetSyntax(cancellationToken) is not AttributeSyntax { ArgumentList: { } arguments })

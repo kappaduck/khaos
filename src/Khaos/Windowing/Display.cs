@@ -62,7 +62,7 @@ public readonly struct Display : IEqualityOperators<Display, Display, bool>, IEq
             using OwnedBuffer<uint> screens = GetScreens();
             int length = screens.Length;
 
-            Span<RectI> others = length < MaxScreens ? stackalloc RectI[MaxScreens] : new RectI[length];
+            Span<RectI> others = length <= MaxScreens ? stackalloc RectI[MaxScreens] : new RectI[length];
             int count = 0;
 
             foreach (uint id in screens)

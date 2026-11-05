@@ -1,6 +1,7 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace KappaDuck.Khaos.Analyzers.Tests.Harness;
@@ -38,5 +39,23 @@ internal sealed class TestCompilationTests
         ArgumentException exception = Assert.Throws<ArgumentException>(() => TestCompilation.Edit(compilation, "public sealed class Player;", "public sealed class Enemy;"));
 
         await exception.ParamName.Should().BeEqualTo("edited");
+    }
+
+    [Test]
+    public async Task WithoutReferencesShouldLeaveTheCoreLibraryUnresolved()
+    {
+        CSharpCompilation compilation = TestCompilation.WithoutReferences("public sealed class Player;");
+
+        INamedTypeSymbol baseObject = compilation.GetSpecialType(SpecialType.System_Object);
+
+        await baseObject.TypeKind.Should().BeEqualTo(TypeKind.Error);
+    }
+
+    [Test]
+    public async Task WithoutReferencesShouldNameTheSourcesLikeCreate()
+    {
+        CSharpCompilation compilation = TestCompilation.WithoutReferences("public sealed class Player;", "public sealed class Enemy;");
+
+        await compilation.SyntaxTrees[1].FilePath.Should().BeEqualTo("Source1.cs");
     }
 }

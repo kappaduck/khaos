@@ -441,6 +441,29 @@ internal sealed class InteropVoidPointerAnalyzerTests
         await result.Ids.Should().BeEmpty();
     }
 
+
+    [Test]
+    public async Task ReasonWithoutAnArgumentShouldReportKHI004AtTheMethod()
+    {
+        const string source = """
+            using System.Runtime.InteropServices;
+
+            namespace KappaDuck.Khaos.Interop.SDL;
+
+            internal static unsafe partial class SDL3
+            {
+                [LibraryImport(nameof(SDL3), EntryPoint = "SDL_SetPointerProperty")]
+                [UntypedBecause()]
+                internal static partial byte SetPointerProperty(uint props, byte* name, void* value);
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropVoidPointerAnalyzer>.RunAsync(source, UntypedBecause);
+
+        await result.CompilationErrors.Should().Contain("CS7036");
+        await result.Reported.Should().BeEqualTo("Source0.cs(9,34): error KHI004: 'SetPointerProperty' gives [UntypedBecause] an empty reason; say why it cannot be typed");
+    }
+
     private const string UntypedBecause = """
         namespace KappaDuck.Khaos.Interop;
 
