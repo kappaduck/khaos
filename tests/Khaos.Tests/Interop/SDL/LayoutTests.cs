@@ -1,6 +1,7 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
+using KappaDuck.Khaos.Graphics;
 using KappaDuck.Khaos.Interop.SDL.Primitives;
 using KappaDuck.Khaos.Mathematics;
 using System.Runtime.CompilerServices;
@@ -12,6 +13,26 @@ namespace KappaDuck.Khaos.Tests.Interop.SDL;
 internal sealed class LayoutTests
 {
     private const int DisplayModeFieldsBeforeInternal = 32;
+
+    [Test]
+    public async Task ColorShouldHaveTheSizeOfSDLColor()
+    {
+        int size = Unsafe.SizeOf<Color>();
+
+        await size.Should().BeEqualTo(4);
+    }
+
+    [Test]
+    public async Task ColorShouldStoreItsRGBAInTheOrderOfSDLColor()
+    {
+        Color[] color = [new(1, 2, 3, 4)];
+
+        byte[] expected = [1, 2, 3, 4];
+
+        byte[] fields = unsafe (MemoryMarshal.Cast<Color, byte>(color)).ToArray();
+
+        await fields.Should().BeEquivalentTo(expected, EqualityComparer<byte>.Default, CollectionOrdering.Matching);
+    }
 
     [Test]
     public async Task DisplayModeShouldHaveTheSizeOfSDLDisplayMode()

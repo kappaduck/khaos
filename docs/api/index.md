@@ -12,9 +12,10 @@ you want.
 | :----------------------------------- | :------------------------------------------------------------------------- | :----------------- |
 | `KappaDuck.Khaos`                    | Your game class and its loop: what runs each frame, and the time it gets   | `Game2D`           |
 | `KappaDuck.Khaos.Hosting`            | Starting the game from `Program.cs`: services, settings, logs              | `KhaosApplication` |
+| `KappaDuck.Khaos.Windowing`          | The game window and the screens it opens on: title, size, fullscreen       | `Window`           |
 | `KappaDuck.Khaos.Events`             | What happened since the last frame: keys, mouse, gamepads, the window      | `Event`            |
 | `KappaDuck.Khaos.Input`              | The keyboard, the mouse, gamepads, and actions such as "jump"              |                    |
-| `KappaDuck.Khaos.Graphics`           | Colors, sprites, shapes and animations                                     | `Sprite`           |
+| `KappaDuck.Khaos.Graphics`           | Colors, sprites, shapes, animations, and the graphics settings (VSync)     | `Sprite`           |
 | `KappaDuck.Khaos.Graphics.Rendering` | Drawing on the screen: the renderer, textures                              | `Renderer`         |
 | `KappaDuck.Khaos.Audio`              | Sound effects, music, volume                                               |                    |
 | `KappaDuck.Khaos.Fonts`              | Fonts and text on the screen                                               |                    |

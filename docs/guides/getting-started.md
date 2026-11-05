@@ -64,13 +64,12 @@ method fills the window with one color, every frame:
 ```csharp
 protected override void Draw(Renderer renderer, in Frame frame)
 {
-    renderer.Clear(Color.Slate);
-    renderer.Present();
+    renderer.Clear(Color.Teal);
 }
 ```
 
-Change `Color.Slate` to another color, run the game again, on the desktop or in the browser: it follows. Both apps
-run the same game, so every change you make shows on both.
+Change `Color.Teal` to another color, such as `Color.MidnightBlue`, and run the game again, on the desktop
+or in the browser: it follows. Both apps run the same game, so every change you make shows on both.
 
 From here:
 

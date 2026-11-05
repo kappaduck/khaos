@@ -62,9 +62,8 @@ internal sealed class PongGame() : Game2D("Pong!", 1280, 720)
     {
         _ball.Position = Vector2.Lerp(_previous, _position, frame.Alpha);
 
-        renderer.Clear(Color.Slate);
+        renderer.Clear(Color.Teal);
         renderer.Draw(_ball);
-        renderer.Present();
     }
 }
 ```
