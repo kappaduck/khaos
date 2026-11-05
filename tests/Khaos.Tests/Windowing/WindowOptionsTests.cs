@@ -44,6 +44,16 @@ internal sealed class WindowOptionsTests
     }
 
     [Test]
+    public async Task PostConfigureShouldLetConfigurationReplaceTheHeight()
+    {
+        IConfiguration configuration = Configuration(new() { ["window:height"] = "480" });
+
+        WindowOptions options = Resolve(configuration, static window => window.Height = 1080);
+
+        await options.Height.Should().BeEqualTo(480);
+    }
+
+    [Test]
     public async Task PostConfigureShouldWinEvenWhenRegisteredBeforeTheCode()
     {
         IConfiguration configuration = Configuration(new() { ["window:resizable"] = "false" });

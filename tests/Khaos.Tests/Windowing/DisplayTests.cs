@@ -25,7 +25,7 @@ internal sealed class DisplayTests
     public void StopEngine() => _host.Dispose();
 
     [Test]
-    public async Task ConnectedShouldBeFalseForAScreenThatIsNotConnected()
+    public async Task ConnectedShouldReturnFalseForAScreenThatIsNotConnected()
     {
         Display unplugged = new(UnpluggedId);
 
@@ -33,7 +33,7 @@ internal sealed class DisplayTests
     }
 
     [Test]
-    public async Task ConnectedShouldBeTrueForThePrimaryScreen()
+    public async Task ConnectedShouldReturnTrueForThePrimaryScreen()
     {
         Display display = Display.Primary;
 
@@ -111,6 +111,15 @@ internal sealed class DisplayTests
     }
 
     [Test]
+    [OffscreenOnly]
+    public async Task UsableAreaInPixelsShouldBeTheUsableAreaAtAScaleOf1()
+    {
+        RectI pixels = Display.Primary.UsableAreaInPixels;
+
+        await pixels.Should().BeEqualTo(new RectI(0, 0, OffscreenWidth, OffscreenHeight));
+    }
+
+    [Test]
     public async Task UsableAreaShouldFitInsideEveryScreen()
     {
         IReadOnlyList<Display> screens = Display.All;
@@ -147,14 +156,103 @@ internal sealed class DisplayTests
     }
 
     [Test]
-    public async Task EqualsShouldMatchTheSameScreen()
+    public async Task EqualsShouldReturnTrueForTheSameScreen()
     {
-        Display first = Display.Primary;
-        Display again = Display.Primary;
+        Display display = Display.Primary;
 
-        bool equal = first == again;
+        bool result = display.Equals(Display.Primary);
 
-        await equal.Should().BeTrue();
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsShouldReturnFalseForAnotherScreen()
+    {
+        Display display = Display.Primary;
+
+        bool result = display.Equals(new Display(UnpluggedId));
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnTrueForTheSameScreenBoxed()
+    {
+        Display display = Display.Primary;
+        object boxed = Display.Primary;
+
+        bool result = display.Equals(boxed);
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnFalseForNull()
+    {
+        Display display = Display.Primary;
+
+        bool result = display.Equals(null);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnFalseForAnotherType()
+    {
+        Display display = Display.Primary;
+        object key = display.Key;
+
+        bool result = display.Equals(key);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task GetHashCodeShouldMatchForTheSameScreen()
+    {
+        int expected = Display.Primary.GetHashCode();
+
+        int hash = Display.Primary.GetHashCode();
+
+        await hash.Should().BeEqualTo(expected);
+    }
+
+    [Test]
+    public async Task EqualityShouldReturnTrueForTheSameScreen()
+    {
+        Display display = Display.Primary;
+
+        bool result = display == Display.Primary;
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualityShouldReturnFalseForAnotherScreen()
+    {
+        Display display = Display.Primary;
+
+        bool result = display == new Display(UnpluggedId);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task InequalityShouldReturnTrueForAnotherScreen()
+    {
+        bool result = Display.Primary != new Display(UnpluggedId);
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task InequalityShouldReturnFalseForTheSameScreen()
+    {
+        Display primary = Display.Primary;
+
+        bool result = primary != Display.Primary;
+
+        await result.Should().BeFalse();
     }
 
     [Test]
@@ -194,12 +292,18 @@ internal sealed class DisplayTests
         const string UsableBoundsHint = "SDL_DISPLAY_USABLE_BOUNDS";
 
         SDLHints.Set(UsableBoundsHint, TaskbarOf40);
+        RectI area;
 
-        RectI area = Display.Primary.UsableArea;
+        try
+        {
+            area = Display.Primary.UsableArea;
+        }
+        finally
+        {
+            SDLHints.Reset(UsableBoundsHint);
+        }
 
         await area.Should().BeEqualTo(new RectI(0, 0, OffscreenWidth, OffscreenHeight - 40));
-
-        SDLHints.Reset(UsableBoundsHint);
     }
 
     private static bool FitsInside(RectI area, SizeI screen) => new RectI(PointI.Origin, screen).Contains(area);
