@@ -145,7 +145,23 @@ internal sealed class TransformTests
     }
 
     [Test]
-    public async Task TryInvertShouldSucceedForAnInvertibleTransform()
+    public async Task TransformRectShouldMoveTheRectWithTheTranslation()
+    {
+        Rect bounds = Transform.Translation(new Vector2(5f, -3f)).TransformRect(new Rect(1f, 2f, 10f, 20f));
+
+        await bounds.Should().BeEqualTo(new Rect(6f, -1f, 10f, 20f));
+    }
+
+    [Test]
+    public async Task TransformRectShouldKeepTheBoundsOrderedWhenMirrored()
+    {
+        Rect bounds = Transform.Scaling(new Vector2(-1f, 1f)).TransformRect(new Rect(1f, 2f, 10f, 20f));
+
+        await bounds.Should().BeEqualTo(new Rect(-11f, 2f, 10f, 20f));
+    }
+
+    [Test]
+    public async Task TryInvertShouldReturnTrueForAnInvertibleTransform()
     {
         Transform sprite = Transform.Create(new Point(120f, -40f), Angle.FromDegrees(33f), new Vector2(2f, 3f));
 
@@ -167,7 +183,7 @@ internal sealed class TransformTests
     }
 
     [Test]
-    public async Task TryInvertShouldFailWhenAnAxisIsFlattened()
+    public async Task TryInvertShouldReturnFalseWhenAnAxisIsFlattened()
     {
         bool inverted = Transform.Scaling(new Vector2(0f, 1f)).TryInvert(out _);
 
@@ -183,7 +199,7 @@ internal sealed class TransformTests
     }
 
     [Test]
-    public async Task TryDecomposeShouldSucceedForATransformFromCreate()
+    public async Task TryDecomposeShouldReturnTrueForATransformFromCreate()
     {
         Transform sprite = Transform.Create(new Point(120f, -40f), Angle.FromDegrees(33f), new Vector2(2f, 3f));
 
@@ -231,7 +247,7 @@ internal sealed class TransformTests
     }
 
     [Test]
-    public async Task TryDecomposeShouldFailForANonUniformScaleAfterARotation()
+    public async Task TryDecomposeShouldReturnFalseForANonUniformScaleAfterARotation()
     {
         Transform sheared = Transform.Scaling(new Vector2(2f, 1f)) * Transform.Rotation(Angle.FromDegrees(45f));
 
@@ -251,7 +267,79 @@ internal sealed class TransformTests
     }
 
     [Test]
-    public async Task EqualityShouldAcceptTheSameTransform()
+    public async Task EqualsShouldReturnTrueForTheSameTransform()
+    {
+        Transform translation = Transform.Translation(new Vector2(3f, 4f));
+
+        bool result = translation.Equals(Transform.Translation(new Vector2(3f, 4f)));
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsShouldReturnFalseForAnotherTransform()
+    {
+        Transform translation = Transform.Translation(new Vector2(3f, 4f));
+
+        bool result = translation.Equals(Transform.Translation(new Vector2(3f, 5f)));
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task EqualsShouldTreatNaNAsEqualToNaN()
+    {
+        Transform translation = Transform.Translation(new Vector2(float.NaN, 0f));
+
+        bool result = translation.Equals(Transform.Translation(new Vector2(float.NaN, 0f)));
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnTrueForTheSameTransformBoxed()
+    {
+        Transform translation = Transform.Translation(new Vector2(3f, 4f));
+        object boxed = Transform.Translation(new Vector2(3f, 4f));
+
+        bool result = translation.Equals(boxed);
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnFalseForNull()
+    {
+        Transform translation = Transform.Translation(new Vector2(3f, 4f));
+
+        bool result = translation.Equals(null);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnFalseForAnotherType()
+    {
+        Transform translation = Transform.Translation(new Vector2(3f, 4f));
+        object matrix = translation.Matrix;
+
+        bool result = translation.Equals(matrix);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task GetHashCodeShouldMatchForEqualTransforms()
+    {
+        int expected = Transform.Translation(new Vector2(3f, 4f)).GetHashCode();
+
+        int hash = Transform.Translation(new Vector2(3f, 4f)).GetHashCode();
+
+        await hash.Should().BeEqualTo(expected);
+    }
+
+    [Test]
+    public async Task EqualityShouldReturnTrueForTheSameTransform()
     {
         Transform translation = Transform.Translation(new Vector2(3f, 4f));
 
@@ -261,11 +349,39 @@ internal sealed class TransformTests
     }
 
     [Test]
-    public async Task InequalityShouldHoldForDifferentTransforms()
+    public async Task EqualityShouldReturnFalseForAnotherTransform()
+    {
+        bool result = Transform.Translation(new Vector2(3f, 4f)) == Transform.Translation(new Vector2(3f, 5f));
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task EqualityShouldTreatNaNAsEqualToNaN()
+    {
+        Transform translation = Transform.Translation(new Vector2(float.NaN, 0f));
+
+        bool result = translation == Transform.Translation(new Vector2(float.NaN, 0f));
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task InequalityShouldReturnTrueForAnotherTransform()
     {
         bool result = Transform.Translation(new Vector2(3f, 4f)) != Transform.Translation(new Vector2(3f, 5f));
 
         await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task InequalityShouldReturnFalseForTheSameTransform()
+    {
+        Transform translation = Transform.Translation(new Vector2(3f, 4f));
+
+        bool result = translation != Transform.Translation(new Vector2(3f, 4f));
+
+        await result.Should().BeFalse();
     }
 
     [Test]

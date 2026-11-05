@@ -20,7 +20,7 @@ internal sealed class WindowTests
     private EngineHost _host = null!;
 
     [Before(Test)]
-    public void StartEngine() => _host = EngineHost.Start(new() { Name = "Duck Quest" });
+    public void StartEngine() => _host = EngineHost.Start(new AppMetadata() { Name = "Duck Quest" });
 
     [After(Test)]
     public void StopEngine() => _host.Dispose();
@@ -57,6 +57,16 @@ internal sealed class WindowTests
         using WindowScope scope = WindowScope.Open(resizable);
 
         await scope.Window.Resizable.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task OpenShouldApplyFullscreen()
+    {
+        WindowOptions fullscreen = new() { Title = "Duck Quest", Width = 640, Height = 360, Fullscreen = true };
+
+        using WindowScope scope = WindowScope.Open(fullscreen);
+
+        await scope.Window.Fullscreen.Should().BeTrue();
     }
 
     [Test]
@@ -107,6 +117,25 @@ internal sealed class WindowTests
     }
 
     [Test]
+    public async Task OpenShouldUseTheChosenDisplayWhenItIsConnected()
+    {
+        WindowOptions onPrimary = new() { Title = "Duck Quest", Width = 640, Height = 360, Display = Display.Primary };
+
+        using WindowScope scope = WindowScope.Open(onPrimary);
+
+        await scope.Window.Display.Should().BeEqualTo(Display.Primary);
+    }
+
+    [Test]
+    [OffscreenOnly]
+    public async Task OpenShouldIgnoreTheChosenPositionWhenTheWindowCannotMove()
+    {
+        WindowOptions saved = new() { Title = "Duck Quest", Width = 640, Height = 360, Position = new PointI(40, 30) };
+
+        await Assert.That(() => WindowScope.Open(saved).Dispose()).ThrowsNothing();
+    }
+
+    [Test]
     [MultipleScreensOnly]
     public async Task OpenShouldUseTheChosenDisplay()
     {
@@ -133,7 +162,7 @@ internal sealed class WindowTests
 
     [Test]
     [OffscreenOnly]
-    public async Task CanMoveShouldBeFalseWithoutARealScreen()
+    public async Task CanMoveShouldReturnFalseWithoutARealScreen()
     {
         using WindowScope scope = WindowScope.Open(_options);
 
@@ -143,7 +172,7 @@ internal sealed class WindowTests
     [Test]
     [RealScreenOnly]
     [RunOn(OS.Windows)]
-    public async Task CanMoveShouldBeTrueOnWindows()
+    public async Task CanMoveShouldReturnTrueOnWindows()
     {
         using WindowScope scope = WindowScope.Open(_options);
 
@@ -457,6 +486,76 @@ internal sealed class WindowTests
         Window window = scope.Window;
 
         await Assert.That(() => window.Opacity = 1.5f).Throws<ArgumentOutOfRangeException>();
+    }
+
+    [Test]
+    public async Task OpacityShouldRejectNaN()
+    {
+        using WindowScope scope = WindowScope.Open(_options);
+        Window window = scope.Window;
+
+        await Assert.That(() => window.Opacity = float.NaN).Throws<ArgumentOutOfRangeException>();
+    }
+
+    [Test]
+    public async Task OpacityShouldRejectANaNWithoutItsSignBit()
+    {
+        using WindowScope scope = WindowScope.Open(_options);
+        Window window = scope.Window;
+        float positiveNaN = BitConverter.Int32BitsToSingle(0x7FC00000);
+
+        await Assert.That(() => window.Opacity = positiveNaN).Throws<ArgumentOutOfRangeException>();
+    }
+
+    [Test]
+    public async Task OpacityShouldBe1ByDefault()
+    {
+        using WindowScope scope = WindowScope.Open(_options);
+
+        await scope.Window.Opacity.Should().BeEqualTo(1f);
+    }
+
+    [Test]
+    [OffscreenOnly]
+    public async Task OpacityShouldThrowWhenTheScreenCannotChangeIt()
+    {
+        using WindowScope scope = WindowScope.Open(_options);
+        Window window = scope.Window;
+
+        await Assert.That(() => window.Opacity = 0.5f).Throws<PlatformException>();
+    }
+
+    [Test]
+    public async Task FocusableShouldReturnTrueByDefault()
+    {
+        using WindowScope scope = WindowScope.Open(_options);
+
+        await scope.Window.Focusable.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task MinimizedShouldReturnFalseForANewWindow()
+    {
+        using WindowScope scope = WindowScope.Open(_options);
+
+        await scope.Window.Minimized.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task MaximizedShouldReturnFalseForANewWindow()
+    {
+        using WindowScope scope = WindowScope.Open(_options);
+
+        await scope.Window.Maximized.Should().BeFalse();
+    }
+
+    [Test]
+    [OffscreenOnly]
+    public async Task OccludedShouldReturnFalseWithoutARealScreen()
+    {
+        using WindowScope scope = WindowScope.Open(_options);
+
+        await scope.Window.Occluded.Should().BeFalse();
     }
 
     [Test]

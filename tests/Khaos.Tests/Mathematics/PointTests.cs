@@ -110,7 +110,97 @@ internal sealed class PointTests
     }
 
     [Test]
-    public async Task EqualityShouldAcceptIdenticalPoints()
+    public async Task EqualsShouldReturnTrueForAPointWithTheSameCoordinates()
+    {
+        Point point = new(3.25f, -1f);
+
+        bool result = point.Equals(new Point(3.25f, -1f));
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    [Arguments(4.25f, -1f)]
+    [Arguments(3.25f, 0f)]
+    public async Task EqualsShouldReturnFalseForAPointThatDiffersByOneCoordinate(float x, float y)
+    {
+        Point point = new(3.25f, -1f);
+
+        bool result = point.Equals(new Point(x, y));
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task EqualsShouldTreatNaNAsEqualToNaN()
+    {
+        Point point = new(float.NaN, 0f);
+
+        bool result = point.Equals(new Point(float.NaN, 0f));
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsShouldReturnTrueForNegativeZero()
+    {
+        Point point = new(0f, 0f);
+
+        bool result = point.Equals(new Point(float.NegativeZero, 0f));
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnTrueForTheSamePointBoxed()
+    {
+        Point point = new(3.25f, -1f);
+        object boxed = new Point(3.25f, -1f);
+
+        bool result = point.Equals(boxed);
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnFalseForNull()
+    {
+        Point point = new(3.25f, -1f);
+
+        bool result = point.Equals(null);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnFalseForAnotherType()
+    {
+        Point point = new(3.25f, -1f);
+        object vector = new Vector2(3.25f, -1f);
+
+        bool result = point.Equals(vector);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task GetHashCodeShouldMatchForEqualPoints()
+    {
+        int hash = new Point(3.25f, -1f).GetHashCode();
+
+        await hash.Should().BeEqualTo(new Point(3.25f, -1f).GetHashCode());
+    }
+
+    [Test]
+    public async Task GetHashCodeShouldMatchForZeroAndNegativeZero()
+    {
+        int hash = new Point(0f, 0f).GetHashCode();
+
+        await hash.Should().BeEqualTo(new Point(float.NegativeZero, 0f).GetHashCode());
+    }
+
+    [Test]
+    public async Task EqualityShouldReturnTrueForIdenticalPoints()
     {
         Point point = new(1f, 1f);
 
@@ -120,7 +210,7 @@ internal sealed class PointTests
     }
 
     [Test]
-    public async Task EqualityShouldRejectPointsThatDifferByTheSmallestAmount()
+    public async Task EqualityShouldReturnFalseForPointsThatDifferByTheSmallestAmount()
     {
         bool result = new Point(1f, 1f) == new Point(1f + 1e-6f, 1f);
 
@@ -128,7 +218,17 @@ internal sealed class PointTests
     }
 
     [Test]
-    public async Task InequalityShouldHoldForDifferentPoints()
+    public async Task EqualityShouldTreatNaNAsEqualToNaN()
+    {
+        Point point = new(float.NaN, 0f);
+
+        bool result = point == new Point(float.NaN, 0f);
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task InequalityShouldReturnTrueForDifferentPoints()
     {
         bool result = new Point(1f, 1f) != new Point(1f, 2f);
 
@@ -136,15 +236,17 @@ internal sealed class PointTests
     }
 
     [Test]
-    public async Task EqualPointsShouldBeFoundInAHashSet()
+    public async Task InequalityShouldReturnFalseForIdenticalPoints()
     {
-        HashSet<Point> visited = [new(3.25f, -1f)];
+        Point point = new(1f, 1f);
 
-        await visited.Contains(new Point(3.25f, -1f)).Should().BeTrue();
+        bool result = point != new Point(1f, 1f);
+
+        await result.Should().BeFalse();
     }
 
     [Test]
-    public async Task IsApproximatelyShouldAcceptAPointWithinTheTolerance()
+    public async Task IsApproximatelyShouldReturnTrueForAPointWithinTheTolerance()
     {
         bool result = new Point(100.05f, 99.95f).IsApproximately(new Point(100f, 100f), 0.1f);
 
@@ -152,7 +254,7 @@ internal sealed class PointTests
     }
 
     [Test]
-    public async Task IsApproximatelyShouldRejectAPointOutsideTheTolerance()
+    public async Task IsApproximatelyShouldReturnFalseForAPointOutsideTheTolerance()
     {
         bool result = new Point(100.2f, 100f).IsApproximately(new Point(100f, 100f), 0.1f);
 
@@ -192,6 +294,16 @@ internal sealed class PointTests
     }
 
     [Test]
+    public async Task ToStringShouldUseTheCurrentCulture()
+    {
+        Point value = new(1.5f, 2.5f);
+
+        string result = value.ToString();
+
+        await result.Should().BeEqualTo(value.ToString(null, CultureInfo.CurrentCulture));
+    }
+
+    [Test]
     public async Task ToStringShouldSeparateWithCommasForTheInvariantCulture()
     {
         string result = new Point(1.5f, 2.5f).ToString(null, CultureInfo.InvariantCulture);
@@ -226,7 +338,7 @@ internal sealed class PointTests
     }
 
     [Test]
-    public async Task TryFormatShouldFailWhenTheDestinationIsTooSmall()
+    public async Task TryFormatShouldReturnFalseWhenTheDestinationIsTooSmall()
     {
         char[] buffer = new char[5];
 

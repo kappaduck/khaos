@@ -4,6 +4,7 @@
 using KappaDuck.Khaos.Mathematics;
 using System.Globalization;
 using System.Numerics;
+using System.Text;
 
 namespace KappaDuck.Khaos.Tests.Mathematics;
 
@@ -87,7 +88,79 @@ internal sealed class PointITests
     }
 
     [Test]
-    public async Task EqualityShouldRejectSwappedCoordinates()
+    public async Task EqualsShouldReturnTrueForAPointWithTheSameCoordinates()
+    {
+        PointI point = new(2, 3);
+
+        bool result = point.Equals(new PointI(2, 3));
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    [Arguments(3, 3)]
+    [Arguments(2, 4)]
+    public async Task EqualsShouldReturnFalseForAPointThatDiffersByOneCoordinate(int x, int y)
+    {
+        PointI point = new(2, 3);
+
+        bool result = point.Equals(new PointI(x, y));
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnTrueForTheSamePointBoxed()
+    {
+        PointI point = new(2, 3);
+        object boxed = new PointI(2, 3);
+
+        bool result = point.Equals(boxed);
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnFalseForNull()
+    {
+        PointI point = new(2, 3);
+
+        bool result = point.Equals(null);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnFalseForAnotherType()
+    {
+        PointI point = new(2, 3);
+        object size = new SizeI(2, 3);
+
+        bool result = point.Equals(size);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task GetHashCodeShouldMatchForEqualPoints()
+    {
+        int hash = new PointI(2, 3).GetHashCode();
+
+        await hash.Should().BeEqualTo(new PointI(2, 3).GetHashCode());
+    }
+
+    [Test]
+    public async Task EqualityShouldReturnTrueForIdenticalPoints()
+    {
+        PointI point = new(2, 3);
+
+        bool result = point == new PointI(2, 3);
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualityShouldReturnFalseForSwappedCoordinates()
     {
         bool result = new PointI(2, 3) == new PointI(3, 2);
 
@@ -95,11 +168,21 @@ internal sealed class PointITests
     }
 
     [Test]
-    public async Task EqualPointsShouldBeFoundInAHashSet()
+    public async Task InequalityShouldReturnTrueForDifferentPoints()
     {
-        HashSet<PointI> walls = [new(2, 3)];
+        bool result = new PointI(2, 3) != new PointI(2, 4);
 
-        await walls.Contains(new PointI(2, 3)).Should().BeTrue();
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task InequalityShouldReturnFalseForIdenticalPoints()
+    {
+        PointI point = new(2, 3);
+
+        bool result = point != new PointI(2, 3);
+
+        await result.Should().BeFalse();
     }
 
     [Test]
@@ -108,6 +191,28 @@ internal sealed class PointITests
         (int x, int y) = new PointI(3, 4);
 
         await (x, y).Should().BeEqualTo((3, 4));
+    }
+
+    [Test]
+    public async Task ToStringShouldUseTheCurrentCulture()
+    {
+        PointI value = new(3, -4);
+
+        string result = value.ToString();
+
+        await result.Should().BeEqualTo(value.ToString(null, CultureInfo.CurrentCulture));
+    }
+
+    [Test]
+    public async Task TryFormatUtf8ShouldWriteTheSameTextAsToString()
+    {
+        PointI value = new(3, -4);
+        CultureInfo culture = CultureInfo.GetCultureInfo("fr-CA");
+        byte[] buffer = new byte[64];
+
+        value.TryFormat(buffer, out int written, default, culture);
+
+        await Encoding.UTF8.GetString(buffer, 0, written).Should().BeEqualTo(value.ToString(null, culture));
     }
 
     [Test]

@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 using KappaDuck.Khaos.Analyzers.Tests.Harness.Fixtures;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace KappaDuck.Khaos.Analyzers.Tests.Harness;
 
@@ -42,6 +43,16 @@ internal sealed class AnalyzerRunnerTests
         AnalyzerResult result = await AnalyzerRunner<OptionAnalyzer>.RunAsync("public sealed class Player;");
 
         await result.Ids.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task RunAsyncShouldAnalyzeTheCompilationItIsGiven()
+    {
+        CSharpCompilation compilation = TestCompilation.WithoutReferences("public sealed class Player;");
+
+        AnalyzerResult result = await AnalyzerRunner<TypeAnalyzer>.RunAsync(compilation);
+
+        await result.Reported.Should().BeEqualTo("Source0.cs(1,21): warning TEST001: Type 'Player' found");
     }
 
     [Test]

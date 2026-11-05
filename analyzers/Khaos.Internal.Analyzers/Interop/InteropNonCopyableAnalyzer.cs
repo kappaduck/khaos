@@ -105,12 +105,8 @@ public sealed class InteropNonCopyableAnalyzer : DiagnosticAnalyzer
         return group.Parent is IUsingDeclarationOperation or IUsingOperation;
     }
 
-    private static string NameOf(IOperation reference) => reference switch
-    {
-        ILocalReferenceOperation local => local.Local.Name,
-        IParameterReferenceOperation parameter => parameter.Parameter.Name,
-        _ => reference.Syntax.ToString()
-    };
+    private static string NameOf(IOperation reference)
+        => reference is ILocalReferenceOperation local ? local.Local.Name : ((IParameterReferenceOperation)reference).Parameter.Name;
 
     private static IOperation OutermostOf(IOperation operation)
     {

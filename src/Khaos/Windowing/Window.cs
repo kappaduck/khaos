@@ -210,9 +210,9 @@ public sealed class Window
     /// Gets or sets how opaque the whole window is, from 0 (invisible) to 1 (fully opaque, the default).
     /// </summary>
     /// <remarks>
-    /// Where the operating system cannot make a window see-through, it stays opaque.
+    /// In the browser, the window always stays opaque.
     /// </remarks>
-    /// <exception cref="ArgumentOutOfRangeException">The value is below 0 or above 1.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The value is below 0, above 1 or not a number.</exception>
     /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     public float Opacity
@@ -221,8 +221,14 @@ public sealed class Window
         get => SDL3.ThrowIfNegative(unsafe (SDL3.GetWindowOpacity(Handle)));
         set
         {
+            if (float.IsNaN(value))
+                throw new ArgumentOutOfRangeException(nameof(value), value, "The opacity must be a number.");
+
             ArgumentOutOfRangeException.ThrowIfNegative(value);
             ArgumentOutOfRangeException.ThrowIfGreaterThan(value, 1f);
+
+            if (OperatingSystem.IsBrowser())
+                return;
 
             // SAFETY: Handle is a window that is not destroyed yet.
             SDL3.ThrowIfFailed(unsafe (SDL3.SetWindowOpacity(Handle, value)));

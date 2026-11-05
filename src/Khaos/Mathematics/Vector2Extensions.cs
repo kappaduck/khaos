@@ -86,10 +86,10 @@ public static class Vector2Extensions
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="maxLength"/> is negative or not a number.</exception>
         public Vector2 ClampLength(float maxLength)
         {
-            ArgumentOutOfRangeException.ThrowIfNegative(maxLength);
-
             if (float.IsNaN(maxLength))
                 throw new ArgumentOutOfRangeException(nameof(maxLength), maxLength, "The maximum length must be a number.");
+
+            ArgumentOutOfRangeException.ThrowIfNegative(maxLength);
 
             float lengthSquared = vector.LengthSquared();
 

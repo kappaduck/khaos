@@ -4,6 +4,7 @@
 using KappaDuck.Khaos.Mathematics;
 using System.Globalization;
 using System.Numerics;
+using System.Text;
 
 namespace KappaDuck.Khaos.Tests.Mathematics;
 
@@ -42,6 +43,14 @@ internal sealed class RectTests
         Rect rect = new(10f, 20f, 30f, 40f);
 
         await rect.Center.Should().BeEqualTo(new Point(25f, 40f));
+    }
+
+    [Test]
+    public async Task PositionShouldBeTheTopLeftCorner()
+    {
+        Rect rect = new(10f, 20f, 30f, 40f);
+
+        await rect.Position.Should().BeEqualTo(new Point(10f, 20f));
     }
 
     [Test]
@@ -91,7 +100,7 @@ internal sealed class RectTests
     [Arguments(5f, -1f, true)]
     [Arguments(float.NaN, 5f, true)]
     [Arguments(5f, float.NaN, true)]
-    public async Task IsEmptyShouldBeTrueOnlyForANegativeOrNaNDimension(float width, float height, bool expected)
+    public async Task IsEmptyShouldReturnTrueOnlyForANegativeOrNaNDimension(float width, float height, bool expected)
     {
         Rect rect = new(3f, 3f, width, height);
 
@@ -185,7 +194,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task ContainsAllShouldBeTrueForNoPoint()
+    public async Task ContainsAllShouldReturnTrueForNoPoint()
     {
         Rect rect = new(10f, 20f, 30f, 40f);
 
@@ -193,7 +202,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task ContainsAllShouldBeTrueWhenEveryPointIsInside()
+    public async Task ContainsAllShouldReturnTrueWhenEveryPointIsInside()
     {
         Rect rect = new(0f, 0f, 10f, 10f);
 
@@ -201,7 +210,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task ContainsAllShouldBeFalseWhenOnePointIsOutside()
+    public async Task ContainsAllShouldReturnFalseWhenOnePointIsOutside()
     {
         Rect rect = new(0f, 0f, 10f, 10f);
 
@@ -209,7 +218,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task ContainsAnyShouldBeFalseForNoPoint()
+    public async Task ContainsAnyShouldReturnFalseForNoPoint()
     {
         Rect rect = new(10f, 20f, 30f, 40f);
 
@@ -217,7 +226,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task ContainsAnyShouldBeTrueWhenOnePointIsInside()
+    public async Task ContainsAnyShouldReturnTrueWhenOnePointIsInside()
     {
         Rect rect = new(0f, 0f, 10f, 10f);
 
@@ -225,7 +234,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task ContainsAnyShouldBeFalseWhenEveryPointIsOutside()
+    public async Task ContainsAnyShouldReturnFalseWhenEveryPointIsOutside()
     {
         Rect rect = new(0f, 0f, 10f, 10f);
 
@@ -241,7 +250,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task TryIntersectShouldSucceedForRectsSharingAnEdge()
+    public async Task TryIntersectShouldReturnTrueForRectsSharingAnEdge()
     {
         bool found = Rect.TryIntersect(new Rect(0f, 0f, 10f, 10f), new Rect(10f, 0f, 10f, 10f), out _);
 
@@ -282,7 +291,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task TryIntersectShouldFailForSeparateRects()
+    public async Task TryIntersectShouldReturnFalseForSeparateRects()
     {
         bool found = Rect.TryIntersect(new Rect(0f, 0f, 10f, 10f), new Rect(10.5f, 0f, 10f, 10f), out _);
 
@@ -371,7 +380,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task TryEncloseShouldSucceedWithPoints()
+    public async Task TryEncloseShouldReturnTrueWithPoints()
     {
         bool found = Rect.TryEnclose([new Point(4f, 2f)], out _);
 
@@ -379,7 +388,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task TryEncloseShouldFailWithoutPoints()
+    public async Task TryEncloseShouldReturnFalseWithoutPoints()
     {
         bool found = Rect.TryEnclose([], out _);
 
@@ -428,7 +437,99 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task EqualityShouldAcceptIdenticalRects()
+    public async Task EqualsShouldReturnTrueForARectWithTheSameComponents()
+    {
+        Rect rect = new(10f, 20f, 30f, 40f);
+
+        bool result = rect.Equals(new Rect(10f, 20f, 30f, 40f));
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    [Arguments(11f, 20f, 30f, 40f)]
+    [Arguments(10f, 21f, 30f, 40f)]
+    [Arguments(10f, 20f, 31f, 40f)]
+    [Arguments(10f, 20f, 30f, 41f)]
+    public async Task EqualsShouldReturnFalseForARectThatDiffersByOneComponent(float x, float y, float width, float height)
+    {
+        Rect rect = new(10f, 20f, 30f, 40f);
+
+        bool result = rect.Equals(new Rect(x, y, width, height));
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task EqualsShouldTreatNaNAsEqualToNaN()
+    {
+        Rect rect = new(float.NaN, 0f, 0f, 0f);
+
+        bool result = rect.Equals(new Rect(float.NaN, 0f, 0f, 0f));
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsShouldReturnTrueForNegativeZero()
+    {
+        Rect rect = new(0f, 0f, 0f, 0f);
+
+        bool result = rect.Equals(new Rect(float.NegativeZero, 0f, 0f, 0f));
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnTrueForTheSameRectBoxed()
+    {
+        Rect rect = new(10f, 20f, 30f, 40f);
+        object boxed = new Rect(10f, 20f, 30f, 40f);
+
+        bool result = rect.Equals(boxed);
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnFalseForNull()
+    {
+        Rect rect = new(10f, 20f, 30f, 40f);
+
+        bool result = rect.Equals(null);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnFalseForAnotherType()
+    {
+        Rect rect = new(10f, 20f, 30f, 40f);
+        object cells = new RectI(10, 20, 30, 40);
+
+        bool result = rect.Equals(cells);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task GetHashCodeShouldMatchForEqualRects()
+    {
+        int hash = new Rect(0f, 0f, 32f, 32f).GetHashCode();
+
+        await hash.Should().BeEqualTo(new Rect(0f, 0f, 32f, 32f).GetHashCode());
+    }
+
+    [Test]
+    public async Task GetHashCodeShouldMatchForZeroAndNegativeZero()
+    {
+        int hash = new Rect(0f, 0f, 0f, 0f).GetHashCode();
+
+        await hash.Should().BeEqualTo(new Rect(float.NegativeZero, 0f, 0f, 0f).GetHashCode());
+    }
+
+    [Test]
+    public async Task EqualityShouldReturnTrueForIdenticalRects()
     {
         Rect empty = new(5f, 5f, -1f, 10f);
 
@@ -446,15 +547,35 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task EqualRectsShouldBeFoundInAHashSet()
+    public async Task EqualityShouldTreatNaNAsEqualToNaN()
     {
-        HashSet<Rect> dirty = [new(0f, 0f, 32f, 32f)];
+        Rect rect = new(float.NaN, 0f, 0f, 0f);
 
-        await dirty.Contains(new Rect(0f, 0f, 32f, 32f)).Should().BeTrue();
+        bool result = rect == new Rect(float.NaN, 0f, 0f, 0f);
+
+        await result.Should().BeTrue();
     }
 
     [Test]
-    public async Task IsApproximatelyShouldAcceptARectWithinTheTolerance()
+    public async Task InequalityShouldReturnTrueForDifferentRects()
+    {
+        bool result = new Rect(10f, 20f, 30f, 40f) != new Rect(10f, 20f, 30f, 41f);
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task InequalityShouldReturnFalseForIdenticalRects()
+    {
+        Rect rect = new(10f, 20f, 30f, 40f);
+
+        bool result = rect != new Rect(10f, 20f, 30f, 40f);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task IsApproximatelyShouldReturnTrueForARectWithinTheTolerance()
     {
         bool result = new Rect(0f, 0f, 10f, 10f).IsApproximately(new Rect(0.01f, 0f, 10f, 9.99f), 0.02f);
 
@@ -462,7 +583,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task IsApproximatelyShouldRejectARectOutsideTheTolerance()
+    public async Task IsApproximatelyShouldReturnFalseForARectOutsideTheTolerance()
     {
         bool result = new Rect(0f, 0f, 10f, 10f).IsApproximately(new Rect(0f, 0f, 10.1f, 10f), 0.02f);
 
@@ -476,6 +597,28 @@ internal sealed class RectTests
         (float x, float y, float width, float height) = rect;
 
         await (x, y, width, height).Should().BeEqualTo((10f, 20f, 30f, 40f));
+    }
+
+    [Test]
+    public async Task ToStringShouldUseTheCurrentCulture()
+    {
+        Rect value = new(1.5f, 2.5f, 3f, 4f);
+
+        string result = value.ToString();
+
+        await result.Should().BeEqualTo(value.ToString(null, CultureInfo.CurrentCulture));
+    }
+
+    [Test]
+    public async Task TryFormatUtf8ShouldWriteTheSameTextAsToString()
+    {
+        Rect value = new(1.5f, 2.5f, 3f, 4f);
+        CultureInfo culture = CultureInfo.GetCultureInfo("fr-CA");
+        byte[] buffer = new byte[64];
+
+        value.TryFormat(buffer, out int written, default, culture);
+
+        await Encoding.UTF8.GetString(buffer, 0, written).Should().BeEqualTo(value.ToString(null, culture));
     }
 
     [Test]
@@ -495,7 +638,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task ContainsAllShouldBeTrueForAListInside()
+    public async Task ContainsAllShouldReturnTrueForAListInside()
     {
         Rect area = new(0f, 0f, 10f, 10f);
         List<Point> points = [new Point(1f, 1f), new Point(10f, 10f)];
@@ -504,7 +647,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task ContainsAllShouldBeTrueForAnArrayPassedAsASequence()
+    public async Task ContainsAllShouldReturnTrueForAnArrayPassedAsASequence()
     {
         Rect area = new(0f, 0f, 10f, 10f);
 
@@ -515,7 +658,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task ContainsAllShouldBeFalseForASequenceWithOnePointOutside()
+    public async Task ContainsAllShouldReturnFalseForASequenceWithOnePointOutside()
     {
         Rect area = new(0f, 0f, 10f, 10f);
 
@@ -523,7 +666,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task ContainsAllShouldBeTrueForAnEmptySequence()
+    public async Task ContainsAllShouldReturnTrueForAnEmptySequence()
     {
         Rect area = new(0f, 0f, 10f, 10f);
 
@@ -531,7 +674,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task ContainsAnyShouldBeTrueForASequenceWithOnePointInside()
+    public async Task ContainsAnyShouldReturnTrueForASequenceWithOnePointInside()
     {
         Rect area = new(0f, 0f, 10f, 10f);
 
@@ -539,7 +682,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task ContainsAnyShouldBeFalseForAListOutside()
+    public async Task ContainsAnyShouldReturnFalseForAListOutside()
     {
         Rect area = new(0f, 0f, 10f, 10f);
         List<Point> points = [new Point(20f, 20f), new Point(-1f, 5f)];
@@ -566,7 +709,7 @@ internal sealed class RectTests
     }
 
     [Test]
-    public async Task TryEncloseShouldFailForAnEmptySequence()
+    public async Task TryEncloseShouldReturnFalseForAnEmptySequence()
     {
         bool found = Rect.TryEnclose(Lazily(), out _);
 

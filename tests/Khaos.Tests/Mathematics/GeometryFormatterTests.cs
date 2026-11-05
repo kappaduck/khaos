@@ -164,7 +164,7 @@ internal sealed class GeometryFormatterTests
     }
 
     [Test]
-    public async Task TryFormatShouldSucceedWhenTheDestinationFitsExactly()
+    public async Task TryFormatShouldReturnTrueWhenTheDestinationFitsExactly()
     {
         char[] buffer = new char[FormattedLength];
 
@@ -179,7 +179,7 @@ internal sealed class GeometryFormatterTests
     [Arguments(5)]
     [Arguments(7)]
     [Arguments(9)]
-    public async Task TryFormatShouldFailWhenTheDestinationIsTooSmall(int length)
+    public async Task TryFormatShouldReturnFalseWhenTheDestinationIsTooSmall(int length)
     {
         char[] buffer = new char[length];
 
@@ -204,7 +204,7 @@ internal sealed class GeometryFormatterTests
     }
 
     [Test]
-    public async Task TryFormatUtf8ShouldSucceedWhenTheDestinationFitsExactly()
+    public async Task TryFormatUtf8ShouldReturnTrueWhenTheDestinationFitsExactly()
     {
         byte[] buffer = new byte[FormattedLength];
 
@@ -219,7 +219,7 @@ internal sealed class GeometryFormatterTests
     [Arguments(5)]
     [Arguments(7)]
     [Arguments(9)]
-    public async Task TryFormatUtf8ShouldFailWhenTheDestinationIsTooSmall(int length)
+    public async Task TryFormatUtf8ShouldReturnFalseWhenTheDestinationIsTooSmall(int length)
     {
         byte[] buffer = new byte[length];
 

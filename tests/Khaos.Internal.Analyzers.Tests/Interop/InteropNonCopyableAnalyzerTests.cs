@@ -322,6 +322,170 @@ internal sealed class InteropNonCopyableAnalyzerTests
         await result.Ids.Should().BeEmpty();
     }
 
+
+    [Test]
+    public async Task CompilationWithoutNonCopyableShouldReportNothing()
+    {
+        const string source = """
+            namespace KappaDuck.Khaos.Input;
+
+            internal readonly ref struct Lease : System.IDisposable
+            {
+                public void Dispose()
+                {
+                }
+            }
+
+            internal static class Leases
+            {
+                internal static void Copy()
+                {
+                    Lease lease = new();
+                    Lease copy = lease;
+                    copy.Dispose();
+                }
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropNonCopyableAnalyzer>.RunAsync(source);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Ids.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task FieldReadShouldReportNothing()
+    {
+        const string source = """
+            namespace KappaDuck.Khaos.Interop.SDL;
+
+            internal static class Leases
+            {
+                internal static int Count()
+                {
+                    using Lease lease = new();
+                    return lease.Count;
+                }
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropNonCopyableAnalyzer>.RunAsync(source, Buffer, Lease);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Ids.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task MethodGroupShouldReportNothing()
+    {
+        const string source = """
+            namespace KappaDuck.Khaos.Interop.SDL;
+
+            internal static class Leases
+            {
+                internal static System.Action Releaser()
+                {
+                    using Lease lease = new();
+                    return lease.Release;
+                }
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropNonCopyableAnalyzer>.RunAsync(source, Buffer, Lease);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Ids.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task LocalOfAnArrayTypeShouldReportNothing()
+    {
+        const string source = """
+            namespace KappaDuck.Khaos.Input;
+
+            internal static class Counts
+            {
+                internal static int Total()
+                {
+                    int[] counts = [1, 2];
+                    return counts.Length;
+                }
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropNonCopyableAnalyzer>.RunAsync(source, Buffer);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Ids.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task AssigningACreationToALocalShouldReportKHI012OnlyForTheCreation()
+    {
+        const string source = """
+            namespace KappaDuck.Khaos.Input;
+
+            using KappaDuck.Khaos.Interop.SDL;
+
+            internal static class Keyboards
+            {
+                internal static void Replace()
+                {
+                    OwnedBuffer<uint> keyboards;
+                    keyboards = SDL3.GetKeyboards();
+                }
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropNonCopyableAnalyzer>.RunAsync(source, Buffer);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Reported.Should().BeEqualTo("Source0.cs(10,21): error KHI012: This 'OwnedBuffer<uint>' has no using to own it; declare it with using, or return it to the caller");
+    }
+
+    [Test]
+    public async Task UsingStatementOnACreationShouldReportNothing()
+    {
+        const string source = """
+            namespace KappaDuck.Khaos.Input;
+
+            using KappaDuck.Khaos.Interop.SDL;
+
+            internal static class Keyboards
+            {
+                internal static void Touch()
+                {
+                    using (SDL3.GetKeyboards())
+                    {
+                    }
+                }
+            }
+            """;
+
+        AnalyzerResult result = await AnalyzerRunner<InteropNonCopyableAnalyzer>.RunAsync(source, Buffer);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Ids.Should().BeEmpty();
+    }
+
+    private const string Lease = """
+        namespace KappaDuck.Khaos.Interop.SDL;
+
+        [NonCopyable]
+        internal struct Lease : System.IDisposable
+        {
+            internal int Count;
+
+            internal void Release()
+            {
+            }
+
+            public void Dispose()
+            {
+            }
+        }
+        """;
+
     private const string Buffer = """
         namespace KappaDuck.Khaos.Interop
         {
