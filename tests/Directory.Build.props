@@ -30,6 +30,10 @@
     <IsKhaosAnalyzerTests>$(MSBuildProjectName.EndsWith('.Analyzers.Tests'))</IsKhaosAnalyzerTests>
   </PropertyGroup>
 
+  <ItemGroup Label="Exclude Test projects from code coverage">
+    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage" />
+  </ItemGroup>
+
   <ItemGroup Label="Analyzer test NuGets" Condition="'$(IsKhaosAnalyzerTests)' == 'true'">
     <PackageReference Include="Basic.Reference.Assemblies.Net110" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />

@@ -3,6 +3,7 @@
 
 using KappaDuck.Khaos.Mathematics;
 using System.Globalization;
+using System.Text;
 
 namespace KappaDuck.Khaos.Tests.Mathematics;
 
@@ -72,7 +73,7 @@ internal sealed class RectITests
     [Arguments(0, 5, true)]
     [Arguments(5, 0, true)]
     [Arguments(-1, 5, true)]
-    public async Task IsEmptyShouldBeTrueForAZeroOrNegativeDimension(int width, int height, bool expected)
+    public async Task IsEmptyShouldReturnTrueForAZeroOrNegativeDimension(int width, int height, bool expected)
     {
         RectI rect = new(3, 3, width, height);
 
@@ -168,7 +169,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task ContainsAllShouldBeTrueForNoCell()
+    public async Task ContainsAllShouldReturnTrueForNoCell()
     {
         RectI rect = new(10, 20, 30, 40);
 
@@ -176,7 +177,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task ContainsAllShouldBeTrueWhenEveryCellIsInside()
+    public async Task ContainsAllShouldReturnTrueWhenEveryCellIsInside()
     {
         RectI rect = new(0, 0, 10, 10);
 
@@ -184,7 +185,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task ContainsAllShouldBeFalseWhenOneCellIsOutside()
+    public async Task ContainsAllShouldReturnFalseWhenOneCellIsOutside()
     {
         RectI rect = new(0, 0, 10, 10);
 
@@ -192,7 +193,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task ContainsAnyShouldBeFalseForNoCell()
+    public async Task ContainsAnyShouldReturnFalseForNoCell()
     {
         RectI rect = new(10, 20, 30, 40);
 
@@ -200,7 +201,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task ContainsAnyShouldBeTrueWhenOneCellIsInside()
+    public async Task ContainsAnyShouldReturnTrueWhenOneCellIsInside()
     {
         RectI rect = new(0, 0, 10, 10);
 
@@ -208,7 +209,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task ContainsAnyShouldBeFalseWhenEveryCellIsOutside()
+    public async Task ContainsAnyShouldReturnFalseWhenEveryCellIsOutside()
     {
         RectI rect = new(0, 0, 10, 10);
 
@@ -225,7 +226,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task TryIntersectShouldFailForRectsSharingAnEdge()
+    public async Task TryIntersectShouldReturnFalseForRectsSharingAnEdge()
     {
         bool found = RectI.TryIntersect(new RectI(0, 0, 10, 10), new RectI(10, 0, 10, 10), out _);
 
@@ -267,7 +268,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task TryIntersectShouldFailForSeparateRects()
+    public async Task TryIntersectShouldReturnFalseForSeparateRects()
     {
         bool found = RectI.TryIntersect(new RectI(0, 0, 10, 10), new RectI(11, 0, 10, 10), out _);
 
@@ -356,7 +357,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task TryEncloseShouldSucceedWithCells()
+    public async Task TryEncloseShouldReturnTrueWithCells()
     {
         bool found = RectI.TryEnclose([new PointI(4, 2)], out _);
 
@@ -364,7 +365,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task TryEncloseShouldFailWithoutCells()
+    public async Task TryEncloseShouldReturnFalseWithoutCells()
     {
         bool found = RectI.TryEnclose([], out _);
 
@@ -396,7 +397,71 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task EqualityShouldAcceptIdenticalRects()
+    public async Task EqualsShouldReturnTrueForARectWithTheSameComponents()
+    {
+        RectI rect = new(10, 20, 30, 40);
+
+        bool result = rect.Equals(new RectI(10, 20, 30, 40));
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    [Arguments(11, 20, 30, 40)]
+    [Arguments(10, 21, 30, 40)]
+    [Arguments(10, 20, 31, 40)]
+    [Arguments(10, 20, 30, 41)]
+    public async Task EqualsShouldReturnFalseForARectThatDiffersByOneComponent(int x, int y, int width, int height)
+    {
+        RectI rect = new(10, 20, 30, 40);
+
+        bool result = rect.Equals(new RectI(x, y, width, height));
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnTrueForTheSameRectBoxed()
+    {
+        RectI rect = new(10, 20, 30, 40);
+        object boxed = new RectI(10, 20, 30, 40);
+
+        bool result = rect.Equals(boxed);
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnFalseForNull()
+    {
+        RectI rect = new(10, 20, 30, 40);
+
+        bool result = rect.Equals(null);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnFalseForAnotherType()
+    {
+        RectI rect = new(10, 20, 30, 40);
+        object area = new Rect(10f, 20f, 30f, 40f);
+
+        bool result = rect.Equals(area);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task GetHashCodeShouldMatchForEqualRects()
+    {
+        int hash = new RectI(0, 0, 32, 32).GetHashCode();
+
+        await hash.Should().BeEqualTo(new RectI(0, 0, 32, 32).GetHashCode());
+    }
+
+    [Test]
+    public async Task EqualityShouldReturnTrueForIdenticalRects()
     {
         RectI empty = new(5, 5, 0, 10);
 
@@ -414,11 +479,21 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task EqualRectsShouldBeFoundInAHashSet()
+    public async Task InequalityShouldReturnTrueForDifferentRects()
     {
-        HashSet<RectI> dirty = [new(0, 0, 32, 32)];
+        bool result = new RectI(10, 20, 30, 40) != new RectI(10, 20, 30, 41);
 
-        await dirty.Contains(new RectI(0, 0, 32, 32)).Should().BeTrue();
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task InequalityShouldReturnFalseForIdenticalRects()
+    {
+        RectI rect = new(10, 20, 30, 40);
+
+        bool result = rect != new RectI(10, 20, 30, 40);
+
+        await result.Should().BeFalse();
     }
 
     [Test]
@@ -428,6 +503,28 @@ internal sealed class RectITests
         (int x, int y, int width, int height) = rect;
 
         await (x, y, width, height).Should().BeEqualTo((10, 20, 30, 40));
+    }
+
+    [Test]
+    public async Task ToStringShouldUseTheCurrentCulture()
+    {
+        RectI value = new(1, -2, 3, 4);
+
+        string result = value.ToString();
+
+        await result.Should().BeEqualTo(value.ToString(null, CultureInfo.CurrentCulture));
+    }
+
+    [Test]
+    public async Task TryFormatUtf8ShouldWriteTheSameTextAsToString()
+    {
+        RectI value = new(1, -2, 3, 4);
+        CultureInfo culture = CultureInfo.GetCultureInfo("fr-CA");
+        byte[] buffer = new byte[64];
+
+        value.TryFormat(buffer, out int written, default, culture);
+
+        await Encoding.UTF8.GetString(buffer, 0, written).Should().BeEqualTo(value.ToString(null, culture));
     }
 
     [Test]
@@ -447,7 +544,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task ContainsAllShouldBeTrueForAListInside()
+    public async Task ContainsAllShouldReturnTrueForAListInside()
     {
         RectI area = new(0, 0, 10, 10);
         List<PointI> points = [new PointI(1, 1), new PointI(9, 9)];
@@ -456,7 +553,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task ContainsAllShouldBeTrueForAnArrayPassedAsASequence()
+    public async Task ContainsAllShouldReturnTrueForAnArrayPassedAsASequence()
     {
         RectI area = new(0, 0, 10, 10);
 
@@ -467,7 +564,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task ContainsAllShouldBeFalseForASequenceWithOneCellOutside()
+    public async Task ContainsAllShouldReturnFalseForASequenceWithOneCellOutside()
     {
         RectI area = new(0, 0, 10, 10);
 
@@ -475,7 +572,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task ContainsAllShouldBeTrueForAnEmptySequence()
+    public async Task ContainsAllShouldReturnTrueForAnEmptySequence()
     {
         RectI area = new(0, 0, 10, 10);
 
@@ -483,7 +580,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task ContainsAnyShouldBeTrueForASequenceWithOneCellInside()
+    public async Task ContainsAnyShouldReturnTrueForASequenceWithOneCellInside()
     {
         RectI area = new(0, 0, 10, 10);
 
@@ -491,7 +588,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task ContainsAnyShouldBeFalseForAListOutside()
+    public async Task ContainsAnyShouldReturnFalseForAListOutside()
     {
         RectI area = new(0, 0, 10, 10);
         List<PointI> points = [new PointI(20, 20), new PointI(10, 5)];
@@ -518,7 +615,7 @@ internal sealed class RectITests
     }
 
     [Test]
-    public async Task TryEncloseShouldFailForAnEmptySequence()
+    public async Task TryEncloseShouldReturnFalseForAnEmptySequence()
     {
         bool found = RectI.TryEnclose(Lazily(), out _);
 

@@ -134,6 +134,22 @@ internal sealed class Vector2ExtensionsTests
     }
 
     [Test]
+    public async Task ClampLengthShouldRejectANaNWithoutItsSignBit()
+    {
+        float positiveNaN = BitConverter.Int32BitsToSingle(0x7FC00000);
+
+        await Assert.That(() => new Vector2(1f, 1f).ClampLength(positiveNaN)).Throws<ArgumentOutOfRangeException>();
+    }
+
+    [Test]
+    public async Task ClampLengthShouldSayThatNaNIsNotANumber()
+    {
+        ArgumentOutOfRangeException exception = Assert.Throws<ArgumentOutOfRangeException>(static () => new Vector2(1f, 1f).ClampLength(float.NaN));
+
+        await exception.Message.Should().Contain("must be a number");
+    }
+
+    [Test]
     public async Task MoveTowardsShouldStepByTheMaximumDistance()
     {
         Vector2 moved = new Vector2(0f, 0f).MoveTowards(new Vector2(10f, 0f), 3f);

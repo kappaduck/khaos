@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 using KappaDuck.Khaos.Mathematics;
+using System.Collections;
 
 namespace KappaDuck.Khaos.Tests.Mathematics;
 
@@ -59,7 +60,7 @@ internal sealed class CellEnumeratorTests
     }
 
     [Test]
-    public async Task MoveNextShouldBeFalseAfterTheLastCell()
+    public async Task MoveNextShouldReturnFalseAfterTheLastCell()
     {
         CellEnumerator cells = new RectI(0, 0, 1, 1).Cells;
 
@@ -82,4 +83,18 @@ internal sealed class CellEnumeratorTests
 
         await cells.Current.Should().BeEqualTo(new PointI(10, 10));
     }
+
+    [Test]
+    public async Task CurrentShouldBeTheSameCellThroughTheNonGenericInterface()
+    {
+        CellEnumerator cells = new RectI(10, 20, 1, 1).Cells;
+        object expected = new PointI(10, 20);
+
+        cells.MoveNext();
+
+        await NonGenericCurrent(ref cells).Should().BeEqualTo(expected);
+    }
+
+    private static object NonGenericCurrent<TEnumerator>(ref TEnumerator enumerator)
+        where TEnumerator : IEnumerator, allows ref struct => enumerator.Current;
 }

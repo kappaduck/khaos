@@ -22,11 +22,9 @@ internal sealed class AngleTests
     [Test]
     public async Task FromRadiansShouldKeepTheValue()
     {
-        const float radians = MathF.PI / 2f;
+        Angle angle = Angle.FromRadians(MathF.PI / 2f);
 
-        Angle angle = Angle.FromRadians(radians);
-
-        await angle.Radians.Should().BeEqualTo(radians);
+        await angle.Radians.Should().BeEqualTo(MathF.PI / 2f);
     }
 
     [Test]
@@ -104,7 +102,7 @@ internal sealed class AngleTests
     }
 
     [Test]
-    public async Task IsApproximatelyShouldRejectAnglesFurtherThanTheTolerance()
+    public async Task IsApproximatelyShouldReturnFalseForAnglesFurtherThanTheTolerance()
     {
         bool result = Angle.FromDegrees(10f).IsApproximately(Angle.FromDegrees(12f), Angle.FromDegrees(1f));
 
@@ -112,7 +110,105 @@ internal sealed class AngleTests
     }
 
     [Test]
-    public async Task EqualityShouldAcceptTheSameAngle()
+    public async Task EqualsShouldReturnTrueForTheSameAngle()
+    {
+        Angle angle = Angle.FromRadians(1f);
+
+        bool result = angle.Equals(Angle.FromRadians(1f));
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsShouldReturnFalseForAnAngleThatDiffersByTheSmallestAmount()
+    {
+        Angle angle = Angle.FromRadians(1f);
+
+        bool result = angle.Equals(Angle.FromRadians(1f + 1e-6f));
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task EqualsShouldTellAFullTurnFromZero()
+    {
+        Angle turn = Angle.FromDegrees(360f);
+
+        bool result = turn.Equals(Angle.Zero);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task EqualsShouldTreatNaNAsEqualToNaN()
+    {
+        Angle angle = Angle.FromRadians(float.NaN);
+
+        bool result = angle.Equals(Angle.FromRadians(float.NaN));
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsShouldReturnTrueForNegativeZero()
+    {
+        Angle angle = Angle.FromRadians(0f);
+
+        bool result = angle.Equals(Angle.FromRadians(float.NegativeZero));
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnTrueForTheSameAngleBoxed()
+    {
+        Angle angle = Angle.FromRadians(1f);
+        object boxed = Angle.FromRadians(1f);
+
+        bool result = angle.Equals(boxed);
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnFalseForNull()
+    {
+        Angle angle = Angle.FromRadians(1f);
+
+        bool result = angle.Equals(null);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task EqualsObjectShouldReturnFalseForAnotherType()
+    {
+        Angle angle = Angle.FromRadians(1f);
+        object radians = 1f;
+
+        bool result = angle.Equals(radians);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task GetHashCodeShouldMatchForEqualAngles()
+    {
+        int hash = Angle.FromDegrees(45f).GetHashCode();
+
+        await hash.Should().BeEqualTo(Angle.FromDegrees(45f).GetHashCode());
+    }
+
+    [Test]
+    public async Task GetHashCodeShouldMatchForZeroAndNegativeZero()
+    {
+        int hash = Angle.FromRadians(0f).GetHashCode();
+
+        await hash.Should().BeEqualTo(Angle.FromRadians(float.NegativeZero).GetHashCode());
+    }
+
+    [Test]
+    public async Task EqualityShouldReturnTrueForTheSameAngle()
     {
         Angle angle = Angle.FromRadians(1f);
 
@@ -122,7 +218,7 @@ internal sealed class AngleTests
     }
 
     [Test]
-    public async Task EqualityShouldRejectAnglesThatDifferByTheSmallestAmount()
+    public async Task EqualityShouldReturnFalseForAnglesThatDifferByTheSmallestAmount()
     {
         bool result = Angle.FromRadians(1f) == Angle.FromRadians(1f + 1e-6f);
 
@@ -130,7 +226,17 @@ internal sealed class AngleTests
     }
 
     [Test]
-    public async Task InequalityShouldHoldForDifferentAngles()
+    public async Task EqualityShouldTreatNaNAsEqualToNaN()
+    {
+        Angle angle = Angle.FromRadians(float.NaN);
+
+        bool result = angle == Angle.FromRadians(float.NaN);
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task InequalityShouldReturnTrueForDifferentAngles()
     {
         bool result = Angle.FromRadians(1f) != Angle.FromRadians(2f);
 
@@ -138,11 +244,75 @@ internal sealed class AngleTests
     }
 
     [Test]
-    public async Task LessThanShouldHoldForAnglesThatDifferByTheSmallestAmount()
+    public async Task InequalityShouldReturnFalseForTheSameAngle()
+    {
+        Angle angle = Angle.FromRadians(1f);
+
+        bool result = angle != Angle.FromRadians(1f);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task LessThanShouldReturnTrueForAnglesThatDifferByTheSmallestAmount()
     {
         bool result = Angle.FromRadians(1f) < Angle.FromRadians(1f + 1e-6f);
 
         await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task GreaterThanShouldReturnTrueForALargerAngle()
+    {
+        bool result = Angle.FromDegrees(90f) > Angle.FromDegrees(45f);
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task GreaterThanShouldReturnFalseForTheSameAngle()
+    {
+        Angle rightAngle = Angle.FromDegrees(90f);
+
+        bool result = rightAngle > Angle.FromDegrees(90f);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task LessThanOrEqualShouldReturnTrueForTheSameAngle()
+    {
+        Angle rightAngle = Angle.FromDegrees(90f);
+
+        bool result = rightAngle <= Angle.FromDegrees(90f);
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task LessThanOrEqualShouldReturnFalseForALargerAngle()
+    {
+        bool result = Angle.FromDegrees(90f) <= Angle.FromDegrees(45f);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task GreaterThanOrEqualShouldReturnTrueForTheSameAngle()
+    {
+        Angle rightAngle = Angle.FromDegrees(90f);
+
+        bool result = rightAngle >= Angle.FromDegrees(90f);
+
+        await result.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task GreaterThanOrEqualShouldReturnFalseForASmallerAngle()
+    {
+        bool result = Angle.FromDegrees(45f) >= Angle.FromDegrees(90f);
+
+        await result.Should().BeFalse();
     }
 
     [Test]
@@ -151,14 +321,6 @@ internal sealed class AngleTests
         int result = Angle.FromRadians(1f).CompareTo(Angle.FromRadians(2f));
 
         await result.Should().BeLessThan(0);
-    }
-
-    [Test]
-    public async Task EqualAnglesShouldBeFoundInAHashSet()
-    {
-        HashSet<Angle> angles = [Angle.FromDegrees(45f)];
-
-        await angles.Contains(Angle.FromDegrees(45f)).Should().BeTrue();
     }
 
     [Test]
@@ -226,6 +388,16 @@ internal sealed class AngleTests
     }
 
     [Test]
+    public async Task ToStringShouldUseTheCurrentCulture()
+    {
+        Angle angle = Angle.FromDegrees(90.5f);
+
+        string result = angle.ToString();
+
+        await result.Should().BeEqualTo(angle.ToString(null, CultureInfo.CurrentCulture));
+    }
+
+    [Test]
     public async Task ToStringShouldApplyTheFormatAndTheProvider()
     {
         string result = Angle.FromDegrees(90f).ToString("F1", CultureInfo.GetCultureInfo("fr-CA"));
@@ -252,7 +424,7 @@ internal sealed class AngleTests
     }
 
     [Test]
-    public async Task TryFormatUtf8ShouldFailWhenTheDegreeSignDoesNotFit()
+    public async Task TryFormatUtf8ShouldReturnFalseWhenTheDegreeSignDoesNotFit()
     {
         byte[] buffer = new byte[3];
 
@@ -263,7 +435,27 @@ internal sealed class AngleTests
     }
 
     [Test]
-    public async Task TryFormatShouldFailWhenTheDestinationIsTooSmall()
+    public async Task TryFormatUtf8ShouldReturnFalseWhenTheNumberDoesNotFit()
+    {
+        byte[] buffer = new byte[1];
+
+        bool result = Angle.FromDegrees(90f).TryFormat(buffer, out _, default, CultureInfo.InvariantCulture);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task TryFormatShouldReturnFalseWhenTheNumberDoesNotFit()
+    {
+        char[] buffer = new char[1];
+
+        bool result = Angle.FromDegrees(90f).TryFormat(buffer, out _, default, CultureInfo.InvariantCulture);
+
+        await result.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task TryFormatShouldReturnFalseWhenTheDestinationIsTooSmall()
     {
         char[] buffer = new char[2];
 
