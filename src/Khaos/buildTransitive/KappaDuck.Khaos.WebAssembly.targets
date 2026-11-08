@@ -9,7 +9,7 @@
       2. Serves _khaos/khaos.js and _khaos/khaos.css, and a default index.html when the game has none.
       3. Puts the game's assets (under assets/) and appsettings*.json (at the root) in the
          page's virtual file system: the app's own, and those of the game projects it references.
-      4. After `dotnet publish`, zips wwwroot into <AssemblyName>-web.zip.
+      4. After `dotnet publish`, zips wwwroot into <KhaosGameName>.zip.
       5. Makes CA1416 an error and passes the Khaos environment to the runtime's boot config.
 
     Properties a game can set:

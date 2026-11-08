@@ -78,20 +78,22 @@
     <KhaosGameName Condition="'$(KhaosGameName)' == ''">$([System.Text.RegularExpressions.Regex]::Replace('$(MSBuildProjectName)', '\.(Desktop|Web)$', ''))</KhaosGameName>
   </PropertyGroup>
 
-  <Target Name="KhaosRenamePublishedExecutable" AfterTargets="_CopyAotSymbols"
-          Condition="'$(UsingMicrosoftNETSdkWebAssembly)' != 'true' and '$(PublishAot)' == 'true' and '$(KhaosGameName)' != '' and '$(KhaosGameName)' != '$(TargetName)'">
+  <Target Name="KhaosRenamePublishedExecutable" AfterTargets="Publish"
+            Condition="'$(UsingMicrosoftNETSdkWebAssembly)' != 'true' and '$(KhaosGameName)' != '' and '$(KhaosGameName)' != '$(TargetName)'">
     <PropertyGroup>
       <_KhaosPublishDir>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(PublishDir)'))</_KhaosPublishDir>
+      <_KhaosPublishedExecutable>$(_KhaosPublishDir)$(TargetName)$(_NativeExecutableExtension)</_KhaosPublishedExecutable>
     </PropertyGroup>
 
     <ItemGroup>
-      <_KhaosPublishedBinary Include="$(_KhaosPublishDir)$(TargetName)$(NativeBinaryExt)" />
-      <_KhaosPublishedBinary Include="$(_KhaosPublishDir)$(TargetName)*.pdb;$(_KhaosPublishDir)$(TargetName)*.dbg" />
+      <_KhaosPublishedBinary Include="$(_KhaosPublishedExecutable)" Condition="Exists('$(_KhaosPublishedExecutable)')" />
+      <_KhaosPublishedBinary Include="$(_KhaosPublishDir)$(TargetName)*.pdb;$(_KhaosPublishDir)$(TargetName)*.dbg" Condition="'$(PublishAot)' == 'true'" />
       <_KhaosPublishedBinary KhaosRenamed="$(_KhaosPublishDir)$(KhaosGameName)$([System.String]::Copy('%(Filename)%(Extension)').Substring($(TargetName.Length)))" />
     </ItemGroup>
 
     <Move SourceFiles="@(_KhaosPublishedBinary)" DestinationFiles="@(_KhaosPublishedBinary->'%(KhaosRenamed)')" />
-    <Message Importance="high" Text="$(MSBuildProjectName) -> $(_KhaosPublishDir)$(KhaosGameName)$(NativeBinaryExt)" />
+    <Message Importance="high" Text="$(MSBuildProjectName) -> $(_KhaosPublishDir)$(KhaosGameName)$(_NativeExecutableExtension)"
+             Condition="Exists('$(_KhaosPublishDir)$(KhaosGameName)$(_NativeExecutableExtension)')" />
   </Target>
 
   <PropertyGroup Label="Desktop" Condition="('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe') and '$(UsingMicrosoftNETSdkWebAssembly)' != 'true' and '$(ApplicationIcon)' == ''">
