@@ -37,6 +37,7 @@
 
   <ItemGroup Label="Internals">
     <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+    <InternalsVisibleTo Include="$(AssemblyName).Allocations.Tests" />
     <InternalsVisibleTo Include="Benchmarks" />
   </ItemGroup>
 

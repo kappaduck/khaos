@@ -53,15 +53,16 @@
   </Folder>
   <Folder Name="/src/">
     <File Path="src/Directory.Build.props" />
-    <Project Path="src/Khaos.Templates/Khaos.Templates.csproj" Id="1a9df4ff-db05-4d0f-984e-0941ecfdd3a1" />
+    <Project Path="src/Khaos.Templates/Khaos.Templates.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <File Path="tests/.editorconfig" />
     <File Path="tests/Directory.Build.props" />
     <File Path="tests/Directory.Packages.props" />
+    <Project Path="tests/Khaos.Allocations.Tests/Khaos.Allocations.Tests.csproj" />
     <Project Path="tests/Khaos.Analyzers.Tests/Khaos.Analyzers.Tests.csproj" />
     <Project Path="tests/Khaos.Internal.Analyzers.Tests/Khaos.Internal.Analyzers.Tests.csproj" />
-    <Project Path="tests/Khaos.Tests/Khaos.Tests.csproj" Id="a3dc23be-5969-42b3-845b-d1226044a021" />
+    <Project Path="tests/Khaos.Tests/Khaos.Tests.csproj" />
   </Folder>
   <Folder Name="/workflows/">
     <File Path=".github/dependabot.yml" />
