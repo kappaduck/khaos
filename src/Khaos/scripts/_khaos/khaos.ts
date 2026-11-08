@@ -400,7 +400,24 @@ type Encoding = '.br' | '.gz';
 * @returns The extension to ask for, or null to stay on the plain files.
 */
 async function detectEncoding(): Promise<Encoding | null> {
+  let listed: string[];
+
+  try {
+    const response = await fetch(new URL('./probe.txt', import.meta.url), { cache: 'no-store' });
+    listed = response.ok ? (await response.text()).split(/\s+/).filter(line => line !== '') : [];
+  } catch {
+    return null;
+  }
+
+  if (listed[0] !== 'khaos') {
+    return null;
+  }
+
   for (const extension of ['.br', '.gz'] as const) {
+    if (!listed.includes(extension.slice(1))) {
+      continue;
+    }
+
     try {
       const response = await fetch(new URL(`./probe.txt${extension}`, import.meta.url), { cache: 'no-store' });
 
