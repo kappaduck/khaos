@@ -204,7 +204,7 @@ jam comes first.
 Full API documentation and samples are available:
 
 - [Full API reference][khaos.kappaduck.com]
-- [Benchmarks](https://khaos.kappaduck.com/benchmarks/): measured on every release
+- [Performance](https://khaos.kappaduck.com/performance/): how fast Khaos is, measured on every release
 - **[Examples][examples]**: one concept per example, playable in the documentation
 - **[`demo/`][demo]**: games made with Khaos, from small ones that each show a few features to a full game, playable in the documentation
 
