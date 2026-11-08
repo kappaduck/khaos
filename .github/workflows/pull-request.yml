@@ -57,6 +57,22 @@ jobs:
           --coverage
           --coverage-output-format cobertura
 
+      - name: Install the NativeAOT prerequisites
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends clang zlib1g-dev
+
+      - name: Publish the allocation tests as NativeAOT
+        run: dotnet publish tests/Khaos.Allocations.Tests --configuration Release
+
+      - name: Test on NativeAOT
+        shell: bash
+        run: |
+          exe=$(find artifacts/publish/Khaos.Allocations.Tests -type f \( -name KappaDuck.Khaos.Allocations.Tests -o -name KappaDuck.Khaos.Allocations.Tests.exe \) | head -1)
+          [[ -n "$exe" ]] || { echo "::error::The published allocation tests were not found under artifacts/publish."; exit 1; }
+          "$exe" --results-directory "${{ github.workspace }}/artifacts/test-results" --report-trx --report-trx-filename KappaDuck.Khaos.Allocations.Tests-nativeaot.trx
+
       - name: Upload results
         uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}

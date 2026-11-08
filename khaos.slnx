@@ -67,6 +67,7 @@
   <Folder Name="/workflows/">
     <File Path=".github/dependabot.yml" />
     <File Path=".github/workflows/benchmarks.yml" />
+    <File Path=".github/workflows/docs.yml" />
     <File Path=".github/workflows/khaos.yml" />
     <File Path=".github/workflows/labels.yml" />
     <File Path=".github/workflows/native.yml" />
