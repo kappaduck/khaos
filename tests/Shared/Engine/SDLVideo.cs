@@ -6,7 +6,7 @@ using KappaDuck.Khaos.Interop.SDL.Marshalling;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 
-namespace KappaDuck.Khaos.Tests.Helpers;
+namespace KappaDuck.Khaos.Testing.Engine;
 
 internal static partial class SDLVideo
 {

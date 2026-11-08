@@ -1,7 +1,7 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
-namespace KappaDuck.Khaos.Tests.Helpers;
+namespace KappaDuck.Khaos.Testing.Engine;
 
 [AttributeUsage(AttributeTargets.Method)]
 internal sealed class NamedVideoDriverOnlyAttribute() : SkipAttribute("The platform chooses the video driver in this session.")
