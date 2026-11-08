@@ -78,6 +78,36 @@
     <KhaosGameName Condition="'$(KhaosGameName)' == ''">$([System.Text.RegularExpressions.Regex]::Replace('$(MSBuildProjectName)', '\.(Desktop|Web)$', ''))</KhaosGameName>
   </PropertyGroup>
 
+  <!--
+    The game's identity, which the system shows apart from the window (the volume mixer, the window grouping of a
+    Linux desktop). It comes from the usual .NET properties:
+
+      Product               The name. The window title too, when the game gives none.
+      Version               The version.
+      Company               The creator (Authors when Company is not set).
+      Copyright             One line, such as "Copyright (c) 2027 KappaDuck".
+      KhaosGameIdentifier   A reverse-domain name, such as com.kappaduck.duckquest.
+      KhaosGameUrl          The game's page: a store, itch.io or a repository.
+
+    The SDK fills Product, Authors and Company with the assembly name when the game sets none
+    (Microsoft.NET.DefaultAssemblyInfo.targets): the name is then KhaosGameName, and the creator is left out.
+    The values go through the runtime configuration, like the environment, and the settings never change them.
+  -->
+  <PropertyGroup Label="Game metadata" Condition="'$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe'">
+    <_KhaosGameTitle>$(Product)</_KhaosGameTitle>
+    <_KhaosGameTitle Condition="'$(Product)' == '' or '$(Product)' == '$(AssemblyName)'">$(KhaosGameName)</_KhaosGameTitle>
+    <_KhaosGameCreator Condition="'$(Company)' != '$(AssemblyName)'">$(Company)</_KhaosGameCreator>
+  </PropertyGroup>
+
+  <ItemGroup Label="Game metadata" Condition="'$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe'">
+    <RuntimeHostConfigurationOption Include="KappaDuck.Khaos.Game.Name" Value="$(_KhaosGameTitle)" Condition="'$(_KhaosGameTitle)' != ''" />
+    <RuntimeHostConfigurationOption Include="KappaDuck.Khaos.Game.Version" Value="$(Version)" Condition="'$(Version)' != ''" />
+    <RuntimeHostConfigurationOption Include="KappaDuck.Khaos.Game.Creator" Value="$(_KhaosGameCreator)" Condition="'$(_KhaosGameCreator)' != ''" />
+    <RuntimeHostConfigurationOption Include="KappaDuck.Khaos.Game.Copyright" Value="$(Copyright)" Condition="'$(Copyright)' != ''" />
+    <RuntimeHostConfigurationOption Include="KappaDuck.Khaos.Game.Identifier" Value="$(KhaosGameIdentifier)" Condition="'$(KhaosGameIdentifier)' != ''" />
+    <RuntimeHostConfigurationOption Include="KappaDuck.Khaos.Game.Url" Value="$(KhaosGameUrl)" Condition="'$(KhaosGameUrl)' != ''" />
+  </ItemGroup>
+
   <Target Name="KhaosRenamePublishedExecutable" AfterTargets="Publish"
             Condition="'$(UsingMicrosoftNETSdkWebAssembly)' != 'true' and '$(KhaosGameName)' != '' and '$(KhaosGameName)' != '$(TargetName)'">
     <PropertyGroup>
