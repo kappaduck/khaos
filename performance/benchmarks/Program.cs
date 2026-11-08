@@ -8,31 +8,32 @@ using BenchmarkDotNet.Exporters;
 using BenchmarkDotNet.Exporters.Json;
 using BenchmarkDotNet.Loggers;
 using BenchmarkDotNet.Order;
+using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Validators;
 using System.Reflection;
 
-namespace KappaDuck.Khaos.Benchmarks;
+BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly)
+                 .Run(args, new Configuration());
 
-internal sealed class KhaosConfiguration : ManualConfig
+file sealed class Configuration : ManualConfig
 {
-    public KhaosConfiguration()
+    public Configuration()
     {
         AddColumnProvider(DefaultColumnProviders.Instance);
         AddLogger(ConsoleLogger.Default);
-        AddExporter(MarkdownExporter.GitHub);
+        AddExporter(MarkdownExporter.GitHub, JsonExporter.FullCompressed);
 
-        AddExporter(JsonExporter.FullCompressed);
         AddDiagnoser(MemoryDiagnoser.Default);
-
         AddValidator(JitOptimizationsValidator.FailOnError);
 
         WithOrderer(new DefaultOrderer(SummaryOrderPolicy.FastestToSlowest));
         WithArtifactsPath(ResolveArtifactsPath());
-    }
 
-    private static string ResolveArtifactsPath()
-    {
-        return typeof(KhaosConfiguration).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
-                                                  .Single(attribute => attribute.Key == "ArtifactsPath").Value!;
+        static string ResolveArtifactsPath()
+        {
+            Assembly assembly = typeof(Configuration).Assembly;
+            return assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
+                           .Single(a => a.Key == "ArtifactsPath").Value!;
+        }
     }
 }
