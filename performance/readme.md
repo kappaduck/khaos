@@ -1,6 +1,6 @@
 # Performance
 
-How fast Khaos runs, and what it allocates. Allocations matter as much as time where the game loop should allocate
+How fast Khaos runs, and what it allocates. Allocations matter as much as time. The game loop should allocate
 nothing, and a measurement proves it.
 
 ```bash
@@ -11,11 +11,11 @@ dotnet run -c Release --project performance/benchmarks -- --filter '*'
 
 Each kind answers its own question. A measurement belongs to exactly one of them.
 
-| Kind         | Measures                                    | It answers                                             | Lives in                              |
-| :----------- | :------------------------------------------ | :----------------------------------------------------- | :------------------------------------ |
-| **Micro**    | One method                                  | How fast is it, and does it allocate?                  | `benchmarks/Micro/<Namespace>/`       |
-| **Frame**    | One whole frame, headless                   | What does a frame cost before the game adds anything?  | `benchmarks/Frame/`                   |
-| **Scenario** | A recorded game, replayed from start to end | How does a whole game behave over thousands of frames? | One project per demo, here (later)    |
+| Kind         | Measures                                    | It answers                                             | Lives in                           |
+| :----------- | :------------------------------------------ | :----------------------------------------------------- | :--------------------------------- |
+| **Micro**    | One method                                  | How fast is it, and does it allocate?                  | `benchmarks/Micro/<Namespace>/`    |
+| **Frame**    | One whole frame, headless                   | What does a frame cost before the game adds anything?  | `benchmarks/Frame/`                |
+| **Scenario** | A recorded game, replayed from start to end | How does a whole game behave over thousands of frames? | One project per demo, here (later) |
 
 **Micro** benchmarks cover the hot paths, the code a game runs every frame. On a hot path, the expected result is
 `Allocated = 0 B` (shown as `-`).
@@ -92,7 +92,7 @@ dotnet tools/compare-benchmarks.cs --base ../khaos-base/artifacts/benchmarks/res
 
 ### Testing the comparison tool
 
-`tools/compare-benchmarks/` holds fake data, two small reports in BenchmarkDotNet's format with invented numbers,
+`tools/benchmarks/` holds fake data, two small reports in BenchmarkDotNet's format with invented numbers,
 and the output they must give. They test the tool, not Khaos, so nothing reads them when the benchmarks run. Real
 measurements would not work there, because they change a little on every run and a benchmark near the threshold
 would flip between `Same` and `Slower`. Each invented case forces one answer instead.
@@ -103,12 +103,13 @@ would flip between `Same` and `Slower`. Each invented case forces one answer ins
 | `diff.json`   | The same benchmarks in a made-up 0.2.0. One slower and allocating more, one faster, one allocating less, one unchanged, one gone, one new |
 | `expected.md` | The comparison the tool must print for these two files                                                                                    |
 
-After a change to the tool, check that it still prints the expected output, that `--strict` fails on the extra
-allocation, and that it still reads a real report (a folder compared with itself shows no change):
+After a change to the tool, run its self-test from the root of the repository. It compares the fake data, checks
+that the output matches `expected.md` (whatever the line endings) and that `--strict` fails on the extra allocation.
+Then check that the tool still reads a real report, where a folder compared with itself shows no change. Both
+commands work the same in bash and PowerShell.
 
-```bash
-dotnet tools/compare-benchmarks.cs --base tools/compare-benchmarks/base.json --diff tools/compare-benchmarks/diff.json --base-name 0.1.0 --diff-name 0.2.0 | diff - tools/compare-benchmarks/expected.md
-dotnet tools/compare-benchmarks.cs --base tools/compare-benchmarks/base.json --diff tools/compare-benchmarks/diff.json --strict > /dev/null; echo $?   # 1
+```shell
+dotnet tools/compare-benchmarks.cs --self-test   # Self-test passed, exit code 0
 dotnet tools/compare-benchmarks.cs --base artifacts/benchmarks/results --diff artifacts/benchmarks/results --strict   # No change, exit code 0
 ```
 
