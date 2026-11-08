@@ -42,7 +42,7 @@
 
     <!-- A game's assembly is named after the game, not KappaDuck.<project>. -->
     <AssemblyName>$(MSBuildProjectName)</AssemblyName>
-    <RootNamespace>$(MSBuildProjectName.Replace('.Desktop', '').Replace('.Web', ''))</RootNamespace>
+    <RootNamespace>$(MSBuildProjectName)</RootNamespace>
   </PropertyGroup>
 
   <!-- What the template writes in each app's project file. -->

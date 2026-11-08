@@ -28,6 +28,7 @@ jobs:
 
     outputs:
       latest: ${{ steps.latest.outputs.latest }}
+      previous: ${{ steps.latest.outputs.previous }}
 
     env:
       Channel: ${{ github.event_name == 'release' && !github.event.release.prerelease && 'release' || 'beta' }}
@@ -83,7 +84,11 @@ jobs:
           Tag: ${{ github.event.release.tag_name }}
         run: |
           version="${Tag#v}"
-          highest=$(git tag --list | sed 's/^v//' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
+          stable=$(git tag --list | sed 's/^v//' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V)
+          highest=$(tail -n 1 <<< "$stable")
+          previous=$(printf '%s\n%s\n' "$stable" "$version" | sort -V -u | grep -x -F -B 1 "$version" | head -n 1)
+          [[ "$previous" == "$version" ]] && previous=""
+          echo "previous=${previous:+v$previous}" >> "$GITHUB_OUTPUT"
           if [[ "$version" == "$highest" ]]; then
             echo "latest=true" >> "$GITHUB_OUTPUT"
           else
@@ -143,4 +148,5 @@ jobs:
     with:
       stage: production
       benchmarks: true
+      benchmarks-base: ${{ needs.publish.outputs.previous }}
     secrets: inherit

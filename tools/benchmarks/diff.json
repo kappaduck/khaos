@@ -1,0 +1,145 @@
+{
+  "Title": "Fixture 0.2.0",
+  "Benchmarks": [
+    {
+      "DisplayInfo": "FrameBenchmarks.FrameWithEvents: DefaultJob [Count=64]",
+      "FullName": "KappaDuck.Khaos.Benchmarks.Frame.FrameBenchmarks.FrameWithEvents(Count: 64)",
+      "Statistics": {
+        "OriginalValues": [
+          1593,
+          1594,
+          1595,
+          1596,
+          1597,
+          1598,
+          1599,
+          1600,
+          1601,
+          1602,
+          1603,
+          1604,
+          1605,
+          1606,
+          1607
+        ],
+        "N": 15,
+        "Median": 1600
+      },
+      "Memory": {
+        "BytesAllocatedPerOperation": 48
+      }
+    },
+    {
+      "DisplayInfo": "ColorBenchmarks.Lerp: DefaultJob",
+      "FullName": "KappaDuck.Khaos.Benchmarks.Micro.Graphics.ColorBenchmarks.Lerp",
+      "Statistics": {
+        "OriginalValues": [
+          8.89,
+          8.9,
+          8.91,
+          8.92,
+          8.93,
+          8.94,
+          8.95,
+          8.96,
+          8.97,
+          8.98,
+          8.99,
+          9.0,
+          9.01,
+          9.02,
+          9.03
+        ],
+        "N": 15,
+        "Median": 8.96
+      },
+      "Memory": {
+        "BytesAllocatedPerOperation": 0
+      }
+    },
+    {
+      "DisplayInfo": "KeyboardBenchmarks.IsDown: DefaultJob",
+      "FullName": "KappaDuck.Khaos.Benchmarks.Micro.Input.KeyboardBenchmarks.IsDown",
+      "Statistics": {
+        "OriginalValues": [
+          3.93,
+          3.94,
+          3.95,
+          3.96,
+          3.97,
+          3.98,
+          3.99,
+          4.0,
+          4.01,
+          4.02,
+          4.03,
+          4.04,
+          4.05,
+          4.06,
+          4.07
+        ],
+        "N": 15,
+        "Median": 4.0
+      },
+      "Memory": {
+        "BytesAllocatedPerOperation": 0
+      }
+    },
+    {
+      "DisplayInfo": "GeometryFormatterBenchmarks.TryFormat: DefaultJob [Culture=]",
+      "FullName": "KappaDuck.Khaos.Benchmarks.Micro.Mathematics.GeometryFormatterBenchmarks.TryFormat(Culture: \"\")",
+      "Statistics": {
+        "OriginalValues": [
+          329,
+          330,
+          331,
+          332,
+          333,
+          334,
+          335,
+          336,
+          337,
+          338,
+          339,
+          340,
+          341,
+          342,
+          343
+        ],
+        "N": 15,
+        "Median": 336
+      },
+      "Memory": {
+        "BytesAllocatedPerOperation": 0
+      }
+    },
+    {
+      "DisplayInfo": "RectBenchmarks.Union: DefaultJob",
+      "FullName": "KappaDuck.Khaos.Benchmarks.Micro.Mathematics.RectBenchmarks.Union",
+      "Statistics": {
+        "OriginalValues": [
+          2.13,
+          2.14,
+          2.15,
+          2.16,
+          2.17,
+          2.18,
+          2.19,
+          2.2,
+          2.21,
+          2.22,
+          2.23,
+          2.24,
+          2.25,
+          2.26,
+          2.27
+        ],
+        "N": 15,
+        "Median": 2.2
+      },
+      "Memory": {
+        "BytesAllocatedPerOperation": 0
+      }
+    }
+  ]
+}

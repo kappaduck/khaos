@@ -4,7 +4,7 @@
 using KappaDuck.Khaos.Hosting;
 using KappaDuck.Khaos.Windowing;
 
-namespace KappaDuck.Khaos.Tests.Helpers;
+namespace KappaDuck.Khaos.Testing.Engine;
 
 [AttributeUsage(AttributeTargets.Method)]
 internal sealed class MultipleScreensOnlyAttribute() : SkipAttribute("The test needs a second screen.")

@@ -71,10 +71,17 @@ The result is in `MyGame.Desktop/bin/Release/net11.0/win-x64/publish/` (or `linu
 
 **Zip the whole folder** and share that zip. The `.pdb` or `.dbg` files are only for debugging and can stay out.
 
+> [!NOTE]
+> Without NativeAOT (`<PublishAot>false</PublishAot>` in `MyGame.Desktop.csproj`), the game is still `MyGame.exe`
+> (or `MyGame` on Linux). The folder then also holds your game's `.dll` files (`MyGame.dll`, `MyGame.Desktop.dll`)
+> and the `.json` files .NET reads, and players need .NET installed unless you add `--self-contained` to the
+> publish command.
+
 ### Your game's name and icon
 
-What players get is named after your game, without the `.Desktop` or `.Web` of the apps like `MyGame.exe` (or `MyGame`
-on Linux), and `MyGame.zip` for the browser. To use another name, set `KhaosGameName` in the app's `.csproj`:
+What players get is named after your game, without the `.Desktop` or `.Web` of the apps, such as `MyGame.exe` (or
+`MyGame` on Linux) and `MyGame.zip` for the browser. To use another name, set `KhaosGameName` in the app's `.csproj`,
+`MyGame.Desktop.csproj` or `MyGame.Web.csproj`:
 
 ```xml
 <PropertyGroup>

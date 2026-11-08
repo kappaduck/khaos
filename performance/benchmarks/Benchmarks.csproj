@@ -1,11 +1,24 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup Label="Assembly">
     <AssemblyName>$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>KappaDuck.Khaos.Benchmarks</RootNamespace>
     <OutputType>Exe</OutputType>
     <PublishAot>true</PublishAot>
     <IsPublishable>true</IsPublishable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <!--
+    SafeDirectories covers the application directory on Windows only. NativeAOT searches the application directory
+    on Linux only with AssemblyDirectory, so the native libraries next to the benchmarks are found on both.
+    https://learn.microsoft.com/dotnet/api/system.runtime.interopservices.dllimportsearchpath
+  -->
+  <ItemGroup Label="Configure default search paths for DLL import">
+    <AssemblyAttribute Include="System.Runtime.InteropServices.DefaultDllImportSearchPathsAttribute">
+      <_Parameter1>System.Runtime.InteropServices.DllImportSearchPath.AssemblyDirectory | System.Runtime.InteropServices.DllImportSearchPath.SafeDirectories</_Parameter1>
+      <_Parameter1_IsLiteral>true</_Parameter1_IsLiteral>
+    </AssemblyAttribute>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(KhaosRoot)src/Khaos/Khaos.csproj" />

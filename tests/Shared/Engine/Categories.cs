@@ -1,7 +1,7 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
-namespace KappaDuck.Khaos.Tests.Helpers;
+namespace KappaDuck.Khaos.Testing.Engine;
 
 internal static class Categories
 {

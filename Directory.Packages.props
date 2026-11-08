@@ -37,6 +37,7 @@
 
   <ItemGroup Label="Benchmarks">
     <PackageVersion Include="BenchmarkDotNet" Version="0.16.0-preview.2" />
+    <PackageVersion Include="Perfolizer" Version="0.7.5" />
   </ItemGroup>
 
   <ItemGroup Label="Native">

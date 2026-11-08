@@ -7,11 +7,32 @@ on:
         description: BenchmarkDotNet filter (--filter), for example *Renderer*
         type: string
         default: '*'
+      runtimes:
+        description: Runtimes to measure (--runtimes), separated by spaces; the first one is the baseline
+        type: string
+        default: net11.0 nativeaot11.0
+      base:
+        description: A tag or branch to compare with (v0.1.0, main), measured on the same runner; empty to skip
+        type: string
+        default: ''
+      strict:
+        description: Fail when a benchmark allocates more than in the base
+        type: boolean
+        default: true
   workflow_call:
     inputs:
       filter:
         type: string
         default: '*'
+      runtimes:
+        type: string
+        default: net11.0 nativeaot11.0
+      base:
+        type: string
+        default: ''
+      strict:
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -24,7 +45,7 @@ jobs:
   run:
     name: Run
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 180
 
     steps:
       - name: Checkout repository
@@ -32,16 +53,58 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Checkout the base
+        if: inputs.base != ''
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.base }}
+          path: base
+          persist-credentials: false
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
           global-json-file: ./global.json
 
+      - name: Setup .NET for the base
+        if: inputs.base != ''
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: ./base/global.json
+
+      # The NativeAOT compiler links with clang and zlib: https://learn.microsoft.com/dotnet/core/deploying/native-aot/#prerequisites
+      - name: Install the NativeAOT prerequisites
+        if: contains(inputs.runtimes, 'nativeaot')
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends clang zlib1g-dev
+
+      - name: Run the benchmarks of the base
+        if: inputs.base != ''
+        working-directory: base
+        env:
+          Base: ${{ inputs.base }}
+          Filter: ${{ inputs.filter }}
+          Runtimes: ${{ inputs.runtimes }}
+        run: |
+          if [[ ! -d performance/benchmarks ]]; then
+            echo "::error::$Base has no performance/benchmarks: it is older than the layout this comparison needs."
+            exit 1
+          fi
+          read -ra runtimes <<< "$Runtimes"
+          args=(--filter "$Filter")
+          (( ${#runtimes[@]} > 0 )) && args+=(--runtimes "${runtimes[@]}")
+          dotnet run --configuration Release --project performance/benchmarks -- "${args[@]}"
+
       - name: Run the benchmarks
         env:
           Filter: ${{ inputs.filter }}
-        run: >-
-          dotnet run --configuration Release --project benchmarks -- --filter "$Filter"
+          Runtimes: ${{ inputs.runtimes }}
+        run: |
+          read -ra runtimes <<< "$Runtimes"
+          args=(--filter "$Filter")
+          (( ${#runtimes[@]} > 0 )) && args+=(--runtimes "${runtimes[@]}")
+          dotnet run --configuration Release --project performance/benchmarks -- "${args[@]}"
 
       - name: Summary
         run: |
@@ -58,7 +121,25 @@ jobs:
             echo >> "$GITHUB_STEP_SUMMARY"
           done
 
+      # comparison.md sits next to the reports, so docs.yml finds it at the root of the artifact.
+      - name: Compare with the base
+        if: inputs.base != ''
+        continue-on-error: ${{ !inputs.strict }}
+        env:
+          Base: ${{ inputs.base }}
+          Current: ${{ github.ref_name }}
+          Strict: ${{ inputs.strict }}
+        run: |
+          args=(--base base/artifacts/benchmarks/results --diff artifacts/benchmarks/results)
+          args+=(--base-name "${Base#v}" --diff-name "${Current#v}")
+          [[ "$Strict" == "true" ]] && args+=(--strict)
+          status=0
+          dotnet tools/compare-benchmarks.cs "${args[@]}" > artifacts/benchmarks/results/comparison.md || status=$?
+          cat artifacts/benchmarks/results/comparison.md >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
+
       - name: Upload the reports
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
           name: benchmarks

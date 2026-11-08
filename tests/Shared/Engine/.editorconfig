@@ -1,0 +1,7 @@
+[*.cs]
+
+# IDE0380: Remove unnecessary unsafe modifier
+# Same reason as src/Khaos/Interop/.editorconfig: under the updated memory safety rules, `unsafe` on a LibraryImport
+# marks it requires-unsafe, because native code dereferences its pointers, marshalling or not.
+# https://learn.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/ide0380
+dotnet_diagnostic.IDE0380.severity = none

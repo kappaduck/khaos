@@ -3,7 +3,6 @@
 
 using KappaDuck.Khaos.Hosting;
 using KappaDuck.Khaos.Mathematics;
-using KappaDuck.Khaos.Tests.Helpers;
 using KappaDuck.Khaos.Windowing;
 
 namespace KappaDuck.Khaos.Tests.Windowing;

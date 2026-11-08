@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    A test counts the bytes of one call, so every method must run optimized from its first call: the tier 0 JIT keeps
+    allocations the optimized JIT removes (a box behind `value is IFormattable` in a generic over one of our structs,
+    for example), and when a method is promoted to tier 1 depends on timing, not on the code under test.
+    https://learn.microsoft.com/dotnet/core/runtime-config/compilation#tiered-compilation
+  -->
+  <PropertyGroup Label="Measure optimized code only">
+    <TieredCompilation>false</TieredCompilation>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Native publish, to measure the allocations of the NativeAOT build as well">
+    <PublishAot>true</PublishAot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(KhaosRoot)src/Khaos/Khaos.csproj" />
+  </ItemGroup>
+</Project>

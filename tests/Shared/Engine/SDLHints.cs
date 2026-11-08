@@ -3,7 +3,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace KappaDuck.Khaos.Tests.Helpers;
+namespace KappaDuck.Khaos.Testing.Engine;
 
 internal static partial class SDLHints
 {

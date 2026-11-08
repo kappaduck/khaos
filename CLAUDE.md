@@ -150,7 +150,11 @@ in one readable line. The exception is a test of an enumerator, where the loop i
 
 A test never skips itself from its body (`Skip.Unless`, `Skip.When`, an early `return`): that hides the condition.
 Put it on the method as an attribute, so it shows beside `[Test]`: TUnit's `[RunOn(OS.Windows)]`, or one of ours
-in `tests/Khaos.Tests/Helpers/` (`[OffscreenOnly]`, `[RealScreenOnly]`, `[MultipleScreensOnly]`).
+in `tests/Shared/Engine/` (`[OffscreenOnly]`, `[RealScreenOnly]`, `[MultipleScreensOnly]`).
+
+`tests/Khaos.Tests` checks what the engine does; `tests/Khaos.Allocations.Tests` checks what it allocates, with
+`Allocated.By` (it measures the second call, so call it before any `await`). What both need to start the engine
+(the video driver, the skip attributes, the SDL helpers) lives in `tests/Shared/Engine/`, compiled into both.
 
 ### Demos
 
@@ -160,8 +164,10 @@ existing game, even renamed.
 
 ### Performance
 
-Hot paths should run with zero allocation. Prove it with a benchmark in `benchmarks/`, not by guessing (how
-benchmarks are set up is still to be decided).
+Hot paths should run with zero allocation. Prove it, not by guessing: a test in `tests/Khaos.Allocations.Tests`
+(measured with `GC.GetAllocatedBytesForCurrentThread()`, see `Allocated.By`) for the guarantee, and a benchmark
+in `performance/benchmarks/` when the time matters too. `performance/readme.md` says how they are organized
+(micro, frame, scenario) and how to run them on the JIT and NativeAOT.
 
 Khaos is a game framework: it must be fast and light. By default, write the code that allocates the least,
 as long as it stays readable:

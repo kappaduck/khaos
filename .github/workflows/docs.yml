@@ -12,6 +12,10 @@ on:
         description: Run the benchmarks and publish their results
         type: boolean
         default: false
+      benchmarks-base:
+        description: A tag to compare the benchmarks with (v0.1.0); empty to skip
+        type: string
+        default: ''
   workflow_call:
     inputs:
       stage:
@@ -22,6 +26,10 @@ on:
         description: Run the benchmarks and publish their results
         type: boolean
         default: false
+      benchmarks-base:
+        description: A tag to compare the benchmarks with (v0.1.0); empty to skip
+        type: string
+        default: ''
     secrets:
       CLOUDFLARE_API_TOKEN:
         required: true
@@ -46,6 +54,9 @@ jobs:
     name: Benchmarks
     if: inputs.benchmarks
     uses: ./.github/workflows/benchmarks.yml
+    with:
+      base: ${{ inputs.benchmarks-base }}
+      strict: false
 
   build:
     name: Build the site
@@ -95,19 +106,35 @@ jobs:
           name: benchmarks
           path: artifacts/benchmarks
 
-      # Replace the closing note in docs/benchmarks/index.md
+      # Replace the closing note in docs/performance/index.md with the tables, one section per kind.
+      # BenchmarkDotNet names each report <namespace>.<class>-report-github.md, and the namespace holds the kind.
       - name: Add the benchmark results
         if: inputs.benchmarks
         run: |
           shopt -s nullglob
-          reports=(artifacts/benchmarks/*-report-github.md)
-          (( ${#reports[@]} > 0 )) || { echo "::warning::No benchmark results to publish."; exit 0; }
-          sed -i '/^> \[!NOTE\]/,$d' docs/benchmarks/index.md
-          for report in "${reports[@]}"; do
-            name=$(basename "$report" -report-github.md)
-            printf '\n## %s\n\n' "${name##*.}" >> docs/benchmarks/index.md
-            cat "$report" >> docs/benchmarks/index.md
-          done
+          page=docs/performance/index.md
+          frame=(artifacts/benchmarks/*.Frame.*-report-github.md)
+          micro=(artifacts/benchmarks/*.Micro.*-report-github.md)
+          (( ${#frame[@]} + ${#micro[@]} > 0 )) || { echo "::warning::No benchmark results to publish."; exit 0; }
+          sed -i '/^> \[!NOTE\]/,$d' "$page"
+
+          add() {
+            local heading=$1
+            shift
+            (( $# > 0 )) || return 0
+            printf '\n## %s\n' "$heading" >> "$page"
+            for report in "$@"; do
+              name=$(basename "$report" -report-github.md)
+              printf '\n### %s\n\n' "${name##*.}" >> "$page"
+              cat "$report" >> "$page"
+            done
+          }
+
+          comparison=artifacts/benchmarks/comparison.md
+          [[ -f "$comparison" ]] && { echo; cat "$comparison"; } >> "$page"
+
+          add 'One frame' "${frame[@]}"
+          add 'One operation at a time' "${micro[@]}"
 
       - name: Build the site
         run: dotnet tool exec docfx --yes --allow-roll-forward -- docs/docfx.json

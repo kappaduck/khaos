@@ -31,6 +31,32 @@
     <IsKhaosAnalyzerTests>$(MSBuildProjectName.EndsWith('.Analyzers.Tests'))</IsKhaosAnalyzerTests>
   </PropertyGroup>
 
+  <PropertyGroup Label="Engine test projects">
+    <IsKhaosEngineTests>false</IsKhaosEngineTests>
+    <IsKhaosEngineTests Condition="'$(MSBuildProjectName)' == 'Khaos.Tests' or '$(MSBuildProjectName)' == 'Khaos.Allocations.Tests'">true</IsKhaosEngineTests>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Engine test projects: native interop in the helpers" Condition="'$(IsKhaosEngineTests)' == 'true'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <!--
+    SafeDirectories covers the application directory on Windows only. NativeAOT searches the application directory
+    on Linux only with AssemblyDirectory, so the native libraries next to the tests are found on both.
+    https://learn.microsoft.com/dotnet/api/system.runtime.interopservices.dllimportsearchpath
+  -->
+  <ItemGroup Label="Engine test projects: default search paths for DLL import" Condition="'$(IsKhaosEngineTests)' == 'true'">
+    <AssemblyAttribute Include="System.Runtime.InteropServices.DefaultDllImportSearchPathsAttribute">
+      <_Parameter1>System.Runtime.InteropServices.DllImportSearchPath.AssemblyDirectory | System.Runtime.InteropServices.DllImportSearchPath.SafeDirectories</_Parameter1>
+      <_Parameter1_IsLiteral>true</_Parameter1_IsLiteral>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup Label="Engine test helpers" Condition="'$(IsKhaosEngineTests)' == 'true'">
+    <Compile Include="$(MSBuildThisFileDirectory)Shared/Engine/**/*.cs" LinkBase="Engine" />
+    <Using Include="KappaDuck.Khaos.Testing.Engine" />
+  </ItemGroup>
+
   <ItemGroup Label="Exclude Test projects from code coverage">
     <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage" />
   </ItemGroup>

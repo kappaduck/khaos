@@ -9,5 +9,5 @@
   topicHref: api/index.md
 - name: Errors
   href: rules/
-- name: Benchmarks
-  href: benchmarks/index.md
+- name: Performance
+  href: performance/index.md
