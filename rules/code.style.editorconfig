@@ -97,3 +97,8 @@ dotnet_diagnostic.CA5392.severity = warning
 # Enable the warning to protect from malicious DLL in the default DLL search directories
 # https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca5393
 dotnet_diagnostic.CA5393.severity = warning
+
+# AssemblyDirectory is allowed: the native libraries ship next to the game, which SafeDirectories already trusts on
+# Windows, and NativeAOT on Linux needs it to search there. Still unsafe: UseDllDirectoryForDependencies (256) and
+# ApplicationDirectory (512).
+dotnet_code_quality.CA5393.unsafe_DllImportSearchPath_bits = 768
