@@ -177,16 +177,25 @@ async function run(options: StartOptions): Promise<RuntimeAPI> {
     const exitCode = await runtime.runMain();
 
     if (exitCode !== 0) {
-      ui.fail(`The game did not start (exit code ${exitCode}).`, 'The browser console (F12) has the details.');
+      failToStart(ui, exitCode);
     }
 
     return runtime;
   } catch (error) {
     console.error(error);
-    ui.fail('The game could not start.', describe(error));
+
+    if (isExitStatus(error)) {
+      failToStart(ui, error.status);
+    } else {
+      ui.fail('The game could not start.', describe(error));
+    }
 
     throw error;
   }
+}
+
+function failToStart(ui: Ui, exitCode: number): void {
+  ui.fail(`The game did not start (exit code ${exitCode}).`, 'The browser console (F12) has the details.');
 }
 
 /** Whether the page runs in an iframe, where the player must click the game before it has the keyboard. */
@@ -403,7 +412,27 @@ function setText(host: HTMLElement, selector: string, text: string): void {
 }
 
 function describe(error: unknown): string {
-  return error instanceof Error ? (error.stack ?? error.message) : String(error);
+  if (error instanceof Error) {
+    return error.stack ?? error.message;
+  }
+
+  if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string') {
+    return error.message;
+  }
+
+  return String(error);
+}
+
+/** What the runtime throws when the game calls exit(): not an Error, so it has no stack. */
+interface ExitStatus {
+  readonly name: 'ExitStatus';
+  readonly status: number;
+}
+
+function isExitStatus(error: unknown): error is ExitStatus {
+  return typeof error === 'object' && error !== null
+    && 'name' in error && error.name === 'ExitStatus'
+    && 'status' in error && typeof error.status === 'number';
 }
 
 /**
