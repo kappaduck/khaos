@@ -3,6 +3,7 @@
 
 using KappaDuck.Khaos.Graphics;
 using KappaDuck.Khaos.Graphics.Rendering;
+using KappaDuck.Khaos.Hosting;
 using KappaDuck.Khaos.Windowing;
 
 namespace KappaDuck.Khaos;
@@ -42,6 +43,16 @@ public abstract class Game2D
     /// Closes the game once the current frame ends.
     /// </summary>
     public void Exit() => ExitRequested = true;
+
+    /// <summary>
+    /// Opens the window and runs the game until it exits.
+    /// </summary>
+    /// <remarks>
+    /// In the browser, it returns as soon as the first frame is scheduled, and the game keeps running.
+    /// </remarks>
+    /// <returns>The exit code of the game: 0 when it exits normally.</returns>
+    /// <exception cref="InvalidOperationException">A game is already running.</exception>
+    public int Run() => GameRunner.Run(this);
 
     /// <summary>
     /// Draws the frame. Khaos calls it once per frame, and shows what you drew when it returns.
