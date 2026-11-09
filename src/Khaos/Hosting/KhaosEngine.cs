@@ -12,6 +12,8 @@ internal sealed class KhaosEngine : IDisposable
     private readonly NativeSession _session;
     private readonly Renderer _renderer;
 
+    private bool _disposed;
+
     private KhaosEngine(Game2D game)
     {
         Game = game;
@@ -46,6 +48,11 @@ internal sealed class KhaosEngine : IDisposable
 
     public void Dispose()
     {
+        if (_disposed)
+            return;
+
+        _disposed = true;
+
         _renderer.Destroy();
         Window.Close();
 
