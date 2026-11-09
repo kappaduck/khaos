@@ -17,13 +17,13 @@ internal sealed class WindowTests
 {
     private static readonly WindowOptions _options = new() { Title = "Duck Quest", Width = 640, Height = 360 };
 
-    private EngineHost _host = null!;
+    private NativeSession _session = null!;
 
     [Before(Test)]
-    public void StartEngine() => _host = EngineHost.Start(new AppMetadata() { Name = "Duck Quest" });
+    public void StartEngine() => _session = NativeSession.Start(new AppMetadata() { Name = "Duck Quest" });
 
     [After(Test)]
-    public void StopEngine() => _host.Dispose();
+    public void StopEngine() => _session.Dispose();
 
     [Test]
     public async Task OpenShouldUseTheTitle()
@@ -31,6 +31,24 @@ internal sealed class WindowTests
         using WindowScope scope = WindowScope.Open(_options);
 
         await scope.Window.Title.Should().BeEqualTo("Duck Quest");
+    }
+
+    [Test]
+    public async Task OpenShouldPreferTheTitleOverTheDefaultTitle()
+    {
+        using WindowScope scope = WindowScope.Open(_options, "Duck Quest Deluxe");
+
+        await scope.Window.Title.Should().BeEqualTo("Duck Quest");
+    }
+
+    [Test]
+    public async Task OpenShouldUseTheDefaultTitleWhenTheTitleIsEmpty()
+    {
+        WindowOptions untitled = new() { Width = 640, Height = 360 };
+
+        using WindowScope scope = WindowScope.Open(untitled, "Duck Quest Deluxe");
+
+        await scope.Window.Title.Should().BeEqualTo("Duck Quest Deluxe");
     }
 
     [Test]
@@ -278,7 +296,7 @@ internal sealed class WindowTests
     [Test]
     public async Task OpenShouldThrowWhenTheEngineIsNotStarted()
     {
-        _host.Dispose();
+        _session.Dispose();
 
         await Assert.That(static () => Window.Open(_options)).Throws<InvalidOperationException>();
     }

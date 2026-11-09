@@ -76,6 +76,7 @@
   <ItemGroup Label="Global usings">
     <Using Include="TUnit" />
     <Using Include="TUnit.Mocks" />
+    <Using Include="TUnit.Mocks.Assertions" />
     <Using Include="TUnit.Assertions" />
     <Using Include="TUnit.Assertions.Should" />
     <Using Include="TUnit.Assertions.Should.Extensions" />

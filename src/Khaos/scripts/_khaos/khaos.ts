@@ -10,12 +10,19 @@
 //   [data-khaos-host]            The element around the canvas (default: the
 //                                canvas's parent). khaos.js sets its
 //                                data-khaos-state: loading, ready (waiting for
-//                                Play), playing or failed. khaos.css shows the
-//                                [data-khaos-screen] of that state.
+//                                Play), playing, ended (the game exited) or
+//                                failed. khaos.css shows the [data-khaos-screen]
+//                                of that state, and data-khaos-embedded when
+//                                the page runs in an iframe.
+//   [data-khaos-hint]            "alone" or "embedded": khaos.css shows the one
+//                                that matches data-khaos-embedded. In an
+//                                iframe, Enter does nothing until a click.
 //   <canvas id="canvas">         Or options.canvas. Created in the host if the
 //                                page has none.
 //   [data-khaos-play]            Starts the game. Without one, a click on the
 //                                host or Enter starts it.
+//   [data-khaos-replay]          Reloads the page once the game has ended: the
+//                                runtime cannot run Main a second time.
 //   [data-khaos-error-message]   Receives what went wrong, and
 //   [data-khaos-error-details]   the stack or the game's exception.
 //   [data-khaos-fullscreen]      Puts the host in fullscreen and back. Hidden
@@ -24,10 +31,9 @@
 // Every one is optional: a page with only a canvas runs the game, without
 // screens, and its errors stay in the console.
 //
-// The game follows the canvas's CSS size, so a game with window:resizable and
-// a scaling mode fills whatever box the page gives it, letterboxed.
-import { dotnet } from '../_framework/dotnet';
-import type { LoadBootResourceCallback, RuntimeAPI, WebAssemblyBootResourceType } from '../_framework/dotnet'
+// The canvas takes the size of the game's window, centered in the host.
+import { dotnet } from '../_framework/dotnet.js';
+import type { LoadBootResourceCallback, RuntimeAPI, WebAssemblyBootResourceType } from '../_framework/dotnet.js'
 
 
 /**
@@ -102,9 +108,6 @@ declare global {
 // Emscripten's Module has a canvas property SDL reads; .NET's typings leave it out.
 type SdlModule = RuntimeAPI['Module'] & { canvas: HTMLCanvasElement };
 
-// GameRunner prints this before the exception when the game stops on an error.
-const stoppedMarker = 'Khaos: the game stopped';
-
 let started: Promise<RuntimeAPI> | undefined;
 
 /**
@@ -142,7 +145,7 @@ async function run(options: StartOptions): Promise<RuntimeAPI> {
     throw error;
   }
 
-  reportGameErrors(ui);
+  reportCrashes(ui);
 
   try {
     const queryArgs = new URLSearchParams(window.location.search).getAll('arg');
@@ -163,6 +166,8 @@ async function run(options: StartOptions): Promise<RuntimeAPI> {
     // SDL changes the mouse cursor through Module.canvas.
     (runtime.Module as SdlModule).canvas = ui.canvas;
 
+    listenToGame(runtime, ui);
+
     if (options.clickToPlay ?? true) {
       await ui.waitForPlay();
     }
@@ -172,20 +177,32 @@ async function run(options: StartOptions): Promise<RuntimeAPI> {
     const exitCode = await runtime.runMain();
 
     if (exitCode !== 0) {
-      ui.fail(`The game did not start (exit code ${exitCode}).`, 'The browser console (F12) has the details.');
+      failToStart(ui, exitCode);
     }
 
     return runtime;
   } catch (error) {
     console.error(error);
-    ui.fail('The game could not start.', describe(error));
+
+    if (isExitStatus(error)) {
+      failToStart(ui, error.status);
+    } else {
+      ui.fail('The game could not start.', describe(error));
+    }
 
     throw error;
   }
 }
 
+function failToStart(ui: Ui, exitCode: number): void {
+  ui.fail(`The game did not start (exit code ${exitCode}).`, 'The browser console (F12) has the details.');
+}
+
+/** Whether the page runs in an iframe, where the player must click the game before it has the keyboard. */
+const embedded = window.self !== window.top;
+
 /** The value of data-khaos-state on the host; khaos.css shows the screen of the same name. */
-type State = 'loading' | 'ready' | 'playing' | 'failed';
+type State = 'loading' | 'ready' | 'playing' | 'ended' | 'failed';
 
 /** The screens of the page, as run() drives them. */
 interface Ui {
@@ -193,8 +210,10 @@ interface Ui {
   readonly canvas: HTMLCanvasElement;
   /** Shows the ready screen and resolves on the player's first interaction. */
   waitForPlay(): Promise<void>;
-  /** Hides the screens and gives the canvas the keyboard, unless the game has already failed. */
+  /** Hides the screens, unless the game has already failed, and gives the canvas the keyboard (see takeFocus). */
   playing(): void;
+  /** Shows the ended screen, unless the game has already failed. */
+  ended(): void;
   /** Shows the failed screen. Only the first report counts: it is the most specific one. */
   fail(message: string, details?: string): void;
 }
@@ -208,6 +227,8 @@ function connectUi(options: StartOptions): Ui {
   canvas.id ||= document.getElementById('canvas') ? 'khaos-canvas' : 'canvas';
   canvas.tabIndex = -1;
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  host.toggleAttribute('data-khaos-embedded', embedded);
 
   const setState = (state: State): void => {
     host.dataset.khaosState = state;
@@ -225,11 +246,21 @@ function connectUi(options: StartOptions): Ui {
         void host.requestFullscreen();
       }
 
-      canvas.focus();
+      takeFocus(canvas);
     });
   }
 
+  host.querySelector<HTMLButtonElement>('[data-khaos-replay]')?.addEventListener('click', () => {
+    window.location.reload();
+  });
+
   let failed = false;
+
+  const leaveFullscreen = (): void => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => { });
+    }
+  };
 
   setState('loading');
 
@@ -260,7 +291,7 @@ function connectUi(options: StartOptions): Ui {
 
         if (play) {
           play.addEventListener('click', go, { signal });
-          play.focus();
+          takeFocus(play);
         } else {
           // No Play button on the page: the host is one.
           host.addEventListener('pointerdown', go, { signal });
@@ -273,7 +304,21 @@ function connectUi(options: StartOptions): Ui {
         setState('playing');
       }
 
-      canvas.focus();
+      takeFocus(canvas);
+    },
+
+    ended() {
+      if (failed) {
+        return;
+      }
+
+      leaveFullscreen();
+      setState('ended');
+      const replay = host.querySelector<HTMLElement>('[data-khaos-replay]');
+
+      if (replay) {
+        takeFocus(replay);
+      }
     },
 
     fail(message, details) {
@@ -282,9 +327,7 @@ function connectUi(options: StartOptions): Ui {
       }
 
       failed = true;
-      if (document.fullscreenElement) {
-        document.exitFullscreen().catch(() => { });
-      }
+      leaveFullscreen();
 
       setText(host, '[data-khaos-error-message]', message);
       setText(host, '[data-khaos-error-details]', details ?? '');
@@ -315,6 +358,20 @@ function resolveCanvas(canvas: StartOptions['canvas']): HTMLCanvasElement | null
   }
 
   return null;
+}
+
+/**
+ * Gives the element the keyboard, without scrolling the page to it.
+ *
+ * @remarks
+ * In an iframe, it does so only when the frame already has the focus, so a game that loads on a
+ * page never takes it from what the player is doing there, such as typing in a search box. The
+ * player clicks the game to play: SDL reads the keyboard on the frame's window, which then has it.
+ */
+function takeFocus(element: HTMLElement): void {
+  if (!embedded || document.hasFocus()) {
+    element.focus({ preventScroll: true });
+  }
 }
 
 function resolveHost(canvas: HTMLCanvasElement | null): HTMLElement {
@@ -355,29 +412,49 @@ function setText(host: HTMLElement, selector: string, text: string): void {
 }
 
 function describe(error: unknown): string {
-  return error instanceof Error ? (error.stack ?? error.message) : String(error);
+  if (error instanceof Error) {
+    return error.stack ?? error.message;
+  }
+
+  if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string') {
+    return error.message;
+  }
+
+  return String(error);
+}
+
+/** What the runtime throws when the game calls exit(): not an Error, so it has no stack. */
+interface ExitStatus {
+  readonly name: 'ExitStatus';
+  readonly status: number;
+}
+
+function isExitStatus(error: unknown): error is ExitStatus {
+  return typeof error === 'object' && error !== null
+    && 'name' in error && error.name === 'ExitStatus'
+    && 'status' in error && typeof error.status === 'number';
 }
 
 /**
- * Puts the errors that have no caller on the page.
+ * The functions the game calls in the page, as the `khaos` module of its JavaScript imports.
  *
  * @remarks
- * A game that throws inside the loop has no caller to throw to: GameRunner prints the
- * exception, marked, and this shows it. The WebAssembly side failing outright (an abort)
- * arrives as an uncaught RuntimeError.
+ * A game that throws inside the loop has no caller to throw to: GameRunner calls `stopped`
+ * with the whole exception, stack included. `ended` means the game exited. Interop/Browser/KhaosPage.cs
+ * binds both by name: by hand on .NET 11, with [JSImport] on .NET 12.
  */
-function reportGameErrors(ui: Ui): void {
-  const original = console.error.bind(console);
+function listenToGame(runtime: RuntimeAPI, ui: Ui): void {
+  runtime.setModuleImports('khaos', {
+    ended: (): void => ui.ended(),
+    stopped: (exception: string): void => {
+      console.error(exception);
+      ui.fail('The game stopped because of an error.', exception);
+    },
+  });
+}
 
-  console.error = (...args: unknown[]): void => {
-    original(...args);
-
-    const text = args.map(String).join(' ');
-    if (text.includes(stoppedMarker)) {
-      ui.fail('The game stopped because of an error.', text);
-    }
-  };
-
+/** Puts a crash of the WebAssembly side (an abort) on the page: it arrives as an uncaught RuntimeError. */
+function reportCrashes(ui: Ui): void {
   window.addEventListener('error', (e: ErrorEvent) => {
     if (e.error instanceof WebAssembly.RuntimeError) {
       ui.fail('The game crashed.', describe(e.error));
@@ -400,7 +477,24 @@ type Encoding = '.br' | '.gz';
 * @returns The extension to ask for, or null to stay on the plain files.
 */
 async function detectEncoding(): Promise<Encoding | null> {
+  let listed: string[];
+
+  try {
+    const response = await fetch(new URL('./probe.txt', import.meta.url), { cache: 'no-store' });
+    listed = response.ok ? (await response.text()).split(/\s+/).filter((line) => line !== '') : [];
+  } catch {
+    return null;
+  }
+
+  if (listed[0] !== 'khaos') {
+    return null;
+  }
+
   for (const extension of ['.br', '.gz'] as const) {
+    if (!listed.includes(extension.slice(1))) {
+      continue;
+    }
+
     try {
       const response = await fetch(new URL(`./probe.txt${extension}`, import.meta.url), { cache: 'no-store' });
 

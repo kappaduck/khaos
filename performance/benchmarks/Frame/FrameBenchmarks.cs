@@ -2,19 +2,13 @@
 // Licensed under the MIT license.
 
 using BenchmarkDotNet.Attributes;
-using KappaDuck.Khaos.Graphics;
-using KappaDuck.Khaos.Graphics.Rendering;
 using KappaDuck.Khaos.Hosting;
-using KappaDuck.Khaos.Windowing;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace KappaDuck.Khaos.Benchmarks.Frame;
 
 public class FrameBenchmarks
 {
-    private EngineHost _host = null!;
-    private Window _window = null!;
-    private Renderer _renderer = null!;
+    private KhaosEngine _engine = null!;
 
     private int _frame;
 
@@ -23,39 +17,26 @@ public class FrameBenchmarks
     {
         Headless.UseOffscreen();
 
-        _host = EngineHost.Start(new AppMetadata() { Name = "Benchmarks" });
-        _window = Window.Open(new WindowOptions() { Title = "Benchmarks", Width = 1280, Height = 720 });
-        _renderer = Renderer.Create(_window, VSync.Disabled, NullLogger<Renderer>.Instance);
+        _engine = KhaosEngine.Start(new FrameGame());
     }
 
     [GlobalCleanup]
-    public void StopEngine()
-    {
-        _renderer.Destroy();
-        _window.Close();
-        _host.Dispose();
-    }
+    public void StopEngine() => _engine.Dispose();
 
     [Benchmark(Baseline = true)]
-    public void EmptyFrame()
-    {
-        _renderer.Clear(Color.Black);
-        _renderer.Present();
-    }
+    public void EmptyFrame() => _engine.Iterate();
 
     [Benchmark]
     public void FrameWithTitleCounter()
     {
-        _renderer.Clear(Color.Black);
-        _window.SetTitle($"Benchmarks - frame {_frame++}");
-        _renderer.Present();
+        _engine.Window.SetTitle($"Benchmarks - frame {_frame++}");
+        _engine.Iterate();
     }
 
     [Benchmark]
     public void FrameWithTitleString()
     {
-        _renderer.Clear(Color.Black);
-        _window.Title = "Benchmarks - frame " + _frame++;
-        _renderer.Present();
+        _engine.Window.Title = "Benchmarks - frame " + _frame++;
+        _engine.Iterate();
     }
 }

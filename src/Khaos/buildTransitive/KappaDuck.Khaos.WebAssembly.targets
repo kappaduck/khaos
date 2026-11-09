@@ -142,6 +142,14 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <_KhaosProbeLine Include="khaos" />
+      <_KhaosProbeLine Include="br" Condition="'$(KhaosWebCompression)' == 'Brotli' and Exists('$(_KhaosPublishWwwroot)_khaos/probe.txt.br')" />
+      <_KhaosProbeLine Include="gz" Condition="'$(KhaosWebCompression)' == 'Gzip' and Exists('$(_KhaosPublishWwwroot)_khaos/probe.txt.gz')" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="$(_KhaosPublishWwwroot)_khaos/probe.txt" Lines="@(_KhaosProbeLine)" Overwrite="true" />
+
+    <ItemGroup>
       <_KhaosWebFile Include="$(_KhaosPublishWwwroot)**/*" Exclude="$(_KhaosPublishWwwroot)**/*.br;$(_KhaosPublishWwwroot)**/*.gz" />
       <_KhaosWebFile Include="$(_KhaosPublishWwwroot)**/*.br" Condition="'$(KhaosWebCompression)' == 'Brotli'" />
       <_KhaosWebFile Include="$(_KhaosPublishWwwroot)**/*.gz" Condition="'$(KhaosWebCompression)' == 'Gzip'" />

@@ -3,7 +3,7 @@
 
 namespace KappaDuck.Khaos.Hosting;
 
-internal sealed class EngineHost : IDisposable
+internal sealed class NativeSession : IDisposable
 {
     private const string AppMetadataCopyrightProperty = "SDL.app.metadata.copyright";
     private const string AppMetadataCreatorProperty = "SDL.app.metadata.creator";
@@ -12,31 +12,36 @@ internal sealed class EngineHost : IDisposable
     private const string AppMetadataTypeProperty = "SDL.app.metadata.type";
     private const string AppMetadataUrlProperty = "SDL.app.metadata.url";
     private const string AppMetadataVersionProperty = "SDL.app.metadata.version";
+    private const string NoSignalHandlersHint = "SDL_NO_SIGNAL_HANDLERS";
 
-    private const SDL_Subsystems Subsystems = SDL_Subsystems.Video;
+    private static bool _started;
+    private bool _disposed;
 
-    private static int _started;
-    private int _disposed;
-
-    private EngineHost()
+    private NativeSession()
     {
     }
+
+    internal static bool Started => _started;
 
     public void Dispose()
     {
-        if (Interlocked.Exchange(ref _disposed, 1) == 0)
+        if (!Interlocked.Exchange(ref _disposed, true))
             Stop();
     }
 
-    internal static EngineHost Start(AppMetadata metadata)
+    internal static NativeSession Start(AppMetadata metadata)
     {
-        if (Interlocked.CompareExchange(ref _started, 1, 0) != 0)
-            throw new InvalidOperationException("The engine host is already started. Dispose it before starting it again.");
+        if (Interlocked.CompareExchange(ref _started, true, false))
+            throw new InvalidOperationException("The native session is already started. Dispose it before starting it again.");
 
         try
         {
             SetMetadata(metadata);
-            SDL3.ThrowIfFailed(SDL3.Init(Subsystems));
+
+            if (!OperatingSystem.IsBrowser())
+                SDL3.ThrowIfFailed(SDL3.SetHint(NoSignalHandlersHint, "1"));
+
+            SDL3.ThrowIfFailed(SDL3.Init(SDL_Subsystems.Video));
         }
         catch
         {
@@ -44,7 +49,7 @@ internal sealed class EngineHost : IDisposable
             throw;
         }
 
-        return new EngineHost();
+        return new NativeSession();
     }
 
     private static void SetMetadata(AppMetadata metadata)
@@ -69,6 +74,6 @@ internal sealed class EngineHost : IDisposable
     private static void Stop()
     {
         SDL3.Quit();
-        Interlocked.Exchange(ref _started, 0);
+        Interlocked.Exchange(ref _started, false);
     }
 }

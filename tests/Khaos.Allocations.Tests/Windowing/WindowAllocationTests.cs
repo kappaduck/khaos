@@ -13,13 +13,13 @@ internal sealed class WindowAllocationTests
 {
     private readonly WindowOptions _options = new() { Title = "Duck Quest", Width = 640, Height = 360 };
 
-    private EngineHost _host = null!;
+    private NativeSession _session = null!;
     private Window _window = null!;
 
     [Before(Test)]
     public void StartEngine()
     {
-        _host = EngineHost.Start(new AppMetadata() { Name = "Duck Quest" });
+        _session = NativeSession.Start(new AppMetadata() { Name = "Duck Quest" });
         _window = Window.Open(_options);
     }
 
@@ -27,7 +27,7 @@ internal sealed class WindowAllocationTests
     public void StopEngine()
     {
         _window.Close();
-        _host.Dispose();
+        _session.Dispose();
     }
 
     [Test]

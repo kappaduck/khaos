@@ -70,8 +70,7 @@ public sealed partial class Renderer
         // SAFETY: window.Handle is a window that is not destroyed yet, and a null name lets SDL pick the driver.
         Renderer renderer = new(SDL3.ThrowIfNull(unsafe (SDL3.CreateRenderer(window.Handle, null))));
 
-        if (!OperatingSystem.IsBrowser())
-            renderer.ApplyVSync(vsync, logger);
+        renderer.ApplyVSync(OperatingSystem.IsBrowser() ? VSync.Enabled : vsync, logger);
 
         return renderer;
     }

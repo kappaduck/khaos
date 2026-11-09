@@ -22,7 +22,14 @@
     <div class="khaos-screen" data-khaos-screen="ready">
       <img class="khaos-mark" src="_khaos/khaos.svg" alt="" />
       <button type="button" class="khaos-play" data-khaos-play>Play</button>
-      <p class="khaos-hint">Click or press Enter</p>
+      <p class="khaos-hint" data-khaos-hint="alone">Click or press Enter</p>
+      <p class="khaos-hint" data-khaos-hint="embedded">Click to play</p>
+    </div>
+
+    <div class="khaos-screen" data-khaos-screen="ended">
+      <img class="khaos-mark" src="_khaos/khaos.svg" alt="" />
+      <p class="khaos-thanks">Thanks for playing!</p>
+      <button type="button" class="khaos-play" data-khaos-replay>Play again</button>
     </div>
 
     <div class="khaos-screen" data-khaos-screen="failed" role="alert">

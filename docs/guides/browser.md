@@ -26,6 +26,18 @@ dotnet run --project MyGame.Web
 The terminal prints a local address, such as `http://localhost:5123`: open it in your browser. To see logs and
 errors, open the browser's developer tools (<kbd>F12</kbd>) and look at the **Console** tab.
 
+When the game ends, the console of a Debug build shows this message, with a status of `1` if the game stopped on an
+error:
+
+```text
+program exited (with status: 0), but keepRuntimeAlive() is set (counter=2) due to an async operation, so halting
+execution but not exiting the runtime or preventing further async execution (you can use emscripten_force_exit, if you
+want to force a true shutdown)
+```
+
+It is expected, and you have nothing to fix. The game has stopped, and the page stays on its last screen. A Release
+build, the one you publish, does not print it.
+
 ## The page
 
 The template's page, in `MyGame.Web/wwwroot/`, shows a few screens around your game:
@@ -58,13 +70,17 @@ Any other CSS rule you write in `app.css` applies too.
 Edit `wwwroot/index.html` freely. Khaos finds its pieces by their `data-khaos-*` attributes, and each piece is
 optional:
 
-| Attribute                                              | What it is                                      |
-| :----------------------------------------------------- | :---------------------------------------------- |
-| `data-khaos-host`                                      | The element that holds the game and its screens |
-| `data-khaos-screen="loading"`, `"ready"`, `"failed"`   | The screen shown in each state                  |
-| `data-khaos-play`                                      | The button that starts the game                 |
-| `data-khaos-fullscreen`                                | The fullscreen button                           |
-| `data-khaos-error-message`, `data-khaos-error-details` | Where an error is written                       |
+| Attribute                                                       | What it is                                      |
+| :-------------------------------------------------------------- | :---------------------------------------------- |
+| `data-khaos-host`                                               | The element that holds the game and its screens |
+| `data-khaos-screen="loading"`, `"ready"`, `"ended"`, `"failed"` | The screen shown in each state                  |
+| `data-khaos-play`                                               | The button that starts the game                 |
+| `data-khaos-hint="alone"`, `"embedded"`                         | The hint under Play, alone or in an `<iframe>`  |
+| `data-khaos-replay`                                             | The button that plays again once the game ends  |
+| `data-khaos-fullscreen`                                         | The fullscreen button                           |
+| `data-khaos-error-message`, `data-khaos-error-details`          | Where an error is written                       |
+
+When the game calls `Exit()`, the page shows the `ended` screen. Without one, the last frame stays on the canvas.
 
 Keep the `<script>` that loads `_khaos/khaos.js` and a `<canvas id="canvas">`. A page with only those two things
 works: the game starts right away, without screens.
@@ -121,6 +137,9 @@ into a folder of your site, for example `game/`, and show it with an `<iframe>` 
 ```html
 <iframe src="/game/" width="1280" height="720" allowfullscreen></iframe>
 ```
+
+In an `<iframe>`, the game does not take the keyboard while it loads, so a visitor typing elsewhere on your page keeps
+typing there. The game gets the keyboard once the player clicks it, or presses Play.
 
 In a **Blazor** app, put that folder in the app's `wwwroot/` and use the `<iframe>` in any page or component: the rest
 of the site stays Blazor, with its own pages, menus and services, and the game runs in its frame. The two can send

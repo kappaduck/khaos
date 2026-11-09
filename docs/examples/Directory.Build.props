@@ -13,6 +13,15 @@
     <KhaosAssetsDirectory>$(_KhaosExampleDirectory)assets/</KhaosAssetsDirectory>
   </PropertyGroup>
 
+  <!--
+    A plain project does not run the #: directives of the example (CS9298 without the FileBasedProgram feature), so
+    the browser app compiles past them and reads the name of the example from its #:property Product line.
+  -->
+  <PropertyGroup Label="Example: browser app name" Condition="'$(_KhaosExampleFile)' != '' and Exists('$(_KhaosExampleFile)')">
+    <Features>$(Features);FileBasedProgram</Features>
+    <Product>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(_KhaosExampleFile)')), '(?m)(?&lt;=^#:property Product=")[^"]*').Value)</Product>
+  </PropertyGroup>
+
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 
   <ItemGroup Label="The example" Condition="'$(_KhaosExampleFile)' != ''">

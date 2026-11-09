@@ -1,7 +1,9 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
+using KappaDuck.Khaos.Interop.SDL.Marshalling;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.Marshalling;
 
 namespace KappaDuck.Khaos.Testing.Engine;
 
@@ -10,7 +12,9 @@ internal static partial class SDLHints
     private const string VideoDriver = "SDL_VIDEO_DRIVER";
     private const int Override = 2;
 
-    internal static void ForceVideoDriver(string driver)
+    internal const string NoSignalHandlers = "SDL_NO_SIGNAL_HANDLERS";
+
+    internal static void UseVideoDriver(string driver)
     {
         if (!SetHintWithPriority(VideoDriver, driver, Override))
             throw new InvalidOperationException($"SDL refused the video driver hint '{driver}'.");
@@ -27,6 +31,10 @@ internal static partial class SDLHints
         if (!SetHint(name, value))
             throw new InvalidOperationException($"SDL refused the hint {name} = '{value}'.");
     }
+
+    [LibraryImport("SDL3", EntryPoint = "SDL_GetHint", StringMarshalling = StringMarshalling.Utf8)]
+    [return: MarshalUsing(typeof(BorrowedUtf8StringMarshaller))]
+    internal static safe partial string? Get(string name);
 
     [LibraryImport("SDL3", EntryPoint = "SDL_ResetHint", StringMarshalling = StringMarshalling.Utf8)]
     [return: MarshalAs(UnmanagedType.U1)]

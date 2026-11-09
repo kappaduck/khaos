@@ -44,7 +44,7 @@ internal sealed class PongGame() : Game2D("Pong!", 1280, 720)
     private Vector2 _position = new(640f, 360f);
     private Vector2 _velocity = new(240f, 180f);
 
-    protected override void Load() => _ball = new Sprite(Assets.Load(Content.Sprites.Ball));
+    protected override void Initialize() => _ball = new Sprite(Assets.Load(Content.Sprites.Ball));
 
     protected override void OnEvent(in Event e)
     {

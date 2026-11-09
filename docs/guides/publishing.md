@@ -110,6 +110,36 @@ you give it yours. Put a square PNG (256 × 256 works well) next to the `.ico` a
 </PropertyGroup>
 ```
 
+### Your game's details
+
+The system shows your game's name in places apart from its window, such as the volume mixer of Windows, and a Linux
+desktop groups the game's windows under its identifier. The template sets the name and the version in
+`Directory.Build.props`, next to the solution, so every project of the game shares them:
+
+```xml
+<PropertyGroup>
+  <Product>Duck Quest</Product>
+  <Version>1.2.0</Version>
+  <Company>KappaDuck</Company>
+  <Copyright>Copyright (c) 2027 KappaDuck</Copyright>
+  <KhaosGameIdentifier>com.kappaduck.duckquest</KhaosGameIdentifier>
+  <KhaosGameUrl>https://kappaduck.itch.io/duck-quest</KhaosGameUrl>
+</PropertyGroup>
+```
+
+| Property              | What it is                                                                   |
+| :-------------------- | :--------------------------------------------------------------------------- |
+| `Product`             | The name of your game, and the title of its window when your game gives none |
+| `Version`             | The version of your game, in any form (`1.2.0`, `2027-04-12`)                |
+| `Company`             | Who made the game, you or your studio                                        |
+| `Copyright`           | One line of copyright, not a whole license                                   |
+| `KhaosGameIdentifier` | A unique reverse-domain name, such as `com.kappaduck.duckquest`              |
+| `KhaosGameUrl`        | The page of your game, on a store, itch.io or GitHub                         |
+
+All of them are optional. Without `Product`, the name is the one the files get, `MyGame`. These are the usual .NET
+properties, so on Windows the Details tab of the executable's properties shows the same name, version and copyright.
+The settings and the command line never change them.
+
 ## Before you upload
 
 - **Play the published version**, not only the one from your editor. A published game is optimized differently, and

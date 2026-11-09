@@ -9,6 +9,9 @@ namespace KappaDuck.Khaos.Allocations.Tests.Mathematics;
 
 internal sealed class GeometryFormatterAllocationTests
 {
+    private static readonly float[] _components = [1.5f, 2.5f, 3.5f, 4.5f];
+    private static readonly float[] _thousands = [1000f, 2000f];
+
     [Test]
     [Arguments("")]
     [Arguments("fr-CA")]
@@ -17,7 +20,7 @@ internal sealed class GeometryFormatterAllocationTests
         char[] buffer = new char[64];
         CultureInfo provider = CultureInfo.GetCultureInfo(culture);
 
-        long allocated = Allocated.By((buffer, provider), static state => GeometryFormatter.TryFormat(state.buffer, out _, [1.5f, 2.5f, 3.5f, 4.5f], default, state.provider));
+        long allocated = Allocated.By((buffer, provider), static state => GeometryFormatter.TryFormat(state.buffer, out _, _components, default, state.provider));
 
         await allocated.Should().BeEqualTo(0L);
     }
@@ -30,7 +33,7 @@ internal sealed class GeometryFormatterAllocationTests
         byte[] buffer = new byte[64];
         CultureInfo provider = CultureInfo.GetCultureInfo(culture);
 
-        long allocated = Allocated.By((buffer, provider), static state => GeometryFormatter.TryFormat(state.buffer, out _, [1.5f, 2.5f, 3.5f, 4.5f], default, state.provider));
+        long allocated = Allocated.By((buffer, provider), static state => GeometryFormatter.TryFormat(state.buffer, out _, _components, default, state.provider));
 
         await allocated.Should().BeEqualTo(0L);
     }
@@ -40,7 +43,7 @@ internal sealed class GeometryFormatterAllocationTests
     {
         char[] buffer = new char[64];
 
-        long allocated = Allocated.By(buffer, static destination => GeometryFormatter.TryFormat(destination, out _, [1000f, 2000f], "N0", CultureInfo.InvariantCulture));
+        long allocated = Allocated.By(buffer, static destination => GeometryFormatter.TryFormat(destination, out _, _thousands, "N0", CultureInfo.InvariantCulture));
 
         await allocated.Should().BeEqualTo(0L);
     }

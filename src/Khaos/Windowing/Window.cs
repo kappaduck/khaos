@@ -481,7 +481,7 @@ public sealed class Window
     // SAFETY: Handle is a window that is not destroyed yet.
     internal bool Sync() => unsafe (SDL3.SyncWindow(Handle));
 
-    internal static Window Open(WindowOptions options)
+    internal static Window Open(WindowOptions options, string? defaultTitle = null)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(options.Width);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(options.Height);
@@ -490,7 +490,9 @@ public sealed class Window
             throw new InvalidOperationException("The engine is not started. Start it before opening a window.");
 
         Display display = options.Display is { Connected: true } chosen ? chosen : Display.Primary;
-        Window window = new(Create(options, display));
+        string title = options.Title is { Length: > 0 } given ? given : defaultTitle ?? string.Empty;
+
+        Window window = new(Create(options, title, display));
 
         try
         {
@@ -558,14 +560,14 @@ public sealed class Window
 
     private static int CenteredOn(uint display) => (int)(CenteredMask | display);
 
-    private static SDL_Window* Create(WindowOptions options, Display display)
+    private static SDL_Window* Create(WindowOptions options, string title, Display display)
     {
         uint properties = SDL3.ThrowIfZero(SDL3.CreateProperties());
         int centered = CenteredOn(display.Id);
 
         try
         {
-            SDL3.ThrowIfFailed(SDL3.SetStringProperty(properties, "SDL.window.create.title", options.Title));
+            SDL3.ThrowIfFailed(SDL3.SetStringProperty(properties, "SDL.window.create.title", title));
             SDL3.ThrowIfFailed(SDL3.SetNumberProperty(properties, "SDL.window.create.width", options.Width));
             SDL3.ThrowIfFailed(SDL3.SetNumberProperty(properties, "SDL.window.create.height", options.Height));
             SDL3.ThrowIfFailed(SDL3.SetNumberProperty(properties, "SDL.window.create.flags", ToState(options)));
