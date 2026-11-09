@@ -19,9 +19,6 @@
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/kappaduck/khaos/blob/main/changelog.md</PackageReleaseNotes>
     <PackageTags>dotnet;csharp;sdl;sdl3;gamedev;game-framework;2d;webassembly</PackageTags>
-
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup Label="Packaging">
