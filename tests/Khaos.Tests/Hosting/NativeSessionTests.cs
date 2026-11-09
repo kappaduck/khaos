@@ -10,7 +10,7 @@ namespace KappaDuck.Khaos.Tests.Hosting;
 
 [Category(Categories.Integration)]
 [NotInParallel(Sequential.Engine)]
-internal sealed class EngineHostTests
+internal sealed class NativeSessionTests
 {
     private const SDL_Subsystems InitializedSubsystems = SDL_Subsystems.Video | SDL_Subsystems.Events;
     private const string MissingDriver = "khaos-missing";
@@ -26,30 +26,19 @@ internal sealed class EngineHostTests
     };
 
     [Test]
-    public async Task StartShouldInitializeVideoAndEvents()
+    public async Task StartShouldInitializeVideo()
     {
-        using EngineHost _ = EngineHost.Start(_metadata);
+        using NativeSession _ = NativeSession.Start(_metadata);
 
-        SDL_Subsystems started = SDL3.WasInit(InitializedSubsystems);
+        SDL_Subsystems initialized = SDL3.WasInit(InitializedSubsystems);
 
-        await started.Should().BeEqualTo(InitializedSubsystems);
-    }
-
-    [Test]
-    [NamedVideoDriverOnly]
-    public async Task StartShouldUseTheVideoDriverOfTheSession()
-    {
-        using EngineHost _ = EngineHost.Start(_metadata);
-
-        string? driver = SDLVideo.GetCurrentVideoDriver();
-
-        await driver.Should().BeEqualTo(VideoDriverSetup.Driver);
+        await initialized.Should().BeEqualTo(InitializedSubsystems);
     }
 
     [Test]
     public async Task StartShouldSetTheAppMetadata()
     {
-        using EngineHost _ = EngineHost.Start(_metadata);
+        using NativeSession _ = NativeSession.Start(_metadata);
 
         string? name = SDLAppMetadata.Get(SDLAppMetadata.Name);
         string? version = SDLAppMetadata.Get(SDLAppMetadata.Version);
@@ -69,9 +58,19 @@ internal sealed class EngineHostTests
     }
 
     [Test]
+    public async Task StartShouldTurnOffTheSignalHandlersOfSDL()
+    {
+        using NativeSession _ = NativeSession.Start(_metadata);
+
+        string? hint = SDLHints.Get(SDLHints.NoSignalHandlers);
+
+        await hint.Should().BeEqualTo("1");
+    }
+
+    [Test]
     public async Task StartShouldLeaveUnsetMetadataEmpty()
     {
-        using EngineHost _ = EngineHost.Start(_metadata with { Version = null });
+        using NativeSession _ = NativeSession.Start(_metadata with { Version = null });
 
         string? version = SDLAppMetadata.Get(SDLAppMetadata.Version);
 
@@ -79,13 +78,13 @@ internal sealed class EngineHostTests
     }
 
     [Test]
-    public async Task StartShouldThrowWhenTheEngineHostIsAlreadyStarted()
+    public async Task StartShouldThrowWhenTheNativeSessionIsAlreadyStarted()
     {
-        using EngineHost _ = EngineHost.Start(_metadata);
+        using NativeSession _ = NativeSession.Start(_metadata);
 
         Action startAgain = static () =>
         {
-            using EngineHost _ = EngineHost.Start(_metadata);
+            using NativeSession _ = NativeSession.Start(_metadata);
         };
 
         await startAgain.Should().ThrowExactly<InvalidOperationException>();
@@ -94,11 +93,11 @@ internal sealed class EngineHostTests
     [Test]
     public async Task StartShouldThrowAPlatformExceptionWhenTheVideoDriverIsMissing()
     {
-        SDLHints.ForceVideoDriver(MissingDriver);
+        SDLHints.UseVideoDriver(MissingDriver);
 
         PlatformException exception = Assert.Throws<PlatformException>(static () =>
         {
-            using EngineHost _ = EngineHost.Start(_metadata);
+            using NativeSession _ = NativeSession.Start(_metadata);
         });
 
         await exception.Message.Should().EndWith($" failed: {MissingDriver} not available");
@@ -107,38 +106,41 @@ internal sealed class EngineHostTests
     [Test]
     public async Task StartShouldLeaveNothingInitializedWhenInitFails()
     {
-        SDLHints.ForceVideoDriver(MissingDriver);
+        SDLHints.UseVideoDriver(MissingDriver);
+
         _ = Assert.Throws<PlatformException>(static () =>
         {
-            using EngineHost _ = EngineHost.Start(_metadata);
+            using NativeSession _ = NativeSession.Start(_metadata);
         });
 
-        SDL_Subsystems started = SDL3.WasInit(SDL_Subsystems.None);
+        SDL_Subsystems initialized = SDL3.WasInit(SDL_Subsystems.None);
 
-        await started.Should().BeEqualTo(SDL_Subsystems.None);
+        await initialized.Should().BeEqualTo(SDL_Subsystems.None);
     }
 
     [Test]
     public async Task StartShouldSucceedAfterAFailedStart()
     {
-        SDLHints.ForceVideoDriver(MissingDriver);
+        SDLHints.UseVideoDriver(MissingDriver);
+
         _ = Assert.Throws<PlatformException>(static () =>
         {
-            using EngineHost _ = EngineHost.Start(_metadata);
+            using NativeSession _ = NativeSession.Start(_metadata);
         });
 
-        using EngineHost engine = EngineHost.Start(_metadata);
+        using NativeSession session = NativeSession.Start(_metadata);
 
-        SDL_Subsystems started = SDL3.WasInit(InitializedSubsystems);
-        await started.Should().BeEqualTo(InitializedSubsystems);
+        SDL_Subsystems initialized = SDL3.WasInit(InitializedSubsystems);
+
+        await initialized.Should().BeEqualTo(InitializedSubsystems);
     }
 
     [Test]
     public async Task DisposeShouldQuitEverySubsystem()
     {
-        EngineHost engine = EngineHost.Start(_metadata);
+        NativeSession session = NativeSession.Start(_metadata);
 
-        engine.Dispose();
+        session.Dispose();
 
         SDL_Subsystems started = SDL3.WasInit(SDL_Subsystems.None);
         await started.Should().BeEqualTo(SDL_Subsystems.None);
@@ -147,22 +149,40 @@ internal sealed class EngineHostTests
     [Test]
     public async Task DisposeShouldBeSafeToCallTwice()
     {
-        EngineHost engine = EngineHost.Start(_metadata);
-        engine.Dispose();
+        NativeSession session = NativeSession.Start(_metadata);
+        session.Dispose();
 
-        await Assert.That(engine.Dispose).ThrowsNothing();
+        await Assert.That(session.Dispose).ThrowsNothing();
     }
 
     [Test]
-    public async Task DisposeShouldNotStopAnEngineHostStartedAfterIt()
+    public async Task DisposeShouldNotStopANativeSessionStartedAfterIt()
     {
-        EngineHost first = EngineHost.Start(_metadata);
+        NativeSession first = NativeSession.Start(_metadata);
         first.Dispose();
 
-        using EngineHost second = EngineHost.Start(_metadata);
+        using NativeSession second = NativeSession.Start(_metadata);
         first.Dispose();
 
-        SDL_Subsystems started = SDL3.WasInit(InitializedSubsystems);
-        await started.Should().BeEqualTo(InitializedSubsystems);
+        SDL_Subsystems initialized = SDL3.WasInit(InitializedSubsystems);
+        await initialized.Should().BeEqualTo(InitializedSubsystems);
+    }
+
+    [Test]
+    public async Task StartedShouldBeTrueWhileASessionIsStarted()
+    {
+        using NativeSession _ = NativeSession.Start(_metadata);
+
+        await NativeSession.Started.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task IsStartedShouldBeFalseOnceTheSessionIsDisposed()
+    {
+        NativeSession session = NativeSession.Start(_metadata);
+
+        session.Dispose();
+
+        await NativeSession.Started.Should().BeFalse();
     }
 }

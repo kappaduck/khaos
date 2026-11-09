@@ -12,7 +12,7 @@ namespace KappaDuck.Khaos.Benchmarks.Frame;
 
 public class FrameBenchmarks
 {
-    private EngineHost _host = null!;
+    private NativeSession _session = null!;
     private Window _window = null!;
     private Renderer _renderer = null!;
 
@@ -23,7 +23,7 @@ public class FrameBenchmarks
     {
         Headless.UseOffscreen();
 
-        _host = EngineHost.Start(new AppMetadata() { Name = "Benchmarks" });
+        _session = NativeSession.Start(new AppMetadata() { Name = "Benchmarks" });
         _window = Window.Open(new WindowOptions() { Title = "Benchmarks", Width = 1280, Height = 720 });
         _renderer = Renderer.Create(_window, VSync.Disabled, NullLogger<Renderer>.Instance);
     }
@@ -33,7 +33,7 @@ public class FrameBenchmarks
     {
         _renderer.Destroy();
         _window.Close();
-        _host.Dispose();
+        _session.Dispose();
     }
 
     [Benchmark(Baseline = true)]

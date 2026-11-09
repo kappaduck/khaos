@@ -17,13 +17,13 @@ internal sealed class WindowTests
 {
     private static readonly WindowOptions _options = new() { Title = "Duck Quest", Width = 640, Height = 360 };
 
-    private EngineHost _host = null!;
+    private NativeSession _session = null!;
 
     [Before(Test)]
-    public void StartEngine() => _host = EngineHost.Start(new AppMetadata() { Name = "Duck Quest" });
+    public void StartEngine() => _session = NativeSession.Start(new AppMetadata() { Name = "Duck Quest" });
 
     [After(Test)]
-    public void StopEngine() => _host.Dispose();
+    public void StopEngine() => _session.Dispose();
 
     [Test]
     public async Task OpenShouldUseTheTitle()
@@ -278,7 +278,7 @@ internal sealed class WindowTests
     [Test]
     public async Task OpenShouldThrowWhenTheEngineIsNotStarted()
     {
-        _host.Dispose();
+        _session.Dispose();
 
         await Assert.That(static () => Window.Open(_options)).Throws<InvalidOperationException>();
     }

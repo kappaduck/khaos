@@ -15,13 +15,13 @@ internal sealed class DisplayTests
     private const int OffscreenWidth = 1024;
     private const int UnpluggedId = 0xFFF;
 
-    private EngineHost _host = null!;
+    private NativeSession _session = null!;
 
     [Before(Test)]
-    public void StartEngine() => _host = EngineHost.Start(new AppMetadata { Name = "Display " });
+    public void StartEngine() => _session = NativeSession.Start(new AppMetadata { Name = "Display " });
 
     [After(Test)]
-    public void StopEngine() => _host.Dispose();
+    public void StopEngine() => _session.Dispose();
 
     [Test]
     public async Task ConnectedShouldReturnFalseForAScreenThatIsNotConnected()
@@ -149,7 +149,7 @@ internal sealed class DisplayTests
     [Test]
     public async Task PrimaryShouldThrowWhenTheEngineIsNotStarted()
     {
-        _host.Dispose();
+        _session.Dispose();
 
         await Assert.That(static () => Display.Primary).Throws<PlatformException>();
     }

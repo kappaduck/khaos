@@ -21,7 +21,7 @@ internal sealed class MultipleScreensOnlyAttribute() : SkipAttribute("The test n
 
     private static bool CountScreens()
     {
-        using EngineHost host = EngineHost.Start(new AppMetadata { Name = "Duck Quest" });
+        using NativeSession _ = NativeSession.Start(new AppMetadata { Name = "Duck Quest" });
         return Display.All.Count > 1;
     }
 }
