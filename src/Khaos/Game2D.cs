@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 using KappaDuck.Khaos.Graphics;
+using KappaDuck.Khaos.Graphics.Rendering;
 using KappaDuck.Khaos.Windowing;
 
 namespace KappaDuck.Khaos;
@@ -41,6 +42,19 @@ public abstract class Game2D
     /// Closes the game once the current frame ends.
     /// </summary>
     public void Exit() => ExitRequested = true;
+
+    /// <summary>
+    /// Draws the frame. Khaos calls it once per frame, and shows what you drew when it returns.
+    /// </summary>
+    /// <param name="renderer">The renderer to draw the frame with.</param>
+    protected internal abstract void Draw(Renderer renderer);
+
+    /// <summary>
+    /// Prepares the game. Khaos calls it once, after the window opens and before the first frame.
+    /// </summary>
+    protected internal virtual void Initialize()
+    {
+    }
 
     internal void Reset() => ExitRequested = false;
 }

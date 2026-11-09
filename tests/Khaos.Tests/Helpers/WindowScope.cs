@@ -13,5 +13,5 @@ internal sealed class WindowScope : IDisposable
 
     public void Dispose() => Window.Close();
 
-    internal static WindowScope Open(WindowOptions options) => new(Window.Open(options));
+    internal static WindowScope Open(WindowOptions options, string? defaultTitle = null) => new(Window.Open(options, defaultTitle));
 }

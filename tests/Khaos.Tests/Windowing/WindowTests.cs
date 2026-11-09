@@ -34,6 +34,24 @@ internal sealed class WindowTests
     }
 
     [Test]
+    public async Task OpenShouldPreferTheTitleOverTheDefaultTitle()
+    {
+        using WindowScope scope = WindowScope.Open(_options, "Duck Quest Deluxe");
+
+        await scope.Window.Title.Should().BeEqualTo("Duck Quest");
+    }
+
+    [Test]
+    public async Task OpenShouldUseTheDefaultTitleWhenTheTitleIsEmpty()
+    {
+        WindowOptions untitled = new() { Width = 640, Height = 360 };
+
+        using WindowScope scope = WindowScope.Open(untitled, "Duck Quest Deluxe");
+
+        await scope.Window.Title.Should().BeEqualTo("Duck Quest Deluxe");
+    }
+
+    [Test]
     public async Task OpenShouldUseTheLogicalSize()
     {
         using WindowScope scope = WindowScope.Open(_options);
