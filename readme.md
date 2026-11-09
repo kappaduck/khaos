@@ -185,14 +185,13 @@ dotnet package add KappaDuck.Khaos --prerelease
 The first goal is a 2D game made with Khaos that runs on desktop and in the browser by March 31, 2027, ready for
 [Ludum Dare] in April 2027. Each milestone ends with a release on NuGet that runs on Windows, Linux and in the browser.
 
-| Version | Target          | What it brings                                                                                                     |
-| :-----: | :-------------- | :----------------------------------------------------------------------------------------------------------------- |
-| `0.1.0` | Late Nov. 2026  | The pipeline: `Game2D` on SDL's main callbacks with a fixed step, events, window, hosting and the template         |
-| `0.2.0` | Late Dec. 2026  | Drawing and moving: batched 2D renderer, shapes, textures, sprites, letterbox, keyboard, mouse, gamepad, input map |
-| `0.3.0` | Mid Jan. 2027   | A game from start to finish: audio with buses, text, the asset catalog, scenes and transitions, timers and tweens  |
-| `0.4.0` | Early Feb. 2027 | The 2D world: 2D camera, sprite sheets and animations, collisions, tilemaps                                        |
-| `0.5.0` | Late Feb. 2027  | Jam comfort: splash and loading screens, debug overlay, particles, simple UI, render targets                       |
-| `0.6.0` | Mar. 31, 2027   | The jam release: fixes only, then the engine freezes                                                               |
+| Version | Target          | What it brings                                                                                                                                                                                             |
+| :-----: | :-------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0.1.0` | Late Dec. 2026  | The foundations: `Game2D` on SDL's main callbacks with a fixed step, events, window, hosting, the template, batched 2D renderer, shapes, textures, sprites, letterbox, keyboard, mouse, gamepad, input map |
+| `0.2.0` | Mid Jan. 2027   | A game from start to finish: audio with buses, text, the asset catalog, scenes and transitions, timers and tweens                                                                                          |
+| `0.3.0` | Early Feb. 2027 | The 2D world: 2D camera, sprite sheets and animations, collisions, tilemaps                                                                                                                                |
+| `0.4.0` | Late Feb. 2027  | Jam comfort: splash and loading screens, debug overlay, particles, simple UI, render targets                                                                                                               |
+| `0.5.0` | Mar. 31, 2027   | The jam release: fixes only, then the engine freezes                                                                                                                                                       |
 
 Scenes, cameras, tilemaps, collisions and tweens will ship in a separate `KappaDuck.Khaos.Toolkit` package.
 
