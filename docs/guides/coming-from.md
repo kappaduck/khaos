@@ -16,7 +16,7 @@ In exchange, everything about your game is in plain C# files that you can read, 
 | You know              | In Khaos                                     | Unity                     | Godot                 | MonoGame                   | raylib                        |
 | :-------------------- | :------------------------------------------- | :------------------------ | :-------------------- | :------------------------- | :---------------------------- |
 | Where the game starts | Your `Game2D` class, started by `Program.cs` | The first scene           | The main scene        | `Game` class               | `main` with a `while` loop    |
-| Loading content       | `Load()`                                     | `Start`, `Awake`          | `_ready`              | `LoadContent`              | Before the loop               |
+| Loading content       | `Initialize()`                               | `Start`, `Awake`          | `_ready`              | `LoadContent`              | Before the loop               |
 | Every frame           | `Update()`                                   | `Update`                  | `_process`            | `Update`                   | Inside the loop               |
 | Fixed-rate gameplay   | `FixedUpdate()`                              | `FixedUpdate`             | `_physics_process`    | Fixed time step option     | By hand                       |
 | Drawing               | `Draw()`                                     | Automatic, from the scene | Automatic, or `_draw` | `Draw` with `SpriteBatch`  | `BeginDrawing` … `EndDrawing` |

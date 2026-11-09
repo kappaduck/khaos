@@ -14,7 +14,7 @@ frame. You override the ones you need.
 
 | Method                                    | Khaos calls it                                                                   | Use it to                                                       |
 | :---------------------------------------- | :------------------------------------------------------------------------------- | :-------------------------------------------------------------- |
-| `Load()`                                  | Once, before the first frame                                                     | Load your images, sounds and fonts, and set up the game         |
+| `Initialize()`                            | Once, before the first frame                                                     | Load your images, sounds and fonts, and set up the game         |
 | `OnEvent(in Event e)`                     | For each thing that happened: a key pressed, a mouse click, a gamepad plugged in | React to the player                                             |
 | `FixedUpdate(in GameTime time)`           | At a steady rate, for example 60 times per second                                | Move things, check collisions, apply the rules of your game     |
 | `Update(in GameTime time)`                | Once per frame                                                                   | Animate what only looks nice, such as a spinning coin or a menu |
@@ -169,4 +169,4 @@ A frame should do its work and return. If one frame waits (a `Thread.Sleep`, a `
 a long time, the game freezes until it is done. In the browser it is worse: the game runs on the page's only thread,
 so the whole tab freezes.
 
-Load what takes time in `Load`, before the game starts, and split long work over several frames.
+Load what takes time in `Initialize`, before the game starts, and split long work over several frames.
