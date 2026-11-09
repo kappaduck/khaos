@@ -118,7 +118,7 @@ line in `expected.md` first. It never follows Khaos, so a new benchmark or a new
 
 ## Results
 
-`KhaosConfiguration` writes the reports to `artifacts/benchmarks/results`, as GitHub markdown and compressed JSON.
+`Configuration` (in `Program.cs`) writes the reports to `artifacts/benchmarks/results`, as GitHub markdown and compressed JSON.
 The memory diagnoser is on, so every table has an `Allocated` column. On GitHub, `.github/workflows/benchmarks.yml`
 runs them:
 
