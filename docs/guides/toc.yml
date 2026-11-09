@@ -18,10 +18,14 @@
   items:
     - name: How a game runs
       href: game-loop.md
+    - name: Positions, sizes and angles
+      href: positions-sizes-angles.md
     - name: Configuration and environments
       href: configuration.md
     - name: Assets
       href: assets.md
+    - name: Keep your game smooth
+      href: smooth-game.md
 - name: Platforms and publishing
   items:
     - name: Supported platforms

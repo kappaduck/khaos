@@ -7,7 +7,8 @@ They are made to be copied. Find the feature you need, read the few lines that d
 
 ## How to use them
 
-- **Play it on the page**, to see what the example does.
+- **Play it on the page**, to see what the example does. Most examples start on their own. Those with sound or input
+  wait for you to press Play: the browser needs a click before it lets a page play sound or read the keyboard.
 - **Read the code below it.** It is the complete program, usually a few dozen lines, with nothing hidden.
 - **Run it yourself** if you want to change things and see what happens. Each example is a single C# file that
   .NET runs directly. From a clone of the [Khaos repository](https://github.com/kappaduck/khaos):

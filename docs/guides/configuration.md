@@ -65,13 +65,13 @@ out what you keep.
 }
 ```
 
-| Setting           | What it does                                                                                                            | Default                |
-| :---------------- | :---------------------------------------------------------------------------------------------------------------------- | :--------------------- |
-| `title`           | The text in the title bar                                                                                               | The title of your game |
-| `width`, `height` | The size of the inside of the window, in logical units: 1280 × 720 looks the same size on a screen at 100 % or at 200 % | The size of your game  |
-| `fullscreen`      | Opens the game over the whole screen                                                                                    | `false`                |
-| `resizable`       | Lets the player resize the window by dragging its edges                                                                 | `false`                |
-| `borderless`      | Opens the window without a title bar or borders                                                                         | `false`                |
+| Setting           | What it does                                                                                                            | Default                                                                                    |
+| :---------------- | :---------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------- |
+| `title`           | The text in the title bar                                                                                               | The title of your game, or [its name](publishing.md#your-games-details) when it gives none |
+| `width`, `height` | The size of the inside of the window, in logical units: 1280 × 720 looks the same size on a screen at 100 % or at 200 % | The size of your game                                                                      |
+| `fullscreen`      | Opens the game over the whole screen                                                                                    | `false`                                                                                    |
+| `resizable`       | Lets the player resize the window by dragging its edges                                                                 | `false`                                                                                    |
+| `borderless`      | Opens the window without a title bar or borders                                                                         | `false`                                                                                    |
 
 Setting names are not case-sensitive: Khaos writes them in camelCase, and `--window:fullscreen true` on the command
 line works too, handy to try a fullscreen run:

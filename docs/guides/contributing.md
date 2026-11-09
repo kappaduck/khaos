@@ -68,6 +68,9 @@ An example is a [file-based app](https://learn.microsoft.com/dotnet/core/sdk/fil
 `dotnet docs/examples/<category>/<name>/<name>.cs` runs it on the desktop, and `docs/examples/Web` compiles it for the
 browser with `-p:Example=<category>/<name>`.
 
+The example starts as soon as its page loads. One with sound or input points its iframe at `play/?click` instead,
+so it waits for Play: the browser needs a click before it lets a page play sound or read the keyboard.
+
 Add it to `docs/examples/toc.yml`, in the order to read them. The page includes the `.cs` file the CI compiles
 (`[!code-csharp[](...)]`), so the code on the page cannot drift from the code that runs.
 
