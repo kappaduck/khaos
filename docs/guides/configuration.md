@@ -120,7 +120,7 @@ The in-game tools are left out of a Production build entirely, so they cost noth
 them on.
 
 > [!NOTE]
-> The overlay comes with Khaos 0.2.0, and grows until 0.5.0 (frame graph, draw calls, logs). See the
+> The overlay comes with Khaos 0.4.0, with the frame graph, the draw calls and the logs. See the
 > [roadmap](roadmap.md).
 
 ### Choosing the environment
