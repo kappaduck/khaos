@@ -1,6 +1,9 @@
 <Project>
   <PropertyGroup Label="Sandbox">
     <IsKhaosGame>true</IsKhaosGame>
+    <Product>Khaos sandbox</Product>
+    <Copyright>Copyright (c) KappaDuck</Copyright>
+    <KhaosGameIdentifier>com.kappaduck.khaos.sandbox</KhaosGameIdentifier>
     <KhaosAssetsDirectory>$(MSBuildThisFileDirectory)assets/</KhaosAssetsDirectory>
 
     <!-- The apps compile their own folder; bin/ and obj/ in case a build writes outside artifacts/. -->

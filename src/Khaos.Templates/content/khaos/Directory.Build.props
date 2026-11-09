@@ -4,4 +4,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+
+  <PropertyGroup Label="The game">
+    <Product>KHAOS_TITLE</Product>
+    <Version>0.1.0</Version>
+    <!-- <Company>Your name or studio</Company> -->
+    <!-- <Copyright>Copyright (c) Your name or studio</Copyright> -->
+    <!-- <KhaosGameIdentifier>com.example.mygame</KhaosGameIdentifier> -->
+    <!-- <KhaosGameUrl>https://example.itch.io/mygame</KhaosGameUrl> -->
+  </PropertyGroup>
 </Project>
