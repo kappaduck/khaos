@@ -2,7 +2,7 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Packages.props', '$(MSBuildThisFileDirectory)../'))" />
 
   <PropertyGroup>
-    <TUnitVersion>1.80.0</TUnitVersion>
+    <TUnitVersion>1.81.16</TUnitVersion>
   </PropertyGroup>
 
   <ItemGroup Label="Test packages">
