@@ -8,6 +8,15 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
+  <!--
+    Experimental feature: https://github.com/dotnet/core/blob/main/release-notes/11.0/preview/preview1/runtime.md#runtime-async
+    Only the tests use it on .NET 11: some keep a ref struct across an await, which only runtime async allows. Tests run
+    on CoreCLR, never in the browser, where Mono cannot run runtime-async methods (https://github.com/dotnet/runtime/issues/109632).
+  -->
+  <PropertyGroup Label="Runtime async">
+    <Features>$(Features);runtime-async=on</Features>
+  </PropertyGroup>
+
   <ItemGroup Label="Common test NuGets">
     <PackageReference Include="TUnit" />
     <PackageReference Include="TUnit.Mocks" />

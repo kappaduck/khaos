@@ -19,9 +19,6 @@
     <AssemblyName>KappaDuck.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>$(AssemblyName)</RootNamespace>
 
-    <!-- Experimental feature: https://github.com/dotnet/core/blob/main/release-notes/11.0/preview/preview1/runtime.md#runtime-async -->
-    <Features>$(Features);runtime-async=on</Features>
-
     <!-- Experimental feature: https://github.com/dotnet/core/blob/main/release-notes/11.0/preview/rc1/csharp.md#unsafe-evolution-refinements -->
     <Features Condition="'$(FileBasedProgram)' != 'true'">$(Features);updated-memory-safety-rules</Features>
 
