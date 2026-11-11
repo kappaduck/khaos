@@ -14,23 +14,39 @@ Reported while your game builds, before anything runs. They all concern the brow
 | [`KHAOS102`](khaos102.md) | `KhaosWebCompression` has a value Khaos does not know |
 | [`KHAOS103`](khaos103.md) | The `wasm-tools` workload is not installed |
 
+## Code errors
+
+Errors in your game's code, shown in your editor as you type. Khaos cannot write the code your game relies on until
+they are fixed.
+
+| Code | What it means |
+| :--- | :------------ |
+| [`KHAOS001`](khaos001.md) | `[CustomEvents]` is not on a `readonly partial struct` |
+| [`KHAOS002`](khaos002.md) | A `[CustomEvents]` group has no events |
+| [`KHAOS003`](khaos003.md) | An event in a `[CustomEvents]` group has the wrong shape |
+| [`KHAOS005`](khaos005.md) | An event in a `[CustomEvents]` group is listed twice or shares a name |
+
 ## Code warnings
 
 Warnings about your game's code, shown in your editor as you type: an asset name that does not exist, an asset
 loaded at the wrong moment. They arrive with the features they check.
 
+| Code | What it means |
+| :--- | :------------ |
+| [`KHAOS004`](khaos004.md) | A `[CustomEvents]` group has the name of a member of `CustomEvent` |
+
 ## Turning a warning off
 
-A warning can be silenced for one line with `#pragma warning disable KHAOS001` (with its code), or for the whole
+A warning can be silenced for one line with `#pragma warning disable KHAOS004` (with its code), or for the whole
 project in your `.editorconfig`:
 
 ```ini
 [*.cs]
-dotnet_diagnostic.KHAOS001.severity = none
+dotnet_diagnostic.KHAOS004.severity = none
 ```
 
-Each page says when silencing makes sense. Build errors cannot be turned off: the game cannot be built without
-fixing them.
+Each page says when silencing makes sense. Errors cannot be turned off: the game cannot be built without fixing
+them.
 
 > [!NOTE]
 > Codes that start with `KHI` are rules for the source code of Khaos itself. You never see them in a game.

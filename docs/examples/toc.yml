@@ -4,3 +4,9 @@
   items:
     - name: Clear the screen
       href: rendering/clear/readme.md
+- name: Events
+  items:
+    - name: Keys
+      href: events/keys/readme.md
+    - name: Game events
+      href: events/game-events/readme.md

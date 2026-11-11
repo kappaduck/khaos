@@ -140,6 +140,7 @@ walk, the input classes tell you what is pressed right now, from `FixedUpdate`. 
 can match on them as much as you like, even in a game that runs at a high frame rate.
 
 Your game can also send events of its own, such as "level finished", and receive them in `OnEvent` the same way.
+[Events](events.md) lists every event and shows how to send your own.
 
 ## Drawing happens in Draw
 

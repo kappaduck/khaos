@@ -27,6 +27,7 @@ Examples arrive with the features they show: a feature is finished when its exam
 | Category  | Examples                                               |
 | :-------- | :----------------------------------------------------- |
 | Rendering | Clear the screen, a sprite, a sprite sheet             |
+| Events    | Keys, game events                                      |
 | Input     | Keyboard, mouse, gamepad, input actions                |
 | Audio     | A sound, music, volume groups                          |
 | Text      | Text on screen, text that wraps                        |

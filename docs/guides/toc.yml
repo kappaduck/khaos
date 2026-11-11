@@ -18,6 +18,8 @@
   items:
     - name: How a game runs
       href: game-loop.md
+    - name: Events
+      href: events.md
     - name: Positions, sizes and angles
       href: positions-sizes-angles.md
     - name: Configuration and environments
