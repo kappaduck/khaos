@@ -24,6 +24,10 @@
     <ProjectReference Include="$(KhaosRoot)src/Khaos/Khaos.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="$(KhaosRoot)analyzers/Khaos.Analyzers/Khaos.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
   <PropertyGroup Label="Artifacts">
     <BenchmarkArtifactsPath>$(KhaosRoot)artifacts/benchmarks</BenchmarkArtifactsPath>
   </PropertyGroup>

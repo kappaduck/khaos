@@ -1,6 +1,7 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
+using KappaDuck.Khaos.Events;
 using KappaDuck.Khaos.Graphics;
 using KappaDuck.Khaos.Graphics.Rendering;
 
@@ -14,6 +15,8 @@ internal sealed class SpyGame : Game2D
 
     internal Action<SpyGame>? OnDraw { get; init; }
 
+    internal Action<SpyGame, Event>? OnEventReceived { get; init; }
+
     protected internal override void Draw(Renderer renderer)
     {
         Draws++;
@@ -21,4 +24,6 @@ internal sealed class SpyGame : Game2D
 
         OnDraw?.Invoke(this);
     }
+
+    protected internal override void OnEvent(in Event e) => OnEventReceived?.Invoke(this, e);
 }
