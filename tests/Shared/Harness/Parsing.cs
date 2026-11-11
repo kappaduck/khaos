@@ -10,4 +10,8 @@ internal static class Parsing
     internal static readonly CSharpParseOptions Preview = CSharpParseOptions.Default
         .WithLanguageVersion(LanguageVersion.Preview)
         .WithFeatures([new("runtime-async", "on"), new("updated-memory-safety-rules", "true")]);
+
+    internal static readonly CSharpParseOptions WithoutMemorySafety = CSharpParseOptions.Default
+        .WithLanguageVersion(LanguageVersion.Preview)
+        .WithFeatures([new("runtime-async", "on")]);
 }
