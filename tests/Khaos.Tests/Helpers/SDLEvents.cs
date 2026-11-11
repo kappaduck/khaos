@@ -31,7 +31,7 @@ internal static partial class SDLEvents
 
     internal static void PushQuit()
     {
-        SDL_Event quit = new() { Type = SDL_EventType.Quit };
+        SDL_Event quit = new(SDL_EventType.Quit);
 
         if (!SDL3.PushEvent(ref quit))
             throw new InvalidOperationException("SDL_PushEvent refused the quit event.");

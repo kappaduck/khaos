@@ -13,6 +13,7 @@ namespace KappaDuck.Khaos.Tests.Interop.SDL;
 internal sealed class LayoutTests
 {
     private const int DisplayModeFieldsBeforeInternal = 32;
+    private const int UserEventFieldsBeforeData = 24;
 
     [Test]
     public async Task ColorShouldHaveTheSizeOfSDLColor()
@@ -56,6 +57,38 @@ internal sealed class LayoutTests
         nint offset = Marshal.OffsetOf<SDL_DisplayMode>(nameof(SDL_DisplayMode.RefreshRate));
 
         await offset.Should().BeEqualTo(20);
+    }
+
+    [Test]
+    public async Task EventShouldHaveTheSizeOfSDLEvent()
+    {
+        int size = Unsafe.SizeOf<SDL_Event>();
+
+        await size.Should().BeEqualTo(128);
+    }
+
+    [Test]
+    public async Task KeyboardEventShouldHaveTheSizeOfSDLKeyboardEvent()
+    {
+        int size = Unsafe.SizeOf<SDL_KeyboardEvent>();
+
+        await size.Should().BeEqualTo(40);
+    }
+
+    [Test]
+    public async Task KeyboardEventRepeatShouldSitAtTheOffsetOfSDLKeyboardEvent()
+    {
+        nint offset = Marshal.OffsetOf<SDL_KeyboardEvent>(nameof(SDL_KeyboardEvent.Repeat));
+
+        await offset.Should().BeEqualTo(37);
+    }
+
+    [Test]
+    public async Task KeyboardEventScancodeShouldSitAtTheOffsetOfSDLKeyboardEvent()
+    {
+        nint offset = Marshal.OffsetOf<SDL_KeyboardEvent>(nameof(SDL_KeyboardEvent.Scancode));
+
+        await offset.Should().BeEqualTo(24);
     }
 
     [Test]
@@ -170,5 +203,45 @@ internal sealed class LayoutTests
         int[] fields = unsafe (MemoryMarshal.Cast<SizeI, int>(value)).ToArray();
 
         await fields.Should().BeEquivalentTo(expected, EqualityComparer<int>.Default, CollectionOrdering.Matching);
+    }
+
+    [Test]
+    public async Task UserEventShouldHaveTheSizeOfSDLUserEvent()
+    {
+        int size = Unsafe.SizeOf<SDL_UserEvent>();
+
+        await size.Should().BeEqualTo(UserEventFieldsBeforeData + (2 * nint.Size));
+    }
+
+    [Test]
+    public async Task UserEventCodeShouldSitAtTheOffsetOfSDLUserEvent()
+    {
+        nint offset = Marshal.OffsetOf<SDL_UserEvent>(nameof(SDL_UserEvent.Code));
+
+        await offset.Should().BeEqualTo(20);
+    }
+
+    [Test]
+    public async Task WindowEventShouldHaveTheSizeOfSDLWindowEvent()
+    {
+        int size = Unsafe.SizeOf<SDL_WindowEvent>();
+
+        await size.Should().BeEqualTo(32);
+    }
+
+    [Test]
+    public async Task WindowEventData1ShouldSitAtTheOffsetOfSDLWindowEvent()
+    {
+        nint offset = Marshal.OffsetOf<SDL_WindowEvent>(nameof(SDL_WindowEvent.Data1));
+
+        await offset.Should().BeEqualTo(20);
+    }
+
+    [Test]
+    public async Task WindowEventData2ShouldSitAtTheOffsetOfSDLWindowEvent()
+    {
+        nint offset = Marshal.OffsetOf<SDL_WindowEvent>(nameof(SDL_WindowEvent.Data2));
+
+        await offset.Should().BeEqualTo(24);
     }
 }

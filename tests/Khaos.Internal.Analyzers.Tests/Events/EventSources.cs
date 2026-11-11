@@ -84,7 +84,6 @@ internal static class EventSources
     internal const string Event = """
         namespace KappaDuck.Khaos.Events;
 
-        [System.Runtime.CompilerServices.Union]
         public readonly partial struct Event;
         """;
 

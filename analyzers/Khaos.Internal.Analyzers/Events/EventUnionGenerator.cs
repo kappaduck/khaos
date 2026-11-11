@@ -102,6 +102,7 @@ public sealed class EventUnionGenerator : IIncrementalGenerator
         builder.AppendLine($"namespace {Namespace};")
                .AppendLine();
 
+        builder.AppendLine("[global::System.Runtime.CompilerServices.Union]");
         using (builder.AppendBlock("public readonly partial struct Event"))
         {
             UnionEmitter.EmitMembers(builder, "Event", union);

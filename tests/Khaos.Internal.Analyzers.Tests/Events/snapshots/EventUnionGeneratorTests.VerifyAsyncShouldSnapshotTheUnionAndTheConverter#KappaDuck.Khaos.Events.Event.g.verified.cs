@@ -4,6 +4,7 @@
 
 namespace KappaDuck.Khaos.Events;
 
+[global::System.Runtime.CompilerServices.Union]
 public readonly partial struct Event
 {
     private readonly byte _tag;

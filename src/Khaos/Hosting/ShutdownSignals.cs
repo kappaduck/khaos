@@ -30,7 +30,7 @@ internal sealed class ShutdownSignals : IDisposable
         if (Interlocked.Exchange(ref _received, 1) != 0)
             return;
 
-        SDL_Event quit = new() { Type = SDL_EventType.Quit };
+        SDL_Event quit = new(SDL_EventType.Quit);
         context.Cancel = SDL3.PushEvent(ref quit);
     }
 }
