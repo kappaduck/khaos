@@ -9,6 +9,27 @@ namespace KappaDuck.Khaos.Analyzers.Tests.Shared;
 internal sealed class EquatableArrayTests
 {
     [Test]
+    public async Task AsSpanShouldReturnTheElementsInOrder()
+    {
+        EquatableArray<string> array = ImmutableArray.Create("window", "renderer").ToEquatableArray();
+        string[] expected = ["window", "renderer"];
+
+        string[] elements = array.AsSpan().ToArray();
+
+        await elements.SequenceEqual(expected).Should().BeTrue();
+    }
+
+    [Test]
+    public async Task AsSpanShouldBeEmptyForDefault()
+    {
+        EquatableArray<string> uninitialized = default;
+
+        int length = uninitialized.AsSpan().Length;
+
+        await length.Should().BeEqualTo(0);
+    }
+
+    [Test]
     public async Task EqualsShouldTreatDefaultAsEmpty()
     {
         EquatableArray<string> uninitialized = default;

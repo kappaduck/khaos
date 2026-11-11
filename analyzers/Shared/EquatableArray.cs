@@ -56,4 +56,6 @@ internal readonly struct EquatableArray<T>(ImmutableArray<T> array) : IEquatable
 
         return hash;
     }
+
+    internal ReadOnlySpan<T> AsSpan() => _array.IsDefault ? [] : _array.AsSpan();
 }

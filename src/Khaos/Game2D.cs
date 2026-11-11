@@ -1,6 +1,7 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
+using KappaDuck.Khaos.Events;
 using KappaDuck.Khaos.Graphics;
 using KappaDuck.Khaos.Graphics.Rendering;
 using KappaDuck.Khaos.Hosting;
@@ -64,6 +65,15 @@ public abstract class Game2D
     /// Prepares the game. Khaos calls it once, after the window opens and before the first frame.
     /// </summary>
     protected internal virtual void Initialize()
+    {
+    }
+
+    /// <summary>
+    /// Reacts to something that happened, such as a key pressed. Khaos calls it once per event, before the frame
+    /// draws.
+    /// </summary>
+    /// <param name="e">The event. Match it with a <see langword="switch"/> or <see langword="is"/>.</param>
+    protected internal virtual void OnEvent(in Event e)
     {
     }
 

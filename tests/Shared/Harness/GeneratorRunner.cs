@@ -9,9 +9,11 @@ namespace KappaDuck.Khaos.Testing.Harness;
 
 internal static class GeneratorRunner<TGenerator> where TGenerator : IIncrementalGenerator, new()
 {
-    internal static GeneratorResult Run(params ReadOnlySpan<string> sources)
+    internal static GeneratorResult Run(params ReadOnlySpan<string> sources) => Run(Parsing.Preview, sources);
+
+    internal static GeneratorResult Run(CSharpParseOptions parsing, params ReadOnlySpan<string> sources)
     {
-        GeneratorDriverRunResult result = Generate(TestCompilation.Create(sources), out Compilation output).GetRunResult();
+        GeneratorDriverRunResult result = Generate(TestCompilation.Create(parsing, sources), parsing, out Compilation output).GetRunResult();
 
         Dictionary<string, string> generated = result.Results
             .SelectMany(static generator => generator.GeneratedSources)
@@ -21,12 +23,12 @@ internal static class GeneratorRunner<TGenerator> where TGenerator : IIncrementa
     }
 
     internal static Task VerifyAsync(ReadOnlySpan<string> sources, [CallerFilePath] string sourceFile = "")
-        => Verify(Generate(TestCompilation.Create(sources), out _), sourceFile: sourceFile);
+        => Verify(Generate(TestCompilation.Create(sources), Parsing.Preview, out _), sourceFile: sourceFile);
 
-    private static GeneratorDriver Generate(CSharpCompilation compilation, out Compilation output)
+    private static GeneratorDriver Generate(CSharpCompilation compilation, CSharpParseOptions parsing, out Compilation output)
     {
         GeneratorDriver driver = CSharpGeneratorDriver
-            .Create([new TGenerator().AsSourceGenerator()], parseOptions: Parsing.Preview)
+            .Create([new TGenerator().AsSourceGenerator()], parseOptions: parsing)
             .RunGeneratorsAndUpdateCompilation(compilation, out output, out _);
 
         Exception? exception = driver.GetRunResult().Results

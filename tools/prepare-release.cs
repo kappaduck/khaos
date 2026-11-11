@@ -12,6 +12,7 @@ const string projectPath = "Directory.Build.props";
 const string changelogPath = "changelog.md";
 const string readmePath = "readme.md";
 const string packagesPath = "Directory.Packages.props";
+const string analyzersPath = "analyzers";
 
 string? missingFile = Array.Find([projectPath, changelogPath, readmePath, packagesPath], static f => !File.Exists(f));
 if (!string.IsNullOrEmpty(missingFile))
@@ -58,12 +59,28 @@ static async Task<int> PrepareReleaseAsync()
     CompatibilityTable table = await CompatibilityTable.ParseAsync(readmePath);
     table.AddRelease(project.Version, runtime);
 
+    AnalyzerReleases[] analyzers = await AnalyzerReleases.FindAsync(analyzersPath);
+
+    foreach (AnalyzerReleases analyzer in analyzers)
+        analyzer.Ship(project.Version);
+
     await changelog.SaveAsync();
     await table.SaveAsync();
+
+    foreach (AnalyzerReleases analyzer in analyzers)
+        await analyzer.SaveAsync();
 
     Console.WriteLine($"Prepared Khaos {project.Version} ({today:yyyy-MM-dd}):");
     Console.WriteLine($"  {changelogPath}: dated the [Unreleased] section");
     Console.WriteLine($"  {readmePath}: added Khaos {project.Version} with the native packages {runtime} to the SDL compatibility table");
+
+    foreach (AnalyzerReleases analyzer in analyzers)
+    {
+        Console.WriteLine(analyzer.RuleCount == 0
+            ? $"  {analyzer.Name}: no unshipped rules"
+            : $"  {analyzer.Name}: shipped {analyzer.RuleCount} rules under Release {project.Version}");
+    }
+
     return 0;
 }
 
@@ -123,6 +140,143 @@ static string? Between(string text, string start, string end)
     int to = text.IndexOf(end, from, StringComparison.Ordinal);
 
     return to < 0 ? null : text[from..to].Trim();
+}
+
+internal sealed class AnalyzerReleases
+{
+    private const char CommentPrefix = ';';
+    private const string ReleasePrefix = "## Release ";
+    private const string RuleIdHeader = "Rule ID";
+    private const string ShippedFile = "AnalyzerReleases.Shipped.md";
+    private const string UnshippedFile = "AnalyzerReleases.Unshipped.md";
+
+    private readonly string _shippedPath;
+    private readonly string _unshippedPath;
+    private string[] _shipped;
+    private string[] _unshipped;
+
+    private AnalyzerReleases(string name, string directory, string[] shipped, string[] unshipped)
+    {
+        _shippedPath = Path.Combine(directory, ShippedFile);
+        _unshippedPath = Path.Combine(directory, UnshippedFile);
+        _shipped = shipped;
+        _unshipped = unshipped;
+
+        Name = name;
+    }
+
+    public string Name { get; }
+
+    public int RuleCount { get; private set; }
+
+    internal static async Task<AnalyzerReleases[]> FindAsync(string root)
+    {
+        if (!Directory.Exists(root))
+            throw new DirectoryNotFoundException($"Cannot find the '{root}' folder.");
+
+        string[] directories = Directory.GetDirectories(root);
+        Array.Sort(directories, StringComparer.Ordinal);
+
+        List<AnalyzerReleases> releases = [];
+
+        foreach (string directory in directories)
+        {
+            string shippedPath = Path.Combine(directory, ShippedFile);
+            string unshippedPath = Path.Combine(directory, UnshippedFile);
+
+            if (!File.Exists(shippedPath) || !File.Exists(unshippedPath))
+                continue;
+
+            string[] shipped = await File.ReadAllLinesAsync(shippedPath);
+            string[] unshipped = await File.ReadAllLinesAsync(unshippedPath);
+
+            releases.Add(new AnalyzerReleases($"{root}/{Path.GetFileName(directory)}", directory, shipped, unshipped));
+        }
+
+        return [.. releases];
+    }
+
+    internal async Task SaveAsync()
+    {
+        if (RuleCount == 0)
+            return;
+
+        await File.WriteAllTextAsync(_shippedPath, Join(_shipped));
+        await File.WriteAllTextAsync(_unshippedPath, Join(_unshipped));
+    }
+
+    internal void Ship(Version version)
+    {
+        string heading = string.Create(CultureInfo.InvariantCulture, $"{ReleasePrefix}{version}");
+
+        if (Array.Exists(_shipped, l => l.AsSpan().TrimEnd().SequenceEqual(heading)))
+            throw new InvalidOperationException($"'{Name}/{ShippedFile}' already has a section for {version}.");
+
+        int comments = CountComments(_unshipped);
+        ReadOnlySpan<string> rules = TrimBlankLines(_unshipped.AsSpan(comments..));
+
+        RuleCount = CountRules(rules);
+
+        if (RuleCount == 0)
+            return;
+
+        ReadOnlySpan<string> shipped = TrimBlankLines(_shipped);
+
+        _shipped = shipped.IsEmpty
+            ? [heading, string.Empty, .. rules]
+            : [.. shipped, string.Empty, heading, string.Empty, .. rules];
+
+        _unshipped = _unshipped[..comments];
+    }
+
+    private static int CountComments(ReadOnlySpan<string> lines)
+    {
+        int count = 0;
+
+        while (count < lines.Length && lines[count].AsSpan().TrimStart().StartsWith(CommentPrefix))
+            count++;
+
+        return count;
+    }
+
+    private static int CountRules(ReadOnlySpan<string> lines)
+    {
+        int count = 0;
+
+        foreach (string line in lines)
+        {
+            if (IsRuleRow(line))
+                count++;
+        }
+
+        return count;
+    }
+
+    private static bool IsRuleRow(ReadOnlySpan<char> line)
+    {
+        if (!line.Contains('|'))
+            return false;
+
+        ReadOnlySpan<char> cells = line.Trim().TrimStart('|').TrimStart();
+        return !cells.StartsWith(RuleIdHeader, StringComparison.Ordinal) && !cells.StartsWith('-') && !cells.StartsWith(':');
+    }
+
+    private static string Join(string[] lines) => lines.Length == 0 ? string.Empty : string.Join('\n', lines) + '\n';
+
+    private static ReadOnlySpan<string> TrimBlankLines(ReadOnlySpan<string> lines)
+    {
+        int start = 0;
+
+        while (start < lines.Length && string.IsNullOrWhiteSpace(lines[start]))
+            start++;
+
+        int end = lines.Length;
+
+        while (end > start && string.IsNullOrWhiteSpace(lines[end - 1]))
+            end--;
+
+        return lines[start..end];
+    }
 }
 
 internal sealed class Changelog

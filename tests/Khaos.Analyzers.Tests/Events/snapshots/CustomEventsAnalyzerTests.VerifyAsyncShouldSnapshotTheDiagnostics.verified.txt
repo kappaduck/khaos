@@ -1,0 +1,63 @@
+﻿[
+  {
+    Location: /*
+[CustomEvents(typeof(CoinInserted))]
+public readonly struct ArcadeEvents;
+                       ^^^^^^^^^^^^
+*/
+ Source1.cs: (8,23)-(8,35),
+    Message: 'ArcadeEvents' is marked [CustomEvents]; declare it as a readonly partial struct, not generic and not nested in another type,
+    Severity: Error,
+    Descriptor: {
+      Id: KHAOS001,
+      Title: [CustomEvents] is not on a readonly partial struct,
+      Description: Khaos adds the members that let OnEvent match the events of the group to the group itself, so it has to be a partial struct it can extend, readonly like every event, at the top level of a namespace and not generic.,
+      HelpLink: https://github.com/kappaduck/khaos/blob/main/docs/rules/khaos001.md,
+      MessageFormat: '{0}' is marked [CustomEvents]; declare it as a readonly partial struct, not generic and not nested in another type,
+      Category: Events,
+      DefaultSeverity: Error,
+      IsEnabledByDefault: true
+    }
+  },
+  {
+    Location: /*
+[CustomEvents]
+public readonly partial struct LobbyEvents;
+                               ^^^^^^^^^^^
+*/
+ Source2.cs: (6,31)-(6,42),
+    Message: 'LobbyEvents' is marked [CustomEvents] but lists no events; list them as [CustomEvents(typeof(MyEvent))],
+    Severity: Error,
+    Descriptor: {
+      Id: KHAOS002,
+      Title: [CustomEvents] group has no events,
+      Description: A group with no events gives OnEvent nothing to match. List at least one readonly record struct in the attribute.,
+      HelpLink: https://github.com/kappaduck/khaos/blob/main/docs/rules/khaos002.md,
+      MessageFormat: '{0}' is marked [CustomEvents] but lists no events; list them as [CustomEvents(typeof(MyEvent))],
+      Category: Events,
+      DefaultSeverity: Error,
+      IsEnabledByDefault: true
+    }
+  },
+  {
+    Location: /*
+
+[CustomEvents(typeof(HighScores))]
+              ^^^^^^^^^^^^^^^^^^
+public readonly partial struct ScoreEvents;
+*/
+ Source3.cs: (7,14)-(7,32),
+    Message: 'HighScores' in 'ScoreEvents' holds 'Scores' of type System.Collections.Generic.List<int>; an event holds only values and strings,
+    Severity: Error,
+    Descriptor: {
+      Id: KHAOS003,
+      Title: event in a [CustomEvents] group has the wrong shape,
+      Description: Each event of a group is copied into the group and read from OnEvent, so it has to be an immutable value: a non-generic readonly record struct, at least as accessible as the group, that holds values and strings, not other objects.,
+      HelpLink: https://github.com/kappaduck/khaos/blob/main/docs/rules/khaos003.md,
+      MessageFormat: '{0}' in '{1}' {2},
+      Category: Events,
+      DefaultSeverity: Error,
+      IsEnabledByDefault: true
+    }
+  }
+]

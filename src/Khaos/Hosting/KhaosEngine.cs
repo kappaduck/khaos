@@ -1,6 +1,7 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
+using KappaDuck.Khaos.Events;
 using KappaDuck.Khaos.Graphics.Rendering;
 using KappaDuck.Khaos.Windowing;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -13,6 +14,7 @@ internal sealed class KhaosEngine : IDisposable
     private readonly Renderer _renderer;
 
     private bool _disposed;
+    private EventContext _eventContext;
 
     private KhaosEngine(Game2D game)
     {
@@ -28,6 +30,7 @@ internal sealed class KhaosEngine : IDisposable
             try
             {
                 _renderer = Renderer.Create(Window, game.GraphicsOptions.VSync, NullLogger<Renderer>.Instance);
+                _eventContext = new EventContext(Window.ContentScale);
             }
             catch
             {
@@ -59,6 +62,14 @@ internal sealed class KhaosEngine : IDisposable
         _session.Dispose();
     }
 
+    internal void Dispatch(in Event e)
+    {
+        Game.OnEvent(in e);
+
+        if (e is QuitRequested)
+            Game.Exit();
+    }
+
     internal SDL_AppResult Iterate()
     {
         if (Game.ExitRequested)
@@ -68,6 +79,24 @@ internal sealed class KhaosEngine : IDisposable
         _renderer.Present();
 
         return SDL_AppResult.Continue;
+    }
+
+    internal void Receive(in SDL_Event native)
+    {
+        if (ChangesContentScale(native.Type))
+            _eventContext = new EventContext(Window.ContentScale);
+
+
+        if (IsKeyRepeat(in native))
+            return;
+
+        if (!EventConverter.TryConvert(in native, in _eventContext, out Event e))
+            return;
+
+        Dispatch(in e);
+
+        if (e.TryGetValue(out CustomEvent custom))
+            custom.Release();
     }
 
     internal static KhaosEngine Start(Game2D game)
@@ -87,4 +116,9 @@ internal sealed class KhaosEngine : IDisposable
 
         return engine;
     }
+
+    private static bool ChangesContentScale(SDL_EventType type)
+        => type is SDL_EventType.WindowResized or SDL_EventType.WindowPixelSizeChanged or SDL_EventType.WindowDisplayScaleChanged;
+
+    private static bool IsKeyRepeat(in SDL_Event native) => native.Type == SDL_EventType.KeyDown && native.Key.Repeat != 0;
 }

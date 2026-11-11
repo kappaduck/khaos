@@ -8,6 +8,11 @@ namespace KappaDuck.Khaos.Internal.Analyzers;
 internal static class Descriptors
 {
     private const string Documentation = "https://github.com/kappaduck/khaos/blob/main/docs/rules/";
+    private const string EventCaseConstructorDescription = "The generated converter builds a case from the native event SDL hands to the game. It finds the field of SDL_Event to read by the type of the constructor's first parameter, and passes the EventContext when the constructor asks for it. A case without that constructor cannot be built, so the generator leaves it out of Event.";
+    private const string EventCaseDuplicateDescription = "One native event becomes one case: the converter switches on the native type, and a type claimed twice would make one of the cases unreachable. The generator keeps the case that sorts first and leaves the other out of Event.";
+    private const string EventCaseFieldDescription = "Event overlaps its unmanaged cases in the same bytes, and the runtime refuses a reference that overlaps anything else. A string gets a field of its own; any other reference would also make a case that a game can keep alive by mistake.";
+    private const string EventCaseShapeDescription = "Every case is copied into Event and handed to OnEvent by in, so it has to be an immutable value the game can read and match: a public, non-generic, top-level readonly record struct.";
+    private const string Events = "Events";
     private const string Interop = "Interop";
     private const string InteropBoolDescription = "A native bool is 1 byte in SDL and a 4-byte BOOL in Win32, and nothing fails when the wrong width is marshalled: the value is simply wrong, sometimes. The area of the binding decides the width, written as UnmanagedType.U1 or UnmanagedType.Bool.";
     private const string InteropBoolStorageDescription = "A bool makes its struct non-blittable: passed by value, the struct needs runtime marshalling disabled, and read through a pointer, its managed layout no longer matches a 4-byte Win32 BOOL. Store a native boolean as byte in SDL and int in Win32, and convert to bool in the public wrapper.";
@@ -278,4 +283,55 @@ internal static class Descriptors
         true,
         InteropNonCopyableDescription,
         $"{Documentation}khi012.md");
+
+    internal static readonly DiagnosticDescriptor EventCaseShape = new(
+        "KHI013",
+        "event case is not a public readonly record struct",
+        "'{0}' is marked [KhaosEvent]; declare it as a public, non-generic, top-level readonly record struct",
+        Events,
+        DiagnosticSeverity.Error,
+        true,
+        EventCaseShapeDescription,
+        $"{Documentation}khi013.md");
+
+    internal static readonly DiagnosticDescriptor EventCaseRange = new(
+        "KHI013",
+        "event case is not a public readonly record struct",
+        "'{0}' covers a range of native types whose last type comes before its first",
+        Events,
+        DiagnosticSeverity.Error,
+        true,
+        EventCaseShapeDescription,
+        $"{Documentation}khi013.md");
+
+    internal static readonly DiagnosticDescriptor EventCaseField = new(
+        "KHI014",
+        "event case holds a reference other than a string",
+        "'{0}' holds '{1}' of type {2}; an event case holds only unmanaged values and strings",
+        Events,
+        DiagnosticSeverity.Error,
+        true,
+        EventCaseFieldDescription,
+        $"{Documentation}khi014.md");
+
+    internal static readonly DiagnosticDescriptor EventCaseConstructor = new(
+        "KHI015",
+        "event case has no valid native constructor",
+        "'{0}' {1}",
+        Events,
+        DiagnosticSeverity.Error,
+        true,
+        EventCaseConstructorDescription,
+        $"{Documentation}khi015.md");
+
+    internal static readonly DiagnosticDescriptor EventCaseDuplicate = new(
+        "KHI016",
+        "native event type claimed by two cases",
+        "'{0}' claims a native event type that '{1}' already converts",
+        Events,
+        DiagnosticSeverity.Error,
+        true,
+        EventCaseDuplicateDescription,
+        $"{Documentation}khi016.md",
+        WellKnownDiagnosticTags.CompilationEnd);
 }

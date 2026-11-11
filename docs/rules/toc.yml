@@ -10,3 +10,17 @@
       href: khaos102.md
     - name: KHAOS103
       href: khaos103.md
+- name: Code errors
+  items:
+    - name: KHAOS001
+      href: khaos001.md
+    - name: KHAOS002
+      href: khaos002.md
+    - name: KHAOS003
+      href: khaos003.md
+    - name: KHAOS005
+      href: khaos005.md
+- name: Code warnings
+  items:
+    - name: KHAOS004
+      href: khaos004.md

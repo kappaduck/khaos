@@ -8,6 +8,23 @@ namespace KappaDuck.Khaos.Analyzers.Tests.Harness;
 internal sealed class GeneratorRunnerTests
 {
     [Test]
+    public async Task RunShouldGiveTheGeneratorTheParseOptionsOfTheRepository()
+    {
+        GeneratorResult result = GeneratorRunner<MemorySafetyGenerator>.Run("public sealed class Player;");
+
+        await result.Source(MemorySafetyGenerator.HintName).Should().Contain("Enabled = true;");
+    }
+
+    [Test]
+    public async Task RunShouldGiveTheGeneratorTheGivenParseOptions()
+    {
+        GeneratorResult result = GeneratorRunner<MemorySafetyGenerator>.Run(Parsing.WithoutMemorySafety, "public sealed class Player;");
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Source(MemorySafetyGenerator.HintName).Should().Contain("Enabled = false;");
+    }
+
+    [Test]
     public async Task RunShouldReturnTheGeneratedSources()
     {
         GeneratorResult result = GeneratorRunner<TypeNameGenerator>.Run("public sealed partial class Player;");

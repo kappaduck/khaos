@@ -20,6 +20,17 @@ internal sealed class TestCompilationTests
     }
 
     [Test]
+    public async Task CreateShouldparseWithTheGivenOptions()
+    {
+        CSharpCompilation compilation = TestCompilation.Create(Parsing.WithoutMemorySafety, "public sealed class Player;");
+
+        IReadOnlyDictionary<string, string> features = compilation.SyntaxTrees[0].Options.Features;
+
+        await features.ContainsKey("updated-memory-safety-rules").Should().BeFalse();
+        await features["runtime-async"].Should().BeEqualTo("on");
+    }
+
+    [Test]
     public async Task EditShouldKeepTheTreesThatDidNotChange()
     {
         CSharpCompilation compilation = TestCompilation.Create("public sealed class Player;", "public sealed class Enemy;");
