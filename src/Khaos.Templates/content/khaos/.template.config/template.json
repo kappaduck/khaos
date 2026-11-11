@@ -38,6 +38,12 @@
       "defaultValue": "both",
       "description": "Where the game runs."
     },
+    "aot": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Publish the desktop game as one native executable (NativeAOT). Needs the C++ build tools, and each system builds its own version."
+    },
     "title": {
       "type": "parameter",
       "datatype": "text",

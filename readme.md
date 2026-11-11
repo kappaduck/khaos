@@ -132,7 +132,6 @@ or via your `.csproj`, on the desktop:
   <PropertyGroup>
     <TargetFramework>net11.0</TargetFramework>
     <OutputType>Exe</OutputType>
-    <PublishAot>true</PublishAot>
   </PropertyGroup>
 
   <ItemGroup>
