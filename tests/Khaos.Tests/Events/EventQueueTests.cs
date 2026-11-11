@@ -14,9 +14,9 @@ internal sealed class EventQueueTests
     [Test]
     public async Task RegisterShouldAcceptTheSameCapacityTwice()
     {
-        EventQueue.Register<LapCompleted>(capacity: 4);
+        EventQueue.Register<SectorTimed>(capacity: 4);
 
-        await Assert.That(static () => EventQueue.Register<LapCompleted>(capacity: 4)).ThrowsNothing();
+        await Assert.That(static () => EventQueue.Register<SectorTimed>(capacity: 4)).ThrowsNothing();
     }
 
     [Test]
@@ -126,6 +126,8 @@ internal sealed class EventQueueTests
     private readonly record struct RaceFinished(int Position);
 
     private readonly record struct RaceStarted(int Track);
+
+    private readonly record struct SectorTimed(int Seconds);
 
     private readonly record struct TireChanged(int Tire);
 }
