@@ -1,10 +1,14 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
+using KappaDuck.Khaos.Events;
 using KappaDuck.Khaos.Hosting;
+using KappaDuck.Khaos.Input;
 using KappaDuck.Khaos.Interop.SDL;
 using KappaDuck.Khaos.Interop.SDL.Primitives;
+using KappaDuck.Khaos.Mathematics;
 using KappaDuck.Khaos.Tests.Helpers;
+using KappaDuck.Khaos.Windowing;
 
 namespace KappaDuck.Khaos.Tests.Hosting;
 
@@ -140,6 +144,98 @@ internal sealed class KhaosEngineTests
         _ = engine.Iterate();
 
         _game.Draw(Any()).WasNeverCalled();
+    }
+
+    [Test]
+    public void DispatchShouldPassTheEventToOnEvent()
+    {
+        using KhaosEngine engine = KhaosEngine.Start(_game);
+        Event e = new(new KeyPressed(Scancode.Space));
+
+        engine.Dispatch(in e);
+
+        _game.OnEvent(received => received is KeyPressed { Code: Scancode.Space }).WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task DispatchShouldExitTheGameOnQuitRequested()
+    {
+        using KhaosEngine engine = KhaosEngine.Start(_game);
+        Event e = new(new QuitRequested());
+
+        engine.Dispatch(in e);
+
+        await _game.Object.ExitRequested.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task DispatchShouldCallOnEventBeforeExitingOnQuitRequested()
+    {
+        bool exitRequestedInOnEvent = true;
+        _game.OnEvent(Any()).Callback(() => exitRequestedInOnEvent = _game.Object.ExitRequested);
+
+        using KhaosEngine engine = KhaosEngine.Start(_game);
+        Event e = new(new QuitRequested());
+
+        engine.Dispatch(in e);
+
+        await exitRequestedInOnEvent.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task DispatchShouldNotExitTheGameOnAnotherEvent()
+    {
+        using KhaosEngine engine = KhaosEngine.Start(_game);
+        Event e = new(new KeyPressed(Scancode.Escape));
+
+        engine.Dispatch(in e);
+
+        await _game.Object.ExitRequested.Should().BeFalse();
+    }
+
+    [Test]
+    public void ReceiveShouldDispatchAnEventThatHasACase()
+    {
+        using KhaosEngine engine = KhaosEngine.Start(_game);
+        SDL_Event native = new(new SDL_KeyboardEvent(SDL_EventType.KeyDown, (int)Scancode.Escape, repeat: 0));
+
+        engine.Receive(in native);
+
+        _game.OnEvent(received => received is KeyPressed { Code: Scancode.Escape }).WasCalled(Times.Once);
+    }
+
+    [Test]
+    public void ReceiveShouldIgnoreAKeyRepeat()
+    {
+        using KhaosEngine engine = KhaosEngine.Start(_game);
+        SDL_Event native = new(new SDL_KeyboardEvent(SDL_EventType.KeyDown, (int)Scancode.Escape, repeat: 1));
+
+        engine.Receive(in native);
+
+        _game.OnEvent(Any()).WasNeverCalled();
+    }
+
+    [Test]
+    public void ReceiveShouldIgnoreATypeWithoutACase()
+    {
+        using KhaosEngine engine = KhaosEngine.Start(_game);
+        SDL_Event native = new(SDL_EventType.WindowPixelSizeChanged);
+
+        engine.Receive(in native);
+
+        _game.OnEvent(Any()).WasNeverCalled();
+    }
+
+    [Test]
+    public void ReceiveShouldGiveTheSizeOfAResizeInLogicalUnits()
+    {
+        using KhaosEngine engine = KhaosEngine.Start(_game);
+        SDL_Event native = new(new SDL_WindowEvent(SDL_EventType.WindowResized, 640, 360));
+        SizeI expected = WindowScale.ToLogical(new SizeI(640, 360), engine.Window.ContentScale);
+
+        engine.Receive(in native);
+
+        _game.OnEvent(received => received is WindowResized { Size: var size } && size == expected).WasCalled(Times.Once);
     }
 
     [Test]

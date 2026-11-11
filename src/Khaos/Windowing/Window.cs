@@ -346,6 +346,8 @@ public sealed class Window
         set => SetTitle(value);
     }
 
+    internal float ContentScale => GetNativeSize().ContentScale;
+
     internal SDL_Window* Handle
     {
         get

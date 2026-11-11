@@ -1,7 +1,9 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
+using KappaDuck.Khaos.Events;
 using KappaDuck.Khaos.Hosting;
+using KappaDuck.Khaos.Input;
 using KappaDuck.Khaos.Interop.SDL;
 using KappaDuck.Khaos.Interop.SDL.Primitives;
 using KappaDuck.Khaos.Tests.Helpers;
@@ -139,6 +141,17 @@ internal sealed class GameRunnerTests
         SDL_Subsystems started = SDL3.WasInit(SDL_Subsystems.Video);
 
         await started.Should().BeEqualTo(SDL_Subsystems.Video);
+    }
+
+    [Test]
+    public void RunShouldPassAPushedKeyToOnEventBeforeTheNextFrame()
+    {
+        _game.Draw(Any()).Callback(static () => SDLEvents.PushKeyDown(Scancode.Escape));
+        _game.OnEvent(static received => received is KeyPressed { Code: Scancode.Escape }).Callback(_game.Object.Exit);
+
+        GameRunner.Run(_game);
+
+        _game.Draw(Any()).WasCalled(Times.Once);
     }
 
     [Test]

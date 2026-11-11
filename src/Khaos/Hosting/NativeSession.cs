@@ -1,6 +1,8 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
+using KappaDuck.Khaos.Events;
+
 namespace KappaDuck.Khaos.Hosting;
 
 internal sealed class NativeSession : IDisposable
@@ -74,6 +76,8 @@ internal sealed class NativeSession : IDisposable
     private static void Stop()
     {
         SDL3.Quit();
+        CustomEventRegistry.ReleaseAll();
+
         Interlocked.Exchange(ref _started, false);
     }
 }

@@ -43,8 +43,11 @@ internal static class GameRunner
 
         try
         {
-            if (unsafe (e->Type) == SDL_EventType.Quit)
-                engine.Game.Exit();
+            // SAFETY: SDL passes an event it owns, valid until the callback returns, and Receive copies what it keeps.
+            unsafe
+            {
+                engine.Receive(in *e);
+            }
 
             return SDL_AppResult.Continue;
         }
