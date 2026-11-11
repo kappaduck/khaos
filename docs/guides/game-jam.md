@@ -86,9 +86,10 @@ Check your jam's page for the size limit and the deadline in your time zone.
 
 ## A desktop download too
 
-If you created the game without `--platform browser`, you also have a desktop app. Publish it on Windows for a
-Windows download (see [Publishing](publishing.md#for-windows-and-linux)), zip the folder, and upload it next to the
-browser version on the same page. Players who prefer a download, or whose browser struggles, will thank you.
+If you created the game without `--platform browser`, you also have a desktop app. Publish it for Windows and for
+Linux from the same computer (see [Publishing](publishing.md#for-windows-and-linux)), zip each folder, and upload them
+next to the browser version on the same page. Players who prefer a download, or whose browser struggles, will thank
+you.
 
 ## After the jam
 

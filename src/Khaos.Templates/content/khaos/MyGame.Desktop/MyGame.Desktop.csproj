@@ -1,7 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+<!--#if (aot) -->
     <PublishAot>true</PublishAot>
+<!--#else -->
+    <SelfContained>true</SelfContained>
+    <PublishTrimmed>true</PublishTrimmed>
+<!--#endif -->
   </PropertyGroup>
 
   <ItemGroup>

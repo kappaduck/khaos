@@ -35,8 +35,9 @@ dotnet publish MyGame -c Release -r win-x64 -p:KhaosEnvironment=Staging
 
 ## Adding the browser later
 
-Move `Program.cs` to a new `MyGame.Desktop` project (`<OutputType>Exe</OutputType>`, `<PublishAot>true</PublishAot>`
-and a reference to `MyGame`), remove `OutputType` and `PublishAot` from `MyGame.csproj` so it becomes a library, and
+Move `Program.cs` to a new `MyGame.Desktop` project (`<OutputType>Exe</OutputType>`, the publish properties
+`SelfContained` and `PublishTrimmed` or `PublishAot`, and a reference to `MyGame`), remove those properties from
+`MyGame.csproj` so it becomes a library, and
 add a `MyGame.Web` project with `<Project Sdk="Microsoft.NET.Sdk.WebAssembly">`, `<OutputType>Exe</OutputType>`, its
 own `Program.cs` and the same reference. Khaos comes to both through `MyGame`.
 `dotnet new khaos --platform both` shows the result.

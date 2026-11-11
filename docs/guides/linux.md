@@ -4,6 +4,11 @@ Linux players use many different distributions, and a game built on one does not
 explains why in two minutes, and gives you the one command that makes your Linux build work on as many systems as
 possible.
 
+> [!NOTE]
+> This page is for a game created with `--aot`. By default, your game carries the copy of .NET that Microsoft builds,
+> which asks for glibc 2.27 ([supported systems](https://github.com/dotnet/core/blob/main/release-notes/11.0/supported-os.md)),
+> older than Khaos's libraries: the Linux build runs everywhere Khaos does, whatever computer you publish it on.
+
 ## The short version
 
 Publish your Linux build inside the Steam Runtime container, like Khaos's own libraries are built:
