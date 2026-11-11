@@ -17,3 +17,7 @@ KHI009 | Interop | Error | native import outside an interop area, [documentation
 KHI010 | Interop | Error | bool or char in a native callback, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi010.md)
 KHI011 | Interop | Error | char in Interop/SDL, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi011.md)
 KHI012 | Interop | Error | non-copyable value used outside its using, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi012.md)
+KHI013 | Events | Error | event case is not a public readonly record struct, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi013.md)
+KHI014 | Events | Error | event case holds a reference other than a string, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi014.md)
+KHI015 | Events | Error | event case has no valid native constructor, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi015.md)
+KHI016 | Events | Error | native event type claimed by two cases, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi016.md)
