@@ -10,14 +10,14 @@
       "rollForward": true
     },
     "tunit.reporting.tool": {
-      "version": "1.81.16",
+      "version": "1.83.8",
       "commands": [
         "tunit-report"
       ],
       "rollForward": true
     },
     "dotnet-reportgenerator-globaltool": {
-      "version": "5.5.12",
+      "version": "5.6.0",
       "commands": [
         "reportgenerator"
       ],
