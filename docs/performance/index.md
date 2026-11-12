@@ -37,7 +37,7 @@ dotnet run -c Release --project performance/benchmarks -- --filter '*'
 ```
 
 It takes a few minutes and prints the same tables, measured on your own hardware. To measure one frame only, use
-`--filter '*.Frame.*'`. To compare the two ways of compiling, add `--runtimes net11.0 nativeaot11.0`; it takes
+`--filter '*.Frames.*'`. To compare the two ways of compiling, add `--runtimes net11.0 nativeaot11.0`; it takes
 longer, as the native build has to be compiled first.
 
 > [!NOTE]

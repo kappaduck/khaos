@@ -36,7 +36,7 @@ internal sealed class GameRunnerTests
 
         TestEngine.Run(game);
 
-        game.Draw(Any()).WasCalled(Times.Exactly(3));
+        game.Draw(Any(), Any()).WasCalled(Times.Exactly(3));
     }
 
     [Test]
@@ -47,7 +47,7 @@ internal sealed class GameRunnerTests
         await Assert.That(() => Mock.VerifyInOrder(() =>
         {
             _game.Initialize().WasCalled();
-            _game.Draw(Any()).WasCalled();
+            _game.Draw(Any(), Any()).WasCalled();
         })).ThrowsNothing();
     }
 
@@ -58,7 +58,7 @@ internal sealed class GameRunnerTests
 
         await Assert.That(() => Mock.VerifyInOrder(() =>
         {
-            _game.Draw(Any()).WasCalled();
+            _game.Draw(Any(), Any()).WasCalled();
             _game.Shutdown().WasCalled();
         })).ThrowsNothing();
     }
@@ -79,7 +79,7 @@ internal sealed class GameRunnerTests
     {
         InvalidOperationException thrown = new("The duck fell off the map.");
 
-        _game.Draw(Any()).Throws(thrown);
+        _game.Draw(Any(), Any()).Throws(thrown);
 
         InvalidOperationException rethrown = Assert.Throws<InvalidOperationException>(() => TestEngine.Run(_game));
 
@@ -89,7 +89,7 @@ internal sealed class GameRunnerTests
     [Test]
     public async Task RunShouldKeepTheStackTraceOfTheExceptionThrownInDraw()
     {
-        _game.Draw(Any()).Callback(FallOffTheMap);
+        _game.Draw(Any(), Any()).Callback(FallOffTheMap);
 
         InvalidOperationException rethrown = Assert.Throws<InvalidOperationException>(() => TestEngine.Run(_game));
 
@@ -118,7 +118,7 @@ internal sealed class GameRunnerTests
     [Test]
     public async Task RunShouldQuitTheEngineWhenDrawThrows()
     {
-        _game.Draw(Any()).Throws(new InvalidOperationException("The duck fell off the map."));
+        _game.Draw(Any(), Any()).Throws(new InvalidOperationException("The duck fell off the map."));
 
         _ = Assert.Throws<InvalidOperationException>(() => TestEngine.Run(_game));
 
@@ -138,7 +138,7 @@ internal sealed class GameRunnerTests
     [Test]
     public async Task RunShouldThrowWhenAGameIsAlreadyRunning()
     {
-        _game.Draw(Any()).Callback(static () => TestEngine.Run(Game2D.Mock(1280, 720)));
+        _game.Draw(Any(), Any()).Callback(static () => TestEngine.Run(Game2D.Mock(1280, 720)));
 
         await Assert.That(() => TestEngine.Run(_game)).ThrowsExactly<InvalidOperationException>();
     }
@@ -193,29 +193,29 @@ internal sealed class GameRunnerTests
     [Test]
     public void RunShouldPassAPushedKeyToOnEventBeforeTheNextFrame()
     {
-        _game.Draw(Any()).Callback(static () => SDLEvents.PushKeyDown(Scancode.Escape));
+        _game.Draw(Any(), Any()).Callback(static () => SDLEvents.PushKeyDown(Scancode.Escape));
         _game.OnEvent(static received => received is KeyPressed { Code: Scancode.Escape }).Callback(_game.Object.Exit);
 
         TestEngine.Run(_game);
 
-        _game.Draw(Any()).WasCalled(Times.Once);
+        _game.Draw(Any(), Any()).WasCalled(Times.Once);
     }
 
     [Test]
     public void RunShouldStopAtTheNextFrameWhenAQuitEventArrives()
     {
-        _game.Draw(Any()).Callback(SDLEvents.PushQuit);
+        _game.Draw(Any(), Any()).Callback(SDLEvents.PushQuit);
 
         TestEngine.Run(_game);
 
-        _game.Draw(Any()).WasCalled(Times.Once);
+        _game.Draw(Any(), Any()).WasCalled(Times.Once);
     }
 
     private static void ExitAt(Mock<Game2D> game, int frame)
     {
         int draws = 0;
 
-        game.Draw(Any()).Callback(() =>
+        game.Draw(Any(), Any()).Callback(() =>
         {
             draws++;
 

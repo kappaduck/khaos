@@ -4,16 +4,13 @@
 using BenchmarkDotNet.Attributes;
 using KappaDuck.Khaos.Hosting.Engine;
 
-namespace KappaDuck.Khaos.Benchmarks.Frame;
+namespace KappaDuck.Khaos.Benchmarks.Frames;
 
-public class EventFrameBenchmarks
+public class FrameBenchmarks
 {
     private KhaosEngine _engine = null!;
 
     private int _frame;
-
-    [Params(0, 8, 64)]
-    public int Events { get; set; }
 
     [GlobalSetup]
     public void StartEngine() => _engine = Headless.Start(new FrameGame());
@@ -21,11 +18,20 @@ public class EventFrameBenchmarks
     [GlobalCleanup]
     public void StopEngine() => _engine.Dispose();
 
+    [Benchmark(Baseline = true)]
+    public void EmptyFrame() => _engine.Iterate();
+
     [Benchmark]
-    public void FrameWithEvents()
+    public void FrameWithTitleCounter()
     {
-        QueuedEvents.Push(Events, _frame++);
-        QueuedEvents.Dispatch(_engine);
+        _engine.Window.SetTitle($"Benchmarks - frame {_frame++}");
+        _engine.Iterate();
+    }
+
+    [Benchmark]
+    public void FrameWithTitleString()
+    {
+        _engine.Window.Title = "Benchmarks - frame " + _frame++;
         _engine.Iterate();
     }
 }

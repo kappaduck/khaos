@@ -3,23 +3,19 @@
 
 #:property Product="Clear the screen"
 
-using System.Diagnostics;
-
 return KhaosApplication.CreateBuilder(args)
                        .Build<ClearGame>()
                        .Run();
 
 internal sealed class ClearGame() : Game2D(960, 540)
 {
-    private long _startedAt;
+    private Color _color = Color.Teal;
 
-    protected override void Initialize() => _startedAt = Stopwatch.GetTimestamp();
+    protected override void Draw(Renderer renderer, in Frame frame) => renderer.Clear(_color);
 
-    protected override void Draw(Renderer renderer)
+    protected override void Update(in GameTime time)
     {
-        double seconds = Stopwatch.GetElapsedTime(_startedAt).TotalSeconds;
-        float amount = (float)(0.5 + (0.5 * Math.Sin(seconds * Math.PI)));
-
-        renderer.Clear(Color.Lerp(Color.Teal, Color.Crimson, amount));
+        float amount = (float)(0.5 + (0.5 * Math.Sin(time.Total * Math.PI)));
+        _color = Color.Lerp(Color.Teal, Color.Crimson, amount);
     }
 }

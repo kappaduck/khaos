@@ -36,7 +36,7 @@ public sealed class KhaosApplication
     /// </remarks>
     /// <returns>The exit code of the game: 0 when it exits normally.</returns>
     /// <exception cref="InvalidOperationException">The application has already run, or another game is running.</exception>
-    /// <exception cref="KhaosException">A setting of the window, the graphics or the engine is not valid.</exception>
+    /// <exception cref="KhaosException">A setting of the window, the graphics, the loop or the engine is not valid.</exception>
     public int Run()
     {
         if (_ran)
@@ -55,7 +55,9 @@ public sealed class KhaosApplication
                 _window,
                 _provider.GetRequiredService<IOptions<WindowOptions>>().Value,
                 _provider.GetRequiredService<IOptions<GraphicsOptions>>().Value,
+                _provider.GetRequiredService<IOptions<LoopOptions>>().Value,
                 _provider.GetRequiredService<IOptions<EngineOptions>>().Value,
+                _provider.GetRequiredService<TimeProvider>(),
                 _provider,
                 _provider.GetRequiredService<ILoggerFactory>());
         }

@@ -17,22 +17,35 @@ internal sealed partial class KhaosEngine : IDisposable
 {
     internal const string Category = "KappaDuck.Khaos.Hosting";
 
+    private const string WaitForEvents = "waitevent";
+
+    private readonly string _frameRate;
+    private readonly ILogger _logger;
+    private readonly LoopClock _loop;
+    private readonly bool _pauseWhenMinimized;
     private readonly NativeSession _session;
     private readonly Renderer _renderer;
     private readonly IDisposable? _services;
+    private readonly TimeProvider _time;
 
     private bool _disposed;
     private EventContext _eventContext;
+    private bool _paused;
     private bool _started;
 
     private KhaosEngine(EngineArguments arguments, ILoggerFactory loggers)
     {
-        (Game2D game, Window window, WindowOptions windowOptions, GraphicsOptions graphics, EngineOptions engineOptions, IDisposable? services, _) = arguments;
+        (Game2D game, Window window, WindowOptions windowOptions, GraphicsOptions graphics, LoopOptions loop, EngineOptions engineOptions, TimeProvider time, IDisposable? services, _) = arguments;
 
         Game = game;
         Window = window;
+        _loop = new LoopClock(loop, time.TimestampFrequency);
+        _pauseWhenMinimized = loop.PauseWhenMinimized;
+        _frameRate = graphics.MaxFrameRate.ToString(CultureInfo.InvariantCulture);
+        _time = time;
         AppMetadata metadata = AppMetadata.FromAppContext();
         ILogger logger = loggers.CreateLogger(Category);
+        _logger = logger;
 
         NativeLog.Attach(loggers);
 
@@ -48,7 +61,7 @@ internal sealed partial class KhaosEngine : IDisposable
 
         try
         {
-            _ = NativeHints.Set(NativeHints.MainCallbackRate, graphics.MaxFrameRate.ToString(CultureInfo.InvariantCulture), logger);
+            SetFrameRate();
             RenderDriver renderDriver = ChooseRenderDriver(engineOptions.RenderDriver, logger);
             window.Open(windowOptions, metadata.Name);
 
@@ -113,6 +126,9 @@ internal sealed partial class KhaosEngine : IDisposable
                 _renderer.Destroy();
                 Window.Close();
 
+                if (_paused)
+                    NativeHints.Reset(NativeHints.MainCallbackRate);
+
                 _session.Dispose();
             }
         }
@@ -124,6 +140,10 @@ internal sealed partial class KhaosEngine : IDisposable
 
         if (e is QuitRequested)
             Game.Exit();
+        else if (e is WindowMinimized && _pauseWhenMinimized)
+            Pause();
+        else if (e is WindowRestored && _paused)
+            Resume();
     }
 
     internal SDL_AppResult Iterate()
@@ -131,7 +151,22 @@ internal sealed partial class KhaosEngine : IDisposable
         if (Game.ExitRequested)
             return SDL_AppResult.Success;
 
-        Game.Draw(_renderer);
+        if (_paused)
+            return SDL_AppResult.Continue;
+
+        int steps = _loop.Advance(_time.GetTimestamp());
+
+        for (int i = 0; i < steps; i++)
+        {
+            GameTime step = _loop.NextStep();
+            Game.FixedUpdate(in step);
+        }
+
+        GameTime frameTime = _loop.Frame;
+        Game.Update(in frameTime);
+
+        Frame frame = new(_loop.Alpha);
+        Game.Draw(_renderer, in frame);
         _renderer.Present();
 
         return SDL_AppResult.Continue;
@@ -181,6 +216,7 @@ internal sealed partial class KhaosEngine : IDisposable
             throw;
         }
 
+        engine._loop.Start(engine._time.GetTimestamp());
         engine._started = true;
 
         return engine;
@@ -233,6 +269,22 @@ internal sealed partial class KhaosEngine : IDisposable
 
         return string.Create(CultureInfo.InvariantCulture, $"{version / 1_000_000}.{version / 1_000 % 1_000}.{version % 1_000}");
     }
+
+    private void Pause()
+    {
+        _paused = true;
+        NativeHints.Force(NativeHints.MainCallbackRate, WaitForEvents);
+    }
+
+    private void Resume()
+    {
+        _paused = false;
+        NativeHints.Reset(NativeHints.MainCallbackRate);
+        SetFrameRate();
+        _loop.Resume(_time.GetTimestamp());
+    }
+
+    private void SetFrameRate() => _ = NativeHints.Set(NativeHints.MainCallbackRate, _frameRate, _logger);
 
     [LoggerMessage(Level = LogLevel.Information, SkipEnabledCheck = true, Message = "Khaos {Version} started on {VideoDriver} with {Renderer} (native {NativeVersion}).")]
     private static partial void Started(ILogger logger, string version, string videoDriver, string renderer, string nativeVersion);

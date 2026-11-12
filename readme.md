@@ -60,13 +60,13 @@ internal sealed class PongGame() : Game2D("Pong!", 1280, 720)
     protected override void FixedUpdate(in GameTime time)
     {
         _previous = _position;
-        _position += _velocity * (float)time.Delta;
+        _position += _velocity * time.Delta;
     }
 
     protected override void Update(in GameTime time)
     {
         // Cosmetic only, so it follows the real clock and stays smooth whatever the simulation rate.
-        _ball.Rotation += Angle.FromDegrees(180f * (float)time.Delta);
+        _ball.Rotation += Angle.FromDegrees(180f * time.Delta);
     }
 
     protected override void Draw(Renderer renderer, in Frame frame)

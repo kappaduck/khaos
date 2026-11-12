@@ -12,6 +12,8 @@ internal sealed record EngineArguments(
     Window Window,
     WindowOptions WindowOptions,
     GraphicsOptions Graphics,
+    LoopOptions Loop,
     EngineOptions Engine,
+    TimeProvider Clock,
     IDisposable? Services,
     ILoggerFactory? Loggers);

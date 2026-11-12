@@ -69,12 +69,12 @@ internal sealed class EventQueueTests
     public void TryPushShouldReachOnEventAsACustomEvent()
     {
         Mock<Game2D> game = Game2D.Mock(1280, 720);
-        game.Draw(Any()).Callback(static () => _ = EventQueue.TryPush(new LapCompleted(3)));
+        game.Draw(Any(), Any()).Callback(static () => _ = EventQueue.TryPush(new LapCompleted(3)));
         game.OnEvent(static received => IsLapThree(received)).Callback(game.Object.Exit);
 
         TestEngine.Run(game);
 
-        game.Draw(Any()).WasCalled(Times.Once);
+        game.Draw(Any(), Any()).WasCalled(Times.Once);
     }
 
     [Test]

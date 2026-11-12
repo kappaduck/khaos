@@ -3,8 +3,6 @@
 
 #:property Product="Game events"
 
-using System.Diagnostics;
-
 return KhaosApplication.CreateBuilder(args)
                        .Build<GameEventsGame>()
                        .Run();
@@ -22,14 +20,13 @@ internal sealed class GameEventsGame() : Game2D(960, 540)
 
     private int _level;
     private int _levelCount;
-    private long _startedAt;
+    private double _seconds;
 
-    protected override void Draw(Renderer renderer)
+    protected override void Draw(Renderer renderer, in Frame frame)
     {
         if (_levelCount == 0)
         {
-            double seconds = Stopwatch.GetElapsedTime(_startedAt).TotalSeconds;
-            float amount = (float)(0.5 + (0.5 * Math.Sin(seconds * Math.PI * 2)));
+            float amount = (float)(0.5 + (0.5 * Math.Sin(_seconds * Math.PI * 2)));
 
             renderer.Clear(Color.Lerp(Color.DimGray, Color.Silver, amount));
             return;
@@ -38,11 +35,7 @@ internal sealed class GameEventsGame() : Game2D(960, 540)
         renderer.Clear(_levels[_level]);
     }
 
-    protected override void Initialize()
-    {
-        _startedAt = Stopwatch.GetTimestamp();
-        _ = Task.Run(LoadLevelsAsync);
-    }
+    protected override void Initialize() => _ = Task.Run(LoadLevelsAsync);
 
     protected override void OnEvent(in Event e)
     {
@@ -68,6 +61,8 @@ internal sealed class GameEventsGame() : Game2D(960, 540)
                 break;
         }
     }
+
+    protected override void Update(in GameTime time) => _seconds = time.Total;
 
     private static async Task LoadLevelsAsync()
     {

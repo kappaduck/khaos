@@ -17,6 +17,12 @@ internal static class TestEngine
     internal static KhaosEngine Start(Game2D game, GraphicsOptions graphics)
         => KhaosEngine.Start(ArgumentsOf(game) with { Graphics = graphics });
 
+    internal static KhaosEngine Start(Game2D game, TimeProvider clock)
+        => KhaosEngine.Start(ArgumentsOf(game) with { Clock = clock });
+
+    internal static KhaosEngine Start(Game2D game, LoopOptions loop, TimeProvider clock)
+        => KhaosEngine.Start(ArgumentsOf(game) with { Loop = loop, Clock = clock });
+
     internal static KhaosEngine Start(Game2D game, EngineOptions engine, ILoggerFactory? loggers = null)
         => KhaosEngine.Start(ArgumentsOf(game) with { Engine = engine, Loggers = loggers });
 
@@ -34,6 +40,15 @@ internal static class TestEngine
         WindowOptions options = new();
         game.ApplyTo(options);
 
-        return new EngineArguments(game, new Window(), options, new GraphicsOptions { VSync = VSync.Disabled }, new EngineOptions(), null, null);
+        return new EngineArguments(
+            game,
+            new Window(),
+            options,
+            new GraphicsOptions { VSync = VSync.Disabled },
+            new LoopOptions(),
+            new EngineOptions(),
+            new SteppedClock(),
+            null,
+            null);
     }
 }

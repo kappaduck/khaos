@@ -21,7 +21,7 @@ internal sealed class ForestEventsTests
 
         TestEngine.Run(game);
 
-        game.Draw(Any()).WasCalled(Times.Once);
+        game.Draw(Any(), Any()).WasCalled(Times.Once);
     }
 
     [Test]
@@ -58,7 +58,7 @@ internal sealed class ForestEventsTests
     {
         int draws = 0;
 
-        game.Draw(Any()).Callback(() =>
+        game.Draw(Any(), Any()).Callback(() =>
         {
             draws++;
             _ = EventQueue.TryPush(new NestFound(3));
