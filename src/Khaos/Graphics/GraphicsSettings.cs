@@ -5,10 +5,14 @@ namespace KappaDuck.Khaos.Graphics;
 
 internal sealed class GraphicsSettings
 {
+    public int? MaxFrameRate { get; set; }
+
     public string? VSync { get; set; }
 
     internal void ApplyTo(GraphicsOptions options)
     {
+        options.MaxFrameRate = MaxFrameRate ?? options.MaxFrameRate;
+
         if (VSync is null)
             return;
 

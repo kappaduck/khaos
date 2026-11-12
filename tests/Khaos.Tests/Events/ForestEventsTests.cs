@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 using KappaDuck.Khaos.Events;
-using KappaDuck.Khaos.Hosting;
 using KappaDuck.Khaos.Interop.SDL.Primitives;
 
 namespace KappaDuck.Khaos.Tests.Events;
@@ -18,10 +17,9 @@ internal sealed class ForestEventsTests
     {
         Mock<Game2D> game = Game2D.Mock(1280, 720);
         PushANestEachFrame(game);
-
         game.OnEvent(static received => received is CustomEvent { ForestEvents: NestFound { Eggs: 3 } }).Callback(game.Object.Exit);
 
-        GameRunner.Run(game);
+        TestEngine.Run(game);
 
         game.Draw(Any()).WasCalled(Times.Once);
     }

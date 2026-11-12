@@ -32,6 +32,9 @@ public sealed partial class Renderer
         }
     }
 
+    // SAFETY: Handle is a renderer that is not destroyed yet, and SDL owns the name it returns.
+    internal string? Name => unsafe (SDL3.GetRendererName(Handle));
+
     /// <summary>
     /// Fills the whole screen with one color.
     /// </summary>
@@ -65,10 +68,13 @@ public sealed partial class Renderer
     // SAFETY: Handle is a renderer that is not destroyed yet.
     internal void Present() => SDL3.ThrowIfFailed(unsafe (SDL3.RenderPresent(Handle)));
 
-    internal static Renderer Create(Window window, VSync vsync, ILogger<Renderer> logger)
+    internal static Renderer Create(Window window, VSync vsync, ILogger<Renderer> logger, bool anyDriver = false)
     {
-        // SAFETY: window.Handle is a window that is not destroyed yet, and a null name lets SDL pick the driver.
-        Renderer renderer = new(SDL3.ThrowIfNull(unsafe (SDL3.CreateRenderer(window.Handle, null))));
+        string? driver = anyDriver ? string.Empty : null;
+
+        // SAFETY: window.Handle is a window that is not destroyed yet. A null name follows the render driver hint, and
+        // an empty one tries every driver.
+        Renderer renderer = new(SDL3.ThrowIfNull(unsafe (SDL3.CreateRenderer(window.Handle, driver))));
 
         renderer.ApplyVSync(OperatingSystem.IsBrowser() ? VSync.Enabled : vsync, logger);
 

@@ -3,14 +3,11 @@
 
 #:property Product="Game events"
 
-using KappaDuck.Khaos;
-using KappaDuck.Khaos.Events;
-using KappaDuck.Khaos.Graphics;
-using KappaDuck.Khaos.Graphics.Rendering;
-using KappaDuck.Khaos.Input;
 using System.Diagnostics;
 
-return new GameEventsGame().Run();
+return KhaosApplication.CreateBuilder(args)
+                       .Build<GameEventsGame>()
+                       .Run();
 
 internal readonly record struct LoadingFinished(int Levels);
 
@@ -49,35 +46,33 @@ internal sealed class GameEventsGame() : Game2D(960, 540)
 
     protected override void OnEvent(in Event e)
     {
-        if (e is CustomEvent { GameEvents: LoadingFinished loaded })
+        switch (e)
         {
-            Console.WriteLine("Yeah!");
-            _levelCount = loaded.Levels;
-            return;
-        }
+            case CustomEvent { GameEvents: LoadingFinished loaded }:
+                _levelCount = loaded.Levels;
+                break;
 
-        if (e is CustomEvent { GameEvents: LevelFinished finished })
-        {
-            _level = (finished.Level + 1) % _levelCount;
-            return;
-        }
+            case CustomEvent { GameEvents: LevelFinished finished }:
+                _level = (finished.Level + 1) % _levelCount;
+                break;
 
-        if (e is KeyPressed { Code: Scancode.Space } && _levelCount > 0)
-        {
-            _ = EventQueue.TryPush(new LevelFinished(_level));
-            return;
-        }
+            case KeyPressed { Code: Scancode.Space } when _levelCount > 0:
+                _ = EventQueue.TryPush(new LevelFinished(_level));
+                break;
 
-        if (e is KeyPressed { Code: Scancode.Escape })
-            Exit();
+            case KeyPressed { Code: Scancode.Escape }:
+                Exit();
+                break;
+
+            default:
+                break;
+        }
     }
 
     private static async Task LoadLevelsAsync()
     {
-        Console.WriteLine(":D");
         await Task.Delay(TimeSpan.FromSeconds(2));
 
-        Console.WriteLine("Push it!");
         _ = EventQueue.TryPush(new LoadingFinished(_levels.Length));
     }
 }

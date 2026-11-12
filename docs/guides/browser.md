@@ -24,7 +24,8 @@ dotnet run --project MyGame.Web
 ```
 
 The terminal prints a local address, such as `http://localhost:5123`: open it in your browser. To see logs and
-errors, open the browser's developer tools (<kbd>F12</kbd>) and look at the **Console** tab.
+errors, open the browser's developer tools (<kbd>F12</kbd>) and look at the **Console** tab. `Debug` logs are under
+the console's **Verbose** level in Chrome and Edge, hidden until you check it: see [where logs go](logging.md#where-logs-go).
 
 When the game ends, the console of a Debug build shows this message, with a status of `1` if the game stopped on an
 error:

@@ -1,9 +1,8 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
-using KappaDuck.Khaos.Allocations.Tests.Helpers;
 using KappaDuck.Khaos.Events;
-using KappaDuck.Khaos.Hosting;
+using KappaDuck.Khaos.Hosting.Engine;
 using KappaDuck.Khaos.Interop.SDL.Primitives;
 
 namespace KappaDuck.Khaos.Allocations.Tests.Events;
@@ -17,7 +16,7 @@ internal sealed class CustomEventAllocationTests
     [Before(Test)]
     public void StartEngine()
     {
-        _engine = KhaosEngine.Start(new SpyGame());
+        _engine = TestEngine.Start(new SpyGame());
     }
 
     [After(Test)]

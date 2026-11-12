@@ -10,8 +10,8 @@ namespace KappaDuck.Khaos.Windowing;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Set them in <c>Program.cs</c>, as with any options in .NET. The <c>window</c> section of your settings, the command
-/// line and the environment variables replace what the code sets, except for <see cref="Display"/> and
+/// Set them in <c>Program.cs</c> with <c>builder.ConfigureWindow</c>. The <c>window</c> section of your settings,
+/// the command line and the environment variables replace what the code sets, except for <see cref="Display"/> and
 /// <see cref="Position"/>.
 /// </para>
 /// <para>

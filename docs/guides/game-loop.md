@@ -19,9 +19,14 @@ frame. You override the ones you need.
 | `FixedUpdate(in GameTime time)`           | At a steady rate, for example 60 times per second                                | Move things, check collisions, apply the rules of your game     |
 | `Update(in GameTime time)`                | Once per frame                                                                   | Animate what only looks nice, such as a spinning coin or a menu |
 | `Draw(Renderer renderer, in Frame frame)` | Once per frame, last                                                             | Draw the frame                                                  |
+| `Shutdown()`                              | Once, after the last frame, while the window is still open                       | Save the player's settings, such as the size of the window      |
 
 Each frame goes in this order: events first, then updates, then drawing. You only override what you need: the
 smallest game only has `Draw`. Call `Exit()` from anywhere to close the game.
+
+`Shutdown` runs only when `Initialize` did. If your game implements `IDisposable`, keep `Dispose` for releasing what
+.NET holds, such as a file you opened. Khaos also disposes a game that never started, so use `Window` in `Shutdown`,
+never in `Dispose`.
 
 ## Why two kinds of update
 
@@ -84,7 +89,7 @@ Khaos draws one frame each time the screen refreshes, which is called vertical s
 on a 60 Hz screen, 144 on a 144 Hz gaming monitor. More frames make movement smoother; gameplay keeps stepping at its
 own steady rate in `FixedUpdate`, so the game itself does not change.
 
-On the desktop, you can change that in your [settings](configuration.md), for example to save a laptop's battery:
+You can change that in your [settings](configuration.md), for example to save a laptop's battery:
 
 ```json
 {
@@ -110,10 +115,18 @@ On the desktop, you can change that in your [settings](configuration.md), for ex
 | `2`, `3`, …  | Every 2 or 3 refreshes: 30 or 20 frames per second on a 60 Hz screen, to save even more battery |
 
 Not every graphics card supports `"adaptive"` or a number; where it does not, the game waits for each refresh, as with
-`true`. In code, set `GraphicsOptions.VSync` to `VSync.Enabled`, `VSync.Disabled`, `VSync.Adaptive` or
-`VSync.Every(2)`.
+`true`. In code, set them in `Program.cs`:
 
-In the browser, the page always draws at the screen's rate: browsers decide, and these settings do nothing there.
+```csharp
+builder.ConfigureGraphics(graphics =>
+{
+    graphics.VSync = VSync.Adaptive;
+    graphics.MaxFrameRate = 60;
+});
+```
+
+In the browser, `vsync` does nothing: the page draws at the screen's rate, as browsers decide. `maxFrameRate` still
+works there, but the browser then times each frame less precisely, so keep it for saving battery.
 
 ## Reacting to the player
 

@@ -1,8 +1,6 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
-using KappaDuck.Khaos.Allocations.Tests.Events;
-using KappaDuck.Khaos.Allocations.Tests.Helpers;
 using KappaDuck.Khaos.Events;
 using KappaDuck.Khaos.Input;
 using KappaDuck.Khaos.Interop.SDL;
@@ -24,7 +22,7 @@ internal sealed class Game2DAllocationTests
         long[] allocated = new long[2];
         SpyGame game = new() { OnDraw = game => Measure(game, allocated) };
 
-        game.Run();
+        TestEngine.Run(game);
 
         await allocated[1].Should().BeEqualTo(allocated[0]);
     }
@@ -33,14 +31,13 @@ internal sealed class Game2DAllocationTests
     public async Task RunShouldNotAllocateBetweenFramesWithEvents()
     {
         long[] allocated = new long[2];
-
         SpyGame game = new()
         {
             OnDraw = game => PushEvents(game, allocated),
             OnEventReceived = (game, e) => Handle(game, in e, allocated)
         };
 
-        game.Run();
+        TestEngine.Run(game);
 
         await allocated[1].Should().BeEqualTo(allocated[0]);
     }
@@ -88,7 +85,7 @@ internal sealed class Game2DAllocationTests
 
     private static void PushKey(SDL_EventType type)
     {
-        SDL_Event key = new(new SDL_KeyboardEvent(type, (int)Scancode.Space, repeat: 0));
+        SDL_Event key = new(new SDL_KeyboardEvent(type, (int)Scancode.Space, 0));
         _ = SDL3.PushEvent(ref key);
     }
 }

@@ -24,3 +24,5 @@
   items:
     - name: KHAOS004
       href: khaos004.md
+    - name: KHAOS006
+      href: khaos006.md

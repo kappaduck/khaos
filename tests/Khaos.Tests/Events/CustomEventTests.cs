@@ -2,9 +2,8 @@
 // Licensed under the MIT license.
 
 using KappaDuck.Khaos.Events;
-using KappaDuck.Khaos.Hosting;
+using KappaDuck.Khaos.Hosting.Engine;
 using KappaDuck.Khaos.Interop.SDL.Primitives;
-using KappaDuck.Khaos.Tests.Helpers;
 
 namespace KappaDuck.Khaos.Tests.Events;
 
@@ -56,13 +55,10 @@ internal sealed class CustomEventTests
     public async Task TryGetShouldReturnFalseForAnEventKeptAfterOnEvent()
     {
         Mock<Game2D> game = Game2D.Mock(1280, 720);
-
         CustomEvent kept = default;
-
         game.OnEvent(Any()).Callback(received => kept = received.TryGetValue(out CustomEvent e) ? e : default);
 
-        using KhaosEngine engine = KhaosEngine.Start(game);
-
+        using KhaosEngine engine = TestEngine.Start(game);
         _ = EventQueue.TryPush(new ChestOpened(1));
         _ = SDLEvents.DispatchCustomEvents(engine);
 

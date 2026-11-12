@@ -1,9 +1,8 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
-using KappaDuck.Khaos.Hosting;
+using KappaDuck.Khaos.Hosting.Engine;
 using KappaDuck.Khaos.Mathematics;
-using KappaDuck.Khaos.Tests.Helpers;
 using KappaDuck.Khaos.Windowing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -17,28 +16,34 @@ internal sealed class WindowTests
 {
     private static readonly WindowOptions _options = new() { Title = "Duck Quest", Width = 640, Height = 360 };
 
+    private readonly Window _window = new();
+
     private NativeSession _session = null!;
 
     [Before(Test)]
     public void StartEngine() => _session = NativeSession.Start(new AppMetadata() { Name = "Duck Quest" });
 
     [After(Test)]
-    public void StopEngine() => _session.Dispose();
+    public void StopEngine()
+    {
+        _window.Close();
+        _session.Dispose();
+    }
 
     [Test]
     public async Task OpenShouldUseTheTitle()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        await scope.Window.Title.Should().BeEqualTo("Duck Quest");
+        await _window.Title.Should().BeEqualTo("Duck Quest");
     }
 
     [Test]
     public async Task OpenShouldPreferTheTitleOverTheDefaultTitle()
     {
-        using WindowScope scope = WindowScope.Open(_options, "Duck Quest Deluxe");
+        _window.Open(_options, "Duck Quest Deluxe");
 
-        await scope.Window.Title.Should().BeEqualTo("Duck Quest");
+        await _window.Title.Should().BeEqualTo("Duck Quest");
     }
 
     [Test]
@@ -46,25 +51,25 @@ internal sealed class WindowTests
     {
         WindowOptions untitled = new() { Width = 640, Height = 360 };
 
-        using WindowScope scope = WindowScope.Open(untitled, "Duck Quest Deluxe");
+        _window.Open(untitled, "Duck Quest Deluxe");
 
-        await scope.Window.Title.Should().BeEqualTo("Duck Quest Deluxe");
+        await _window.Title.Should().BeEqualTo("Duck Quest Deluxe");
     }
 
     [Test]
     public async Task OpenShouldUseTheLogicalSize()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        await scope.Window.Size.Should().BeEqualTo(new SizeI(640, 360));
+        await _window.Size.Should().BeEqualTo(new SizeI(640, 360));
     }
 
     [Test]
     public async Task OpenShouldShowTheWindow()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        await scope.Window.Hidden.Should().BeFalse();
+        await _window.Hidden.Should().BeFalse();
     }
 
     [Test]
@@ -72,9 +77,9 @@ internal sealed class WindowTests
     {
         WindowOptions resizable = new() { Title = "Duck Quest", Width = 640, Height = 360, Resizable = true };
 
-        using WindowScope scope = WindowScope.Open(resizable);
+        _window.Open(resizable);
 
-        await scope.Window.Resizable.Should().BeTrue();
+        await _window.Resizable.Should().BeTrue();
     }
 
     [Test]
@@ -82,9 +87,9 @@ internal sealed class WindowTests
     {
         WindowOptions fullscreen = new() { Title = "Duck Quest", Width = 640, Height = 360, Fullscreen = true };
 
-        using WindowScope scope = WindowScope.Open(fullscreen);
+        _window.Open(fullscreen);
 
-        await scope.Window.Fullscreen.Should().BeTrue();
+        await _window.Fullscreen.Should().BeTrue();
     }
 
     [Test]
@@ -92,9 +97,9 @@ internal sealed class WindowTests
     {
         WindowOptions borderless = new() { Title = "Duck Quest", Width = 640, Height = 360, Borderless = true };
 
-        using WindowScope scope = WindowScope.Open(borderless);
+        _window.Open(borderless);
 
-        await scope.Window.Borderless.Should().BeTrue();
+        await _window.Borderless.Should().BeTrue();
     }
 
     [Test]
@@ -102,7 +107,7 @@ internal sealed class WindowTests
     {
         WindowOptions empty = new() { Title = "Duck Quest", Width = 0 };
 
-        await Assert.That(() => Window.Open(empty)).Throws<ArgumentOutOfRangeException>();
+        await Assert.That(() => _window.Open(empty)).Throws<ArgumentOutOfRangeException>();
     }
 
     [Test]
@@ -119,9 +124,9 @@ internal sealed class WindowTests
     [Test]
     public async Task OpenShouldUseThePrimaryDisplayByDefault()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        await scope.Window.Display.Should().BeEqualTo(Display.Primary);
+        await _window.Display.Should().BeEqualTo(Display.Primary);
     }
 
     [Test]
@@ -129,9 +134,9 @@ internal sealed class WindowTests
     {
         WindowOptions unplugged = new() { Title = "Duck Quest", Width = 640, Height = 360, Display = new Display(0xFFFF) };
 
-        using WindowScope scope = WindowScope.Open(unplugged);
+        _window.Open(unplugged);
 
-        await scope.Window.Display.Should().BeEqualTo(Display.Primary);
+        await _window.Display.Should().BeEqualTo(Display.Primary);
     }
 
     [Test]
@@ -139,9 +144,9 @@ internal sealed class WindowTests
     {
         WindowOptions onPrimary = new() { Title = "Duck Quest", Width = 640, Height = 360, Display = Display.Primary };
 
-        using WindowScope scope = WindowScope.Open(onPrimary);
+        _window.Open(onPrimary);
 
-        await scope.Window.Display.Should().BeEqualTo(Display.Primary);
+        await _window.Display.Should().BeEqualTo(Display.Primary);
     }
 
     [Test]
@@ -150,7 +155,7 @@ internal sealed class WindowTests
     {
         WindowOptions saved = new() { Title = "Duck Quest", Width = 640, Height = 360, Position = new PointI(40, 30) };
 
-        await Assert.That(() => WindowScope.Open(saved).Dispose()).ThrowsNothing();
+        await Assert.That(() => _window.Open(saved)).ThrowsNothing();
     }
 
     [Test]
@@ -160,19 +165,19 @@ internal sealed class WindowTests
         Display second = SecondDisplay();
         WindowOptions onSecond = new() { Title = "Duck Quest", Width = 640, Height = 360, Display = second };
 
-        using WindowScope scope = WindowScope.Open(onSecond);
+        _window.Open(onSecond);
 
-        await scope.Window.Display.Should().BeEqualTo(second);
+        await _window.Display.Should().BeEqualTo(second);
     }
 
     [Test]
     public async Task OpenShouldCenterTheWindowInTheUsableArea()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        RectI area = scope.Window.Display.UsableArea;
-        SizeI size = scope.Window.Size;
+        _window.Open(_options);
+        RectI area = _window.Display.UsableArea;
+        SizeI size = _window.Size;
 
-        PointI position = scope.Window.Position;
+        PointI position = _window.Position;
 
         await ((float)position.X).Should().BeCloseTo(area.X + ((area.Width - size.Width) / 2f), 2f);
         await ((float)position.Y).Should().BeCloseTo(area.Y + ((area.Height - size.Height) / 2f), 2f);
@@ -182,9 +187,9 @@ internal sealed class WindowTests
     [OffscreenOnly]
     public async Task CanMoveShouldReturnFalseWithoutARealScreen()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        await scope.Window.CanMove.Should().BeFalse();
+        await _window.CanMove.Should().BeFalse();
     }
 
     [Test]
@@ -192,42 +197,40 @@ internal sealed class WindowTests
     [RunOn(OS.Windows)]
     public async Task CanMoveShouldReturnTrueOnWindows()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        await scope.Window.CanMove.Should().BeTrue();
+        await _window.CanMove.Should().BeTrue();
     }
 
     [Test]
     [OffscreenOnly]
     public async Task PositionShouldDoNothingWhenTheWindowCannotMove()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        Window window = scope.Window;
-
-        await Assert.That(() => window.Position = new PointI(50, 60)).ThrowsNothing();
+        _window.Open(_options);
+        await Assert.That(() => _window.Position = new PointI(50, 60)).ThrowsNothing();
     }
 
     [Test]
     public async Task DisplayShouldUseThePrimaryScreenForTheDefaultDisplay()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        scope.Window.Display = default;
-        scope.Window.Sync();
+        _window.Display = default;
+        _window.Sync();
 
-        await scope.Window.Display.Should().BeEqualTo(Display.Primary);
+        await _window.Display.Should().BeEqualTo(Display.Primary);
     }
 
     [Test]
     public async Task MoveToShouldUseThePrimaryScreenForAnUnpluggedDisplay()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
         Display unplugged = new(uint.MaxValue >> 16);
 
-        scope.Window.MoveTo(unplugged, new PointI(50, 60));
-        scope.Window.Sync();
+        _window.MoveTo(unplugged, new PointI(50, 60));
+        _window.Sync();
 
-        await scope.Window.Display.Should().BeEqualTo(Display.Primary);
+        await _window.Display.Should().BeEqualTo(Display.Primary);
     }
 
     [Test]
@@ -236,21 +239,21 @@ internal sealed class WindowTests
     {
         WindowOptions saved = new() { Title = "Duck Quest", Width = 640, Height = 360, Position = new PointI(40, 30) };
 
-        using WindowScope scope = WindowScope.Open(saved);
+        _window.Open(saved);
 
-        await scope.Window.Position.Should().BeEqualTo(new PointI(40, 30));
+        await _window.Position.Should().BeEqualTo(new PointI(40, 30));
     }
 
     [Test]
     [RealScreenOnly]
     public async Task PositionShouldMoveTheWindow()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        scope.Window.Position = new PointI(50, 60);
-        scope.Window.Sync();
+        _window.Position = new PointI(50, 60);
+        _window.Sync();
 
-        await scope.Window.Position.Should().BeEqualTo(new PointI(50, 60));
+        await _window.Position.Should().BeEqualTo(new PointI(50, 60));
     }
 
     [Test]
@@ -258,13 +261,13 @@ internal sealed class WindowTests
     public async Task MoveToShouldPlaceTheWindowOnThatDisplay()
     {
         Display second = SecondDisplay();
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        scope.Window.MoveTo(second, new PointI(20, 20));
-        scope.Window.Sync();
+        _window.MoveTo(second, new PointI(20, 20));
+        _window.Sync();
 
-        await scope.Window.Display.Should().BeEqualTo(second);
-        await scope.Window.Position.Should().BeEqualTo(new PointI(20, 20));
+        await _window.Display.Should().BeEqualTo(second);
+        await _window.Position.Should().BeEqualTo(new PointI(20, 20));
     }
 
     [Test]
@@ -272,12 +275,12 @@ internal sealed class WindowTests
     public async Task MoveToShouldKeepTheLogicalSizeOnAScreenWithAnotherScale()
     {
         Display second = SecondDisplay();
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        scope.Window.MoveTo(second, new PointI(20, 20));
-        scope.Window.Sync();
+        _window.MoveTo(second, new PointI(20, 20));
+        _window.Sync();
 
-        await scope.Window.Size.Should().BeEqualTo(new SizeI(640, 360));
+        await _window.Size.Should().BeEqualTo(new SizeI(640, 360));
     }
 
     [Test]
@@ -285,12 +288,12 @@ internal sealed class WindowTests
     public async Task DisplayShouldMoveTheWindowToAnotherDisplay()
     {
         Display second = SecondDisplay();
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        scope.Window.Display = second;
-        scope.Window.Sync();
+        _window.Display = second;
+        _window.Sync();
 
-        await scope.Window.Display.Should().BeEqualTo(second);
+        await _window.Display.Should().BeEqualTo(second);
     }
 
     [Test]
@@ -298,155 +301,149 @@ internal sealed class WindowTests
     {
         _session.Dispose();
 
-        await Assert.That(static () => Window.Open(_options)).Throws<InvalidOperationException>();
+        await Assert.That(() => _window.Open(_options)).Throws<InvalidOperationException>();
     }
 
     [Test]
     public async Task TitleShouldChangeTheNativeTitle()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        scope.Window.Title = "Duck Quest - Level 2";
+        _window.Title = "Duck Quest - Level 2";
 
-        await scope.Window.Title.Should().BeEqualTo("Duck Quest - Level 2");
+        await _window.Title.Should().BeEqualTo("Duck Quest - Level 2");
     }
 
     [Test]
     public async Task SetTitleShouldUseOnlyTheCharactersOfTheSpan()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
         ReadOnlySpan<char> level = "Duck Quest - Level 2 - Boss".AsSpan(0, 20);
 
-        scope.Window.SetTitle(level);
+        _window.SetTitle(level);
 
-        await scope.Window.Title.Should().BeEqualTo("Duck Quest - Level 2");
+        await _window.Title.Should().BeEqualTo("Duck Quest - Level 2");
     }
 
     [Test]
     public async Task SetTitleShouldFormatAnInterpolatedString()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
         const int level = 2;
 
-        scope.Window.SetTitle($"Duck Quest - Level {level}");
+        _window.SetTitle($"Duck Quest - Level {level}");
 
-        await scope.Window.Title.Should().BeEqualTo("Duck Quest - Level 2");
+        await _window.Title.Should().BeEqualTo("Duck Quest - Level 2");
     }
 
     [Test]
     public async Task SetTitleShouldKeepCharactersOutsideAscii()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        scope.Window.SetTitle("Canard — Niveau 2 🦆");
+        _window.SetTitle("Canard — Niveau 2 🦆");
 
-        await scope.Window.Title.Should().BeEqualTo("Canard — Niveau 2 🦆");
+        await _window.Title.Should().BeEqualTo("Canard — Niveau 2 🦆");
     }
 
     [Test]
     public async Task SetTitleShouldAcceptATitleTooLongForTheStack()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
         string longTitle = new('Q', 1000);
 
-        scope.Window.SetTitle(longTitle);
+        _window.SetTitle(longTitle);
 
-        await scope.Window.Title.Should().BeEqualTo(longTitle);
+        await _window.Title.Should().BeEqualTo(longTitle);
     }
 
     [Test]
     public async Task SetTitleShouldAcceptAnEmptyTitle()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        scope.Window.SetTitle([]);
+        _window.SetTitle([]);
 
-        await scope.Window.Title.Should().BeEqualTo(string.Empty);
+        await _window.Title.Should().BeEqualTo(string.Empty);
     }
 
     [Test]
     public async Task SizeShouldResizeTheWindow()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        scope.Window.Size = new SizeI(800, 600);
-        scope.Window.Sync();
+        _window.Size = new SizeI(800, 600);
+        _window.Sync();
 
-        await scope.Window.Size.Should().BeEqualTo(new SizeI(800, 600));
+        await _window.Size.Should().BeEqualTo(new SizeI(800, 600));
     }
 
     [Test]
     public async Task SizeShouldRejectAnEmptySize()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        Window window = scope.Window;
-
-        await Assert.That(() => window.Size = new SizeI(0, 600)).Throws<ArgumentOutOfRangeException>();
+        _window.Open(_options);
+        await Assert.That(() => _window.Size = new SizeI(0, 600)).Throws<ArgumentOutOfRangeException>();
     }
 
     [Test]
     public async Task SizeInPixelsShouldBeTheSizeTimesThePixelDensity()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        SizeI expected = (scope.Window.Size * scope.Window.PixelDensity).Round();
+        SizeI expected = (_window.Size * _window.PixelDensity).Round();
 
-        await scope.Window.SizeInPixels.Should().BeEqualTo(expected);
+        await _window.SizeInPixels.Should().BeEqualTo(expected);
     }
 
     [Test]
     public async Task MinimumSizeShouldStoreTheLimit()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        scope.Window.MinimumSize = new SizeI(320, 180);
+        _window.MinimumSize = new SizeI(320, 180);
 
-        await scope.Window.MinimumSize.Should().BeEqualTo(new SizeI(320, 180));
+        await _window.MinimumSize.Should().BeEqualTo(new SizeI(320, 180));
     }
 
     [Test]
     public async Task MaximumSizeShouldStoreTheLimit()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        scope.Window.MaximumSize = new SizeI(1920, 1080);
+        _window.MaximumSize = new SizeI(1920, 1080);
 
-        await scope.Window.MaximumSize.Should().BeEqualTo(new SizeI(1920, 1080));
+        await _window.MaximumSize.Should().BeEqualTo(new SizeI(1920, 1080));
     }
 
     [Test]
     public async Task MinimumSizeShouldRejectANegativeSize()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        Window window = scope.Window;
-
-        await Assert.That(() => window.MinimumSize = new SizeI(-1, 180)).Throws<ArgumentOutOfRangeException>();
+        _window.Open(_options);
+        await Assert.That(() => _window.MinimumSize = new SizeI(-1, 180)).Throws<ArgumentOutOfRangeException>();
     }
 
     [Test]
     [RealScreenOnly]
     public async Task ResizableShouldChangeTheNativeFlag()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        scope.Window.Resizable = true;
+        _window.Resizable = true;
 
-        await scope.Window.Resizable.Should().BeTrue();
+        await _window.Resizable.Should().BeTrue();
     }
 
     [Test]
     public async Task FullscreenShouldEnterAndLeaveFullscreen()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        Window window = scope.Window;
+        _window.Open(_options);
+        _window.Fullscreen = true;
+        _window.Sync();
+        bool entered = _window.Fullscreen;
 
-        window.Fullscreen = true;
-        window.Sync();
-        bool entered = window.Fullscreen;
-
-        window.Fullscreen = false;
-        window.Sync();
-        bool left = !window.Fullscreen;
+        _window.Fullscreen = false;
+        _window.Sync();
+        bool left = !_window.Fullscreen;
 
         await entered.Should().BeTrue();
         await left.Should().BeTrue();
@@ -455,22 +452,22 @@ internal sealed class WindowTests
     [Test]
     public async Task HideShouldHideTheWindow()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        scope.Window.Hide();
+        _window.Hide();
 
-        await scope.Window.Hidden.Should().BeTrue();
+        await _window.Hidden.Should().BeTrue();
     }
 
     [Test]
     public async Task ShowShouldShowAHiddenWindow()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        scope.Window.Hide();
+        _window.Open(_options);
+        _window.Hide();
 
-        scope.Window.Show();
+        _window.Show();
 
-        await scope.Window.Hidden.Should().BeFalse();
+        await _window.Hidden.Should().BeFalse();
     }
 
     [Test]
@@ -478,134 +475,152 @@ internal sealed class WindowTests
     public async Task MaximizeShouldMaximizeTheWindow()
     {
         WindowOptions resizable = new() { Title = "Duck Quest", Width = 640, Height = 360, Resizable = true };
-        using WindowScope scope = WindowScope.Open(resizable);
+        _window.Open(resizable);
 
-        scope.Window.Maximize();
-        scope.Window.Sync();
+        _window.Maximize();
+        _window.Sync();
 
-        await scope.Window.Maximized.Should().BeTrue();
+        await _window.Maximized.Should().BeTrue();
     }
 
     [Test]
     [RealScreenOnly]
     public async Task FocusableShouldChangeTheNativeFlag()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        scope.Window.Focusable = false;
+        _window.Focusable = false;
 
-        await scope.Window.Focusable.Should().BeFalse();
+        await _window.Focusable.Should().BeFalse();
     }
 
     [Test]
     public async Task OpacityShouldRejectAValueAboveOne()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        Window window = scope.Window;
-
-        await Assert.That(() => window.Opacity = 1.5f).Throws<ArgumentOutOfRangeException>();
+        _window.Open(_options);
+        await Assert.That(() => _window.Opacity = 1.5f).Throws<ArgumentOutOfRangeException>();
     }
 
     [Test]
     public async Task OpacityShouldRejectNaN()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        Window window = scope.Window;
-
-        await Assert.That(() => window.Opacity = float.NaN).Throws<ArgumentOutOfRangeException>();
+        _window.Open(_options);
+        await Assert.That(() => _window.Opacity = float.NaN).Throws<ArgumentOutOfRangeException>();
     }
 
     [Test]
     public async Task OpacityShouldRejectANaNWithoutItsSignBit()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        Window window = scope.Window;
+        _window.Open(_options);
         float positiveNaN = BitConverter.Int32BitsToSingle(0x7FC00000);
 
-        await Assert.That(() => window.Opacity = positiveNaN).Throws<ArgumentOutOfRangeException>();
+        await Assert.That(() => _window.Opacity = positiveNaN).Throws<ArgumentOutOfRangeException>();
     }
 
     [Test]
     public async Task OpacityShouldBe1ByDefault()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        await scope.Window.Opacity.Should().BeEqualTo(1f);
+        await _window.Opacity.Should().BeEqualTo(1f);
     }
 
     [Test]
     [OffscreenOnly]
     public async Task OpacityShouldThrowWhenTheScreenCannotChangeIt()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        Window window = scope.Window;
-
-        await Assert.That(() => window.Opacity = 0.5f).Throws<PlatformException>();
+        _window.Open(_options);
+        await Assert.That(() => _window.Opacity = 0.5f).Throws<PlatformException>();
     }
 
     [Test]
     public async Task FocusableShouldReturnTrueByDefault()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        await scope.Window.Focusable.Should().BeTrue();
+        await _window.Focusable.Should().BeTrue();
     }
 
     [Test]
     public async Task MinimizedShouldReturnFalseForANewWindow()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        await scope.Window.Minimized.Should().BeFalse();
+        await _window.Minimized.Should().BeFalse();
     }
 
     [Test]
     public async Task MaximizedShouldReturnFalseForANewWindow()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        await scope.Window.Maximized.Should().BeFalse();
+        await _window.Maximized.Should().BeFalse();
     }
 
     [Test]
     [OffscreenOnly]
     public async Task OccludedShouldReturnFalseWithoutARealScreen()
     {
-        using WindowScope scope = WindowScope.Open(_options);
+        _window.Open(_options);
 
-        await scope.Window.Occluded.Should().BeFalse();
+        await _window.Occluded.Should().BeFalse();
     }
 
     [Test]
     public async Task CloseShouldMakeEveryMemberThrow()
     {
-        Window window = Window.Open(_options);
+        _window.Open(_options);
 
-        window.Close();
+        _window.Close();
 
-        await Assert.That(() => window.Title).Throws<ObjectDisposedException>();
-        await Assert.That(() => window.SetTitle("Duck Quest")).Throws<ObjectDisposedException>();
-        await Assert.That(() => window.Size).Throws<ObjectDisposedException>();
-        await Assert.That(window.Show).Throws<ObjectDisposedException>();
+        await Assert.That(() => _window.Title).Throws<InvalidOperationException>();
+        await Assert.That(() => _window.SetTitle("Duck Quest")).Throws<InvalidOperationException>();
+        await Assert.That(() => _window.Size).Throws<InvalidOperationException>();
+        await Assert.That(_window.Show).Throws<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task CloseShouldSayTheWindowIsClosed()
+    {
+        _window.Open(_options);
+
+        _window.Close();
+
+        await Assert.That(() => _window.Title).Throws<InvalidOperationException>().WithMessage("The window is closed: the game has exited.");
     }
 
     [Test]
     public async Task CloseShouldBeSafeToCallTwice()
     {
-        Window window = Window.Open(_options);
-        window.Close();
+        _window.Open(_options);
+        _window.Close();
 
-        await Assert.That(window.Close).ThrowsNothing();
+        await Assert.That(_window.Close).ThrowsNothing();
+    }
+
+    [Test]
+    public async Task WindowShouldSayItIsNotOpenYetBeforeItOpens()
+    {
+        await Assert.That(() => _window.Title).Throws<InvalidOperationException>().WithMessage(Window.NotOpenYet);
+    }
+
+    [Test]
+    public async Task OpenShouldThrowWhenTheWindowWasAlreadyOpened()
+    {
+        _window.Open(_options);
+        _window.Close();
+
+        await Assert.That(() => _window.Open(_options)).Throws<InvalidOperationException>();
     }
 
     [Test]
     public async Task ScaleShouldMatchThePixelDensityOfAWindowOnThatScreen()
     {
-        using WindowScope scope = WindowScope.Open(new WindowOptions { Title = "Duck Quest", Width = 640, Height = 360 });
+        _window.Open(new WindowOptions { Title = "Duck Quest", Width = 640, Height = 360 });
 
-        float scale = scope.Window.Display.Scale;
+        float scale = _window.Display.Scale;
 
-        await scale.Should().BeCloseTo(scope.Window.PixelDensity, 0.001f);
+        await scale.Should().BeCloseTo(_window.PixelDensity, 0.001f);
     }
 
     private static Display SecondDisplay()

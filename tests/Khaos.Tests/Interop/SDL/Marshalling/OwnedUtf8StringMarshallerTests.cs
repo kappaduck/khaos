@@ -3,7 +3,6 @@
 
 using KappaDuck.Khaos.Interop.SDL;
 using KappaDuck.Khaos.Interop.SDL.Marshalling;
-using KappaDuck.Khaos.Tests.Helpers;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 

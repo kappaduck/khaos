@@ -31,8 +31,8 @@ internal static class AnalyzerRunner<TAnalyzer> where TAnalyzer : DiagnosticAnal
         CompilationWithAnalyzersOptions analysis = new(
             new AnalyzerOptions([], new AnalyzerOptionsProvider(options)),
             (exception, _, _) => exceptions.Enqueue(exception),
-            concurrentAnalysis: true,
-            logAnalyzerExecutionTime: false
+            true,
+            false
         );
 
         ImmutableArray<Diagnostic> reported = await compilation.WithAnalyzers([new TAnalyzer()], analysis).GetAnalyzerDiagnosticsAsync();

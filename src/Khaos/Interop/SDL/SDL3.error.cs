@@ -49,7 +49,7 @@ internal static partial class SDL3
 
     [LibraryImport(nameof(SDL3), EntryPoint = "SDL_GetError")]
     [return: MarshalUsing(typeof(BorrowedUtf8StringMarshaller))]
-    private static safe partial string? GetError();
+    internal static safe partial string? GetError();
 
     [DoesNotReturn]
     [StackTraceHidden]

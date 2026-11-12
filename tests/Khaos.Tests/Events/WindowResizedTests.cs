@@ -13,7 +13,7 @@ internal sealed class WindowResizedTests
     public async Task NativeConstructorShouldConvertTheSizeToLogicalUnits()
     {
         SDL_WindowEvent native = new(SDL_EventType.WindowResized, 1280, 720);
-        EventContext context = new(contentScale: 2f);
+        EventContext context = new(2f);
 
         WindowResized resized = new(in native, in context);
 
@@ -24,7 +24,7 @@ internal sealed class WindowResizedTests
     public async Task NativeConstructorShouldKeepTheSizeAtAScaleOfOne()
     {
         SDL_WindowEvent native = new(SDL_EventType.WindowResized, 1280, 720);
-        EventContext context = new(contentScale: 1f);
+        EventContext context = new(1f);
 
         WindowResized resized = new(in native, in context);
 
@@ -35,7 +35,7 @@ internal sealed class WindowResizedTests
     public async Task NativeConstructorShouldRoundToTheNearestUnit()
     {
         SDL_WindowEvent native = new(SDL_EventType.WindowResized, 1000, 500);
-        EventContext context = new(contentScale: 1.5f);
+        EventContext context = new(1.5f);
 
         WindowResized resized = new(in native, in context);
 

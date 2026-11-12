@@ -1,6 +1,9 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
+using KappaDuck.Khaos.Graphics;
+using KappaDuck.Khaos.Hosting.Engine;
+using KappaDuck.Khaos.Windowing;
 using System.Runtime.InteropServices;
 
 namespace KappaDuck.Khaos.Benchmarks.Frame;
@@ -11,7 +14,17 @@ internal static partial class Headless
     private const string Offscreen = "offscreen";
     private const int Override = 2;
 
-    internal static void UseOffscreen()
+    internal static KhaosEngine Start(Game2D game)
+    {
+        UseOffscreen();
+
+        WindowOptions window = new();
+        game.ApplyTo(window);
+
+        return KhaosEngine.Start(new EngineArguments(game, new Window(), window, new GraphicsOptions { VSync = VSync.Disabled }, new EngineOptions(), null, null));
+    }
+
+    private static void UseOffscreen()
     {
         if (!SetHintWithPriority(VideoDriver, Offscreen, Override))
             throw new InvalidOperationException("SDL refused the offscreen video driver hint.");

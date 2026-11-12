@@ -11,7 +11,7 @@ internal sealed class WindowScaleTests
     [Test]
     public async Task ContentScaleShouldBeTheDisplayScaleWhenTheSizeIsInPixels()
     {
-        float scale = WindowScale.ContentScale(displayScale: 2f, nativeWidth: 2560, pixelWidth: 2560);
+        float scale = WindowScale.ContentScale(2f, 2560, 2560);
 
         await scale.Should().BeEqualTo(2f);
     }
@@ -19,7 +19,7 @@ internal sealed class WindowScaleTests
     [Test]
     public async Task ContentScaleShouldBeOneWhenTheSizeIsAlreadyLogical()
     {
-        float scale = WindowScale.ContentScale(displayScale: 2f, nativeWidth: 1280, pixelWidth: 2560);
+        float scale = WindowScale.ContentScale(2f, 1280, 2560);
 
         await scale.Should().BeEqualTo(1f);
     }
@@ -27,7 +27,7 @@ internal sealed class WindowScaleTests
     [Test]
     public async Task ContentScaleShouldFallBackToTheDisplayScaleWithoutPixels()
     {
-        float scale = WindowScale.ContentScale(displayScale: 1.5f, nativeWidth: 1280, pixelWidth: 0);
+        float scale = WindowScale.ContentScale(1.5f, 1280, 0);
 
         await scale.Should().BeEqualTo(1.5f);
     }
@@ -37,7 +37,7 @@ internal sealed class WindowScaleTests
     {
         SizeI logical = new(1280, 720);
 
-        SizeI native = WindowScale.ToNative(logical, contentScale: 1.5f);
+        SizeI native = WindowScale.ToNative(logical, 1.5f);
 
         await native.Should().BeEqualTo(new SizeI(1920, 1080));
     }
@@ -47,7 +47,7 @@ internal sealed class WindowScaleTests
     {
         SizeI native = new(2560, 1440);
 
-        SizeI logical = WindowScale.ToLogical(native, contentScale: 2f);
+        SizeI logical = WindowScale.ToLogical(native, 2f);
 
         await logical.Should().BeEqualTo(new SizeI(1280, 720));
     }
@@ -57,7 +57,7 @@ internal sealed class WindowScaleTests
     {
         SizeI native = new(1001, 1000);
 
-        SizeI logical = WindowScale.ToLogical(native, contentScale: 1.25f);
+        SizeI logical = WindowScale.ToLogical(native, 1.25f);
 
         await logical.Should().BeEqualTo(new SizeI(801, 800));
     }
@@ -65,7 +65,7 @@ internal sealed class WindowScaleTests
     [Test]
     public async Task ToNativeShouldKeepZeroAsNoLimit()
     {
-        SizeI native = WindowScale.ToNative(SizeI.Zero, contentScale: 2f);
+        SizeI native = WindowScale.ToNative(SizeI.Zero, 2f);
 
         await native.Should().BeEqualTo(SizeI.Zero);
     }
@@ -75,7 +75,7 @@ internal sealed class WindowScaleTests
     {
         PointI logical = new(100, -40);
 
-        PointI native = WindowScale.ToNative(logical, contentScale: 1.5f);
+        PointI native = WindowScale.ToNative(logical, 1.5f);
 
         await native.Should().BeEqualTo(new PointI(150, -60));
     }
@@ -85,7 +85,7 @@ internal sealed class WindowScaleTests
     {
         PointI native = new(2560, 30);
 
-        PointI logical = WindowScale.ToLogical(native, contentScale: 1.5f);
+        PointI logical = WindowScale.ToLogical(native, 1.5f);
 
         await logical.Should().BeEqualTo(new PointI(1707, 20));
     }
@@ -95,7 +95,7 @@ internal sealed class WindowScaleTests
     {
         RectI native = new(0, 60, 2560, 1380);
 
-        RectI logical = WindowScale.ToLogical(native, contentScale: 2f);
+        RectI logical = WindowScale.ToLogical(native, 2f);
 
         await logical.Should().BeEqualTo(new RectI(0, 30, 1280, 690));
     }
@@ -105,7 +105,7 @@ internal sealed class WindowScaleTests
     {
         SizeI native = new(1280, 720);
 
-        SizeI pixels = WindowScale.ToPixels(native, pixelDensity: 2f);
+        SizeI pixels = WindowScale.ToPixels(native, 2f);
 
         await pixels.Should().BeEqualTo(new SizeI(2560, 1440));
     }
@@ -115,7 +115,7 @@ internal sealed class WindowScaleTests
     {
         SizeI native = new(2560, 1440);
 
-        SizeI pixels = WindowScale.ToPixels(native, pixelDensity: 1f);
+        SizeI pixels = WindowScale.ToPixels(native, 1f);
 
         await pixels.Should().BeEqualTo(native);
     }
@@ -125,7 +125,7 @@ internal sealed class WindowScaleTests
     {
         RectI native = new(0, 30, 1280, 690);
 
-        RectI pixels = WindowScale.ToPixels(native, pixelDensity: 2f);
+        RectI pixels = WindowScale.ToPixels(native, 2f);
 
         await pixels.Should().BeEqualTo(new RectI(0, 60, 2560, 1380));
     }

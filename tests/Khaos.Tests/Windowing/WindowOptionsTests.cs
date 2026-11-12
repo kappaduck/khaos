@@ -59,7 +59,7 @@ internal sealed class WindowOptionsTests
         IConfiguration configuration = Configuration(new() { ["window:resizable"] = "false" });
         ServiceCollection services = new();
 
-        services.ConfigureWindow(configuration);
+        services.BindWindowSettings(configuration);
         services.Configure<WindowOptions>(static window => window.Resizable = true);
 
         WindowOptions options = services.BuildServiceProvider().GetRequiredService<IOptions<WindowOptions>>().Value;
@@ -168,7 +168,7 @@ internal sealed class WindowOptionsTests
         ServiceCollection services = new();
 
         services.Configure(code);
-        services.ConfigureWindow(configuration);
+        services.BindWindowSettings(configuration);
 
         return services.BuildServiceProvider().GetRequiredService<IOptions<WindowOptions>>().Value;
     }

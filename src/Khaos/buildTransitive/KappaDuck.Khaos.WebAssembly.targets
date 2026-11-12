@@ -9,6 +9,7 @@
       2. Serves _khaos/khaos.js and _khaos/khaos.css, and a default index.html when the game has none.
       3. Puts the game's assets (under assets/) and appsettings*.json (at the root) in the
          page's virtual file system: the app's own, and those of the game projects it references.
+         `dotnet publish` keeps appsettings.json and the file of KhaosEnvironment only.
       4. After `dotnet publish`, zips wwwroot into <KhaosGameName>.zip.
       5. Makes CA1416 an error and passes the Khaos environment to the runtime's boot config.
 
@@ -116,12 +117,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <KhaosPageFile Include="$(MSBuildProjectDirectory)/appsettings*.json"
+    <KhaosPageFile Include="$(MSBuildProjectDirectory)/appsettings*.json" KhaosSettings="true"
                    KhaosPagePath="%(Filename)%(Extension)" KhaosPageRoot="$(MSBuildProjectDirectory)/" />
   </ItemGroup>
 
-  <!-- Before the static web assets are collected, which only see Content items that exist by then. -->
+  <!--
+    Before the static web assets are collected, which only see Content items that exist by then. The page files are
+    made before the publish starts, so the settings are picked here: _IsPublishing is what dotnet publish sets.
+  -->
   <Target Name="KhaosAddPageFiles" BeforeTargets="ResolveProjectStaticWebAssets" Condition="'@(KhaosPageFile)' != ''">
+    <ItemGroup Condition="'$(_IsPublishing)' == 'true'">
+      <KhaosPageFile Remove="@(KhaosPageFile)"
+                     Condition="'%(KhaosPageFile.KhaosSettings)' == 'true' and '%(KhaosPageFile.KhaosPagePath)' != 'appsettings.json' and '%(KhaosPageFile.KhaosPagePath)' != 'appsettings.$(KhaosEnvironment).json'" />
+    </ItemGroup>
+
     <ItemGroup>
       <Content Remove="@(KhaosPageFile)" />
       <Content Include="@(KhaosPageFile)" Link="wwwroot/%(KhaosPageFile.KhaosPagePath)" ContentRoot="%(KhaosPageFile.KhaosPageRoot)" />

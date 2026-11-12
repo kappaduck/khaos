@@ -127,9 +127,7 @@ Khaos has two analyzer assemblies, with their own prefixes and numbering:
 To add a rule:
 
 1. Add the `DiagnosticDescriptor`, with a `helpLinkUri` pointing at `docs/rules/<id>.md`.
-2. Add the row to `AnalyzerReleases.Unshipped.md`, or the build fails (RS2000). The row stays there through the
-   betas. When a stable version is prepared, `dotnet tools/prepare-release.cs` moves it to
-   `AnalyzerReleases.Shipped.md`, under `## Release x.y.z`.
+2. Add the row to `AnalyzerReleases.Unshipped.md`, or the build fails (RS2000).
 3. Write the page: cause, why, reported, fix, not reported, suppressing. A `KHAOS` page is read by game authors:
    write it for them, and add it to `docs/rules/toc.yml` and `docs/rules/readme.md`.
 4. Write the tests, including one with the shape the code has **after** the source generators have run: a test

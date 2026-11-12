@@ -83,13 +83,13 @@ internal static class IncrementalChecks
         foreach (string trackingName in reused)
         {
             AddRootedObjects(first, trackingName, failures);
-            AddSteps(second, trackingName, reuse: true, failures);
+            AddSteps(second, trackingName, true, failures);
         }
 
         foreach (string trackingName in recomputed)
         {
             AddRootedObjects(first, trackingName, failures);
-            AddSteps(second, trackingName, reuse: false, failures);
+            AddSteps(second, trackingName, false, failures);
         }
     }
 

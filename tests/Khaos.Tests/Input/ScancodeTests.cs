@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 using KappaDuck.Khaos.Input;
-using KappaDuck.Khaos.Tests.Helpers;
 
 namespace KappaDuck.Khaos.Tests.Input;
 

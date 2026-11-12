@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 using KappaDuck.Khaos.Events;
-using KappaDuck.Khaos.Hosting;
+using KappaDuck.Khaos.Hosting.Engine;
 using KappaDuck.Khaos.Input;
 using KappaDuck.Khaos.Interop.SDL;
 using KappaDuck.Khaos.Interop.SDL.Primitives;
@@ -49,7 +49,7 @@ internal static partial class QueuedEvents
         for (int i = 2; i < count; i++)
         {
             SDL_EventType type = i % 2 == 0 ? SDL_EventType.KeyDown : SDL_EventType.KeyUp;
-            Push(new SDL_Event(new SDL_KeyboardEvent(type, (int)Scancode.Space, repeat: 0)));
+            Push(new SDL_Event(new SDL_KeyboardEvent(type, (int)Scancode.Space, 0)));
         }
     }
 

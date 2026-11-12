@@ -46,41 +46,36 @@ See [Khaos for a game jam](game-jam.md#where-your-game-goes).
 
 ## For Windows and Linux
 
-A desktop game is published as a folder with an executable that players double-click, without installing .NET: the
-game carries its own copy of .NET, trimmed to what it uses. One command per system, and both work from Windows or
-Linux:
+A desktop game is published as a native executable where players double-click it, without installing .NET. That step
+needs the C++ tools of your system, installed once (see
+[Installation](installation.md#when-publishing-a-desktop-game)), and it builds for the system you run it on:
 
 ```bash
-dotnet publish MyGame.Desktop -c Release -r win-x64
-dotnet publish MyGame.Desktop -c Release -r linux-x64
+dotnet publish MyGame.Desktop -c Release -r win-x64     # on Windows
+dotnet publish MyGame.Desktop -c Release -r linux-x64   # on Linux
 ```
+
+To build the Windows version you need a Windows computer, and a Linux computer (or a container) for the Linux
+version. [Publishing for Linux](linux.md) shows how to build the Linux version so it runs on as many systems as
+possible.
 
 The result is in `MyGame.Desktop/bin/Release/net11.0/win-x64/publish/` (or `linux-x64`):
 
-|                                                                  | What it is                                     |
-| :--------------------------------------------------------------- | :--------------------------------------------- |
-| `MyGame.exe` on Windows, `MyGame` on Linux                       | The game                                       |
-| `MyGame.dll`, `MyGame.Desktop.dll` and the other `.dll` files    | Your code, Khaos and the parts of .NET it uses |
-| `.json` files                                                    | What .NET reads to start your game             |
-| `SDL3`, `SDL3_image`, `SDL3_ttf`, `SDL3_mixer` (`.dll` or `.so`) | The libraries Khaos runs on                    |
-| `assets/`                                                        | Your [assets](assets.md)                       |
-| `appsettings*.json`                                              | Your [settings](configuration.md#settings)     |
-| `licenses/`                                                      | The licenses of the libraries inside Khaos     |
+|                                                                  | What it is                                 |
+| :--------------------------------------------------------------- | :----------------------------------------- |
+| `MyGame.exe` on Windows, `MyGame` on Linux                       | The game                                   |
+| `SDL3`, `SDL3_image`, `SDL3_ttf`, `SDL3_mixer` (`.dll` or `.so`) | The libraries Khaos runs on                |
+| `assets/`                                                        | Your [assets](assets.md)                   |
+| `appsettings.json` and `appsettings.<environment>.json`          | Your [settings](configuration.md#settings) |
+| `licenses/`                                                      | The licenses of the libraries inside Khaos |
 
 **Zip the whole folder** and share that zip. The `.pdb` or `.dbg` files are only for debugging and can stay out.
 
-### A single native executable
-
-A game created with `--aot` is compiled ahead of time instead (NativeAOT, `<PublishAot>true</PublishAot>` in
-`MyGame.Desktop.csproj`): the folder holds one native executable in place of the `.dll` and `.json` files, and the
-download is smaller. It comes with two conditions:
-
-- **The C++ tools of your system**, installed once (see [Installation](installation.md#a-native-executable-with---aot)).
-- **Each system builds its own version**: the Windows version on a Windows computer, the Linux version on Linux or
-  in a container. [Publishing for Linux](linux.md) shows how to build it so it runs on as many systems as possible.
-
-To switch an existing game, replace `SelfContained` and `PublishTrimmed` with `PublishAot` in `MyGame.Desktop.csproj`,
-or the other way around.
+> [!NOTE]
+> Without NativeAOT (`<PublishAot>false</PublishAot>` in `MyGame.Desktop.csproj`), the game is still `MyGame.exe`
+> (or `MyGame` on Linux). The folder then also holds your game's `.dll` files (`MyGame.dll`, `MyGame.Desktop.dll`)
+> and the `.json` files .NET reads, and players need .NET installed unless you add `--self-contained` to the
+> publish command.
 
 ### Your game's name and icon
 

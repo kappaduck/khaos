@@ -26,9 +26,9 @@ internal sealed partial class SDL3ErrorTests
     [Test]
     public async Task ThrowIfFailedShouldNameTheCallInTheMessage()
     {
-        PlatformException exception = Assert.Throws<PlatformException>(static () => SDL3.ThrowIfFailed(Hide(succeeded: false)));
+        PlatformException exception = Assert.Throws<PlatformException>(static () => SDL3.ThrowIfFailed(Hide(false)));
 
-        await exception.Message.Should().StartWith("Hide(succeeded: false) failed: ");
+        await exception.Message.Should().StartWith("Hide(false) failed: ");
     }
 
     [Test]
