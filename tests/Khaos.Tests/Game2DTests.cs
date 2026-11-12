@@ -1,6 +1,8 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
+using KappaDuck.Khaos.Windowing;
+
 namespace KappaDuck.Khaos.Tests;
 
 internal sealed class Game2DTests
@@ -26,22 +28,31 @@ internal sealed class Game2DTests
     }
 
     [Test]
-    public async Task ConstructorShouldBuildTheGame()
+    public async Task ApplyToShouldGiveTheTitleAndTheSizeOfTheGame()
     {
         Game2D game = Game2D.Mock("Title", 1280, 720);
+        WindowOptions options = new();
 
-        await game.WindowOptions.Title.Should().BeEqualTo("Title");
-        await game.WindowOptions.Width.Should().BeEqualTo(1280);
-        await game.WindowOptions.Height.Should().BeEqualTo(720);
+        game.ApplyTo(options);
+
+        await options.Title.Should().BeEqualTo("Title");
+        await options.Width.Should().BeEqualTo(1280);
+        await options.Height.Should().BeEqualTo(720);
     }
 
     [Test]
-    public async Task ConstructorShouldLeaveTheTitleEmptyWhenTheGameGivesNone()
+    public async Task ApplyToShouldKeepTheTitleWhenTheGameGivesNone()
     {
-        Game2D game = Game2D.Mock(1280, 720);
+        WindowOptions options = new() { Title = "Duck Quest" };
 
-        await game.WindowOptions.Title.Should().BeEmpty();
-        await game.WindowOptions.Width.Should().BeEqualTo(1280);
-        await game.WindowOptions.Height.Should().BeEqualTo(720);
+        _game.ApplyTo(options);
+
+        await options.Title.Should().BeEqualTo("Duck Quest");
+    }
+
+    [Test]
+    public async Task WindowShouldThrowBeforeTheWindowOpens()
+    {
+        await Assert.That(() => _game.Window).Throws<InvalidOperationException>().WithMessage(Window.NotOpenYet);
     }
 }

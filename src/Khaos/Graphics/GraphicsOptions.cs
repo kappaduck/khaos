@@ -7,12 +7,20 @@ namespace KappaDuck.Khaos.Graphics;
 /// How the game draws on the screen.
 /// </summary>
 /// <remarks>
-/// Set them in <c>Program.cs</c>, as with any options in .NET. The <c>graphics</c> section of your settings, the command
-/// line and the environment variables replace what the code sets.
+/// Set them in <c>Program.cs</c> with <c>builder.ConfigureGraphics</c>. The <c>graphics</c> section of your
+/// settings, the command line and the environment variables replace what the code sets.
 /// </remarks>
 public sealed class GraphicsOptions
 {
     internal const string Section = "graphics";
+
+    /// <summary>
+    /// Gets or sets the most frames the game draws per second. 0 by default, for no limit.
+    /// </summary>
+    /// <remarks>
+    /// In the settings, the key is <c>graphics:maxFrameRate</c>. A limit saves battery on a laptop.
+    /// </remarks>
+    public int MaxFrameRate { get; set; }
 
     /// <summary>
     /// Gets or sets how the game waits for the screen before it shows each frame. <see cref="VSync.Enabled"/> by

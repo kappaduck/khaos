@@ -1,7 +1,7 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
-using KappaDuck.Khaos.Analyzers.Tests.Harness.Fixtures;
+using KappaDuck.Khaos.Analyzers.Tests.Fixtures.Harness;
 
 namespace KappaDuck.Khaos.Analyzers.Tests.Harness;
 

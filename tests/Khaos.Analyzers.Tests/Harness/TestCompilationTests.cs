@@ -20,7 +20,7 @@ internal sealed class TestCompilationTests
     }
 
     [Test]
-    public async Task CreateShouldparseWithTheGivenOptions()
+    public async Task CreateShouldParseWithTheGivenOptions()
     {
         CSharpCompilation compilation = TestCompilation.Create(Parsing.WithoutMemorySafety, "public sealed class Player;");
 

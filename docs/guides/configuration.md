@@ -80,16 +80,20 @@ line works too, handy to try a fullscreen run:
 dotnet run --project MyGame.Desktop -- --window:fullscreen true
 ```
 
-Your game gives its own values in `Program.cs`, with the [options pattern](https://learn.microsoft.com/dotnet/core/extensions/options).
-The `window` section always wins over them, so a player can still change the window without rebuilding:
+Your game gives its own values in `Program.cs`. The `window` section always wins over them, so a player can still
+change the window without rebuilding:
 
 ```csharp
-builder.Services.Configure<WindowOptions>(window =>
+builder.ConfigureWindow(window =>
 {
     window.Title = "Ball";
     window.Resizable = true;
 });
 ```
+
+`builder.ConfigureGraphics(…)` does the same for the [`graphics` section](game-loop.md#frame-rate). Both are short
+for the [options pattern](https://learn.microsoft.com/dotnet/core/extensions/options), so
+`builder.Services.Configure<WindowOptions>(…)` works too.
 
 While the game runs, change the same things through its `Window`: `Window.Title`, `Window.Size`,
 `Window.Fullscreen`, and more. These settings are for the desktop: in the browser, the page decides the size of the
@@ -112,15 +116,19 @@ Each environment can have its own settings file, `appsettings.Development.json` 
 | :-------------------------- | :----------------------------------------------------- | :------------------------------------------------------------------------------------------ | :---------------------------- |
 | When                        | You run the game from your editor or with `dotnet run` | You ask for it                                                                              | You publish the game          |
 | In-game tools (the overlay) | Included, shown from the start; <kbd>F1</kbd> hides it | Included, hidden; <kbd>F1</kbd> shows it                                                    | Not included at all           |
-| Logs (template)             | Everything, down to `Debug`                            | `Information` and up                                                                        | `Information` and up          |
+| [Logs](logging.md)          | Everything, down to `Debug`                            | `Information` and up                                                                        | `Information` and up          |
 | Settings file               | `appsettings.Development.json`                         | `appsettings.Staging.json`                                                                  | `appsettings.Production.json` |
 | Good for                    | Writing the game                                       | Testing a real build where you publish it, with <kbd>F1</kbd> to check the frame rate there | What players download         |
 
 The in-game tools are left out of a Production build entirely, so they cost nothing to players and they cannot turn
 them on.
 
+A published game is one environment, and carries `appsettings.json` and the settings file of that environment only:
+players never get `appsettings.Development.json`. To publish another environment, name it when you publish, such as
+`-p:KhaosEnvironment=Staging`.
+
 > [!NOTE]
-> The overlay comes with Khaos 0.4.0, with the frame graph, the draw calls and the logs. See the
+> The overlay comes with Khaos 0.2.0, and grows until 0.5.0 (frame graph, draw calls, logs). See the
 > [roadmap](roadmap.md).
 
 ### Choosing the environment
@@ -132,6 +140,8 @@ Production), or from the terminal:
 dotnet run --project MyGame.Desktop -lp Staging
 dotnet run --project MyGame.Desktop -- --environment Production
 ```
+
+An empty name, such as `--environment=`, stops the game with an error. Leave the option out to run in `Production`.
 
 **In the browser**, the environment goes in the page address. The template's launch profiles already do it when
 you start from your editor; with `dotnet run`, add it yourself to the address it prints:
@@ -167,6 +177,81 @@ return builder.Build<MyGame>().Run();
 - **Services**: register a class once, and Khaos creates it and hands it to whoever needs it. Useful for things the
   whole game shares, such as high scores or save data.
 - **Logs**: write messages with `ILogger` to see what your game does. They show in the terminal on the desktop, and
-  in the browser's developer console (<kbd>F12</kbd>) on the web.
+  in the browser's developer console (<kbd>F12</kbd>) on the web. See [Logs](logging.md).
 
 You do not have to use either: a small game can do without.
+
+## The engine
+
+The `engine` section sets how the engine starts. Most games never touch it: Khaos picks what works best on each
+computer. It helps when a player has trouble with their graphics card, or to try another graphics API.
+
+```json
+{
+  "engine": {
+    "renderDriver": "vulkan",
+    "videoDriver": "x11"
+  }
+}
+```
+
+| Setting        | What it does                              | Values                                                                                           |
+| :------------- | :---------------------------------------- | :----------------------------------------------------------------------------------------------- |
+| `renderDriver` | The graphics API the game draws with      | `auto` (default), `direct3d11`, `direct3d12`, `opengl`, `opengles2`, `vulkan`, `gpu`, `software` |
+| `videoDriver`  | The system the game opens its window with | `auto` (default), `wayland`, `x11` (both on Linux), `offscreen` (no window, for tests)           |
+
+When a computer does not support the driver you ask for, such as Direct3D on Linux, the game still starts: Khaos
+writes a warning and picks another one. So one `appsettings.json` works on every platform. The first line the game
+writes when it starts says which drivers it uses (see [Logs](logging.md#logs-from-khaos)).
+
+To try one for a single run:
+
+```bash
+dotnet run --project MyGame.Desktop -- --engine:renderDriver=software
+```
+
+In code, set them in `Program.cs`:
+
+```csharp
+using KappaDuck.Khaos.Hosting.Engine;
+
+builder.ConfigureEngine(engine =>
+{
+    engine.RenderDriver = RenderDriver.Vulkan;
+    engine.VideoDriver = VideoDriver.X11;
+});
+```
+
+### Native settings
+
+For what has no option of its own, you can set the native libraries Khaos runs on directly, by name:
+
+```csharp
+builder.ConfigureEngine(engine => engine.Native["SDL_VIDEO_ALLOW_SCREENSAVER"] = "1");
+```
+
+```json
+{
+  "engine": {
+    "native": {
+      "SDL_VIDEO_ALLOW_SCREENSAVER": "1"
+    }
+  }
+}
+```
+
+Khaos applies the engine settings once, when the game starts. From strongest to weakest:
+
+1. an environment variable named like the native setting (`SDL_RENDER_DRIVER=opengl`), which a player or a launcher
+   such as Steam can set
+2. the `engine` section of your settings, in the [order above](#changing-a-setting-for-one-run)
+3. `Program.cs`
+
+A native name that does not start with `SDL_`, or one that has its own option (`SDL_RENDER_DRIVER` is
+`renderDriver`, `SDL_MAIN_CALLBACK_RATE` is `graphics:maxFrameRate`), stops the game with an error that says what to
+use instead.
+
+> [!NOTE]
+> Native settings are the hints of SDL, the library Khaos is built on. Their names and values are in its
+> [list of hints](https://wiki.libsdl.org/SDL3/CategoryHints). Khaos keeps a few for itself, such as how
+> <kbd>Ctrl</kbd>+<kbd>C</kbd> ends the game.

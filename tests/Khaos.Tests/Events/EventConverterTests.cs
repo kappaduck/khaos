@@ -12,7 +12,7 @@ internal sealed class EventConverterTests
 {
     private const int EscapeScancode = 41;
 
-    private static readonly EventContext _unscaled = new(contentScale: 1f);
+    private static readonly EventContext _unscaled = new(1f);
 
     [Test]
     public async Task TryConvertShouldReturnFalseForATypeWithoutACase()
@@ -27,7 +27,7 @@ internal sealed class EventConverterTests
     [Test]
     public async Task TryConvertShouldReturnKeyPressedForAKeyDown()
     {
-        SDL_Event native = new(new SDL_KeyboardEvent(SDL_EventType.KeyDown, EscapeScancode, repeat: 0));
+        SDL_Event native = new(new SDL_KeyboardEvent(SDL_EventType.KeyDown, EscapeScancode, 0));
 
         _ = EventConverter.TryConvert(in native, in _unscaled, out Event e);
 
@@ -37,7 +37,7 @@ internal sealed class EventConverterTests
     [Test]
     public async Task TryConvertShouldReturnKeyReleasedForAKeyUp()
     {
-        SDL_Event native = new(new SDL_KeyboardEvent(SDL_EventType.KeyUp, EscapeScancode, repeat: 0));
+        SDL_Event native = new(new SDL_KeyboardEvent(SDL_EventType.KeyUp, EscapeScancode, 0));
 
         _ = EventConverter.TryConvert(in native, in _unscaled, out Event e);
 
@@ -98,7 +98,7 @@ internal sealed class EventConverterTests
     public async Task TryConvertShouldReturnWindowResizedInLogicalUnits()
     {
         SDL_Event native = new(new SDL_WindowEvent(SDL_EventType.WindowResized, 1280, 720));
-        EventContext context = new(contentScale: 2f);
+        EventContext context = new(2f);
 
         _ = EventConverter.TryConvert(in native, in context, out Event e);
 

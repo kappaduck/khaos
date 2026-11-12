@@ -33,13 +33,13 @@ That is normal: .NET builds a browser version of itself with Khaos inside. The n
 
 ### "Platform linker not found" (Windows)
 
-A game created with `--aot` needs Visual Studio's C++ tools to publish. Open the Visual Studio Installer and add the
-**Desktop development with C++** workload, to Visual Studio or to the free Build Tools. See
-[Installation](installation.md#a-native-executable-with---aot).
+Publishing a desktop game needs Visual Studio's C++ tools. Open the Visual Studio Installer and add the **Desktop
+development with C++** workload, to Visual Studio or to the free Build Tools. See
+[Installation](installation.md#when-publishing-a-desktop-game).
 
 ### clang or zlib is missing (Linux)
 
-A game created with `--aot` needs them to publish. Install them, for example on Debian and Ubuntu:
+Install them, for example on Debian and Ubuntu:
 
 ```bash
 sudo apt install clang zlib1g-dev
@@ -47,8 +47,8 @@ sudo apt install clang zlib1g-dev
 
 ### "Cross-OS native compilation is not supported"
 
-A game created with `--aot` is built for the system you publish on. Publish the Windows version on Windows and the
-Linux version on Linux, or in a container: see [Publishing for Linux](linux.md).
+A desktop game is built for the system you publish on. Publish the Windows version on Windows and the Linux version
+on Linux, or in a container: see [Publishing for Linux](linux.md).
 
 ## When the game runs on the desktop
 

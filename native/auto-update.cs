@@ -94,11 +94,11 @@ await bundledTable.SaveAsync();
 
 await compatibilityTable.SaveAsync();
 
-string body = BuildTable(updates, "Newer stable SDL releases are available. This updates the versions in `native/sdl.env`, which `native.yml` builds for the desktop and for WebAssembly once this is merged.", withLinks: true);
+string body = BuildTable(updates, "Newer stable SDL releases are available. This updates the versions in `native/sdl.env`, which `native.yml` builds for the desktop and for WebAssembly once this is merged.", true);
 await File.WriteAllTextAsync("pr-body.md", $"{body}{Environment.NewLine}{BuildRuntimeNotice(previousRuntime, nextRuntime)}");
 
 SetOutput("updated", "true");
-AppendStepSummary(BuildTable(updates, "### SDL updates", withLinks: false));
+AppendStepSummary(BuildTable(updates, "### SDL updates", false));
 
 Console.WriteLine($"Updated {updates.Count} SDL {(updates.Count == 1 ? "library" : "libraries")} in '{versionsPath}'.");
 return 0;

@@ -66,11 +66,14 @@ it: [The browser](browser.md#the-page) explains how.
 When a project references `KappaDuck.Khaos`, directly or through your game, Khaos sets it up for you. That is why the
 `.csproj` files are so short.
 
-- **No `using` lines for Khaos.** The Khaos namespaces (`KappaDuck.Khaos`, `.Graphics`, `.Input`, `.Audio` and the
-  others), plus the usual .NET ones for services and logging, are available in every file.
+- **No `using` lines for Khaos.** The Khaos namespaces you use every day (`KappaDuck.Khaos`, `.Graphics`, `.Input`,
+  `.Audio` and the others), plus the usual .NET ones for services and logging, are available in every file. The
+  settings you set once in `Program.cs` keep their own namespace, such as `KappaDuck.Khaos.Hosting.Engine` for the
+  graphics API.
 - **Your assets travel with the game.** The `assets/` folder of the game is copied next to the desktop executable,
   and put inside the browser app, without any setting.
-- **Your settings too.** `appsettings*.json` go with the game on both platforms.
+- **Your settings too.** `appsettings*.json` go with the game on both platforms; a published game keeps
+  `appsettings.json` and the file of its [environment](configuration.md) only.
 - **Warnings that matter for games.** Khaos turns on the warnings that point to code that would break once the game
   is published (see [Publishing](publishing.md#before-you-upload)), and warns when a texture, a sound or a font is
   created and never disposed, since that memory is not freed by the garbage collector.

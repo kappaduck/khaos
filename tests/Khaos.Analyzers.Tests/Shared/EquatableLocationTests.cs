@@ -72,7 +72,7 @@ internal sealed class EquatableLocationTests
     [Test]
     public async Task ToDiagnosticShouldReportAtTheCapturedLocation()
     {
-        DiagnosticDescriptor descriptor = new("KHAOS0001", "Title", "Message", "Usage", DiagnosticSeverity.Warning, isEnabledByDefault: true);
+        DiagnosticDescriptor descriptor = new("KHAOS0001", "Title", "Message", "Usage", DiagnosticSeverity.Warning, true);
 
         Diagnostic diagnostic = EquatableLocation.From(Declaration()).ToDiagnostic(descriptor);
 

@@ -24,6 +24,8 @@
       href: positions-sizes-angles.md
     - name: Configuration and environments
       href: configuration.md
+    - name: Logs
+      href: logging.md
     - name: Assets
       href: assets.md
     - name: Keep your game smooth

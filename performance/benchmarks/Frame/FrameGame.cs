@@ -9,10 +9,8 @@ using KappaDuck.Khaos.Mathematics;
 
 namespace KappaDuck.Khaos.Benchmarks.Frame;
 
-internal sealed class FrameGame : Game2D
+internal sealed class FrameGame() : Game2D("Benchmarks", 1280, 720)
 {
-    internal FrameGame() : base("Benchmarks", 1280, 720) => GraphicsOptions.VSync = VSync.Disabled;
-
     internal int Jumps { get; private set; }
 
     internal int Score { get; private set; }

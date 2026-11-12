@@ -7,7 +7,7 @@ namespace KappaDuck.Khaos.Internal.Analyzers.Events;
 
 internal static class EventUnion
 {
-    internal static EquatableArray<EventCase> Resolve(IEnumerable<EventCase> cases) => Resolve(cases, conflicts: null);
+    internal static EquatableArray<EventCase> Resolve(IEnumerable<EventCase> cases) => Resolve(cases, null);
 
     internal static EquatableArray<EventCase> Resolve(IEnumerable<EventCase> cases, List<(EventCase Dropped, EventCase Kept)>? conflicts)
     {

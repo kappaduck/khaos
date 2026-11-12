@@ -1,5 +1,18 @@
 <Project>
+  <!--
+    Like the implicit usings of each .NET SDK: the namespaces a game names in its everyday code. A namespace of fine
+    settings, touched once in Program.cs (KappaDuck.Khaos.Hosting.Engine, KappaDuck.Khaos.Hosting.Logging.Console),
+    takes a using. Audio, Fonts and Assets join once they have a public type: a using of a missing namespace is CS0246.
+  -->
   <ItemGroup Label="Global usings" Condition="('$(ImplicitUsings)' == 'enable' or '$(ImplicitUsings)' == 'true') and '$(KhaosImplicitUsings)' != 'false'">
+    <Using Include="KappaDuck.Khaos" />
+    <Using Include="KappaDuck.Khaos.Events" />
+    <Using Include="KappaDuck.Khaos.Graphics" />
+    <Using Include="KappaDuck.Khaos.Graphics.Rendering" />
+    <Using Include="KappaDuck.Khaos.Hosting" />
+    <Using Include="KappaDuck.Khaos.Input" />
+    <Using Include="KappaDuck.Khaos.Mathematics" />
+    <Using Include="KappaDuck.Khaos.Windowing" />
     <Using Include="Microsoft.Extensions.DependencyInjection" />
     <Using Include="Microsoft.Extensions.Hosting" />
     <Using Include="Microsoft.Extensions.Logging" />
@@ -63,13 +76,19 @@
     </AssemblyAttribute>
   </ItemGroup>
 
+  <!--
+    Settings. A build carries every appsettings*.json, so the launch profiles can switch environments; a publish is
+    one environment (KhaosEnvironment) and carries appsettings.json and that environment's file only.
+  -->
   <ItemGroup Label="Settings">
-    <KhaosSettingsFile Include="$(MSBuildProjectDirectory)/appsettings*.json"
+    <KhaosSettingsFile Include="$(MSBuildProjectDirectory)/appsettings*.json" KhaosSettings="true"
                        KhaosPagePath="%(Filename)%(Extension)" KhaosPageRoot="$(MSBuildProjectDirectory)/" />
     <None Remove="@(KhaosSettingsFile)" />
     <Content Remove="@(KhaosSettingsFile)" />
-    <Content Include="@(KhaosSettingsFile)" CopyToOutputDirectory="PreserveNewest"
+    <Content Include="@(KhaosSettingsFile)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never"
              Condition="'$(UsingMicrosoftNETSdkWebAssembly)' != 'true'" />
+    <Content Update="$(MSBuildProjectDirectory)/appsettings.json;$(MSBuildProjectDirectory)/appsettings.$(KhaosEnvironment).json"
+             CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Target Name="GetKhaosPageFiles" Returns="@(KhaosAsset);@(KhaosSettingsFile)" />

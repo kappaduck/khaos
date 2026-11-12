@@ -34,6 +34,7 @@ loaded at the wrong moment. They arrive with the features they check.
 | Code | What it means |
 | :--- | :------------ |
 | [`KHAOS004`](khaos004.md) | A `[CustomEvents]` group has the name of a member of `CustomEvent` |
+| [`KHAOS006`](khaos006.md) | A game takes its window as a constructor parameter |
 
 ## Turning a warning off
 

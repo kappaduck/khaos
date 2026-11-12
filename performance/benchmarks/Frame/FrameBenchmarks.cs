@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 using BenchmarkDotNet.Attributes;
-using KappaDuck.Khaos.Hosting;
+using KappaDuck.Khaos.Hosting.Engine;
 
 namespace KappaDuck.Khaos.Benchmarks.Frame;
 
@@ -13,12 +13,7 @@ public class FrameBenchmarks
     private int _frame;
 
     [GlobalSetup]
-    public void StartEngine()
-    {
-        Headless.UseOffscreen();
-
-        _engine = KhaosEngine.Start(new FrameGame());
-    }
+    public void StartEngine() => _engine = Headless.Start(new FrameGame());
 
     [GlobalCleanup]
     public void StopEngine() => _engine.Dispose();

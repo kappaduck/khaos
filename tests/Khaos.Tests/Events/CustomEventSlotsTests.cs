@@ -13,7 +13,7 @@ internal sealed class CustomEventSlotsTests
     [Test]
     public async Task ReleaseAllShouldFreeEverySlot()
     {
-        CustomEventSlots<Score> slots = new(Type, capacity: 2);
+        CustomEventSlots<Score> slots = new(Type, 2);
         _ = slots.TryAdd(new Score(1), out _);
         _ = slots.TryAdd(new Score(2), out _);
 
@@ -25,7 +25,7 @@ internal sealed class CustomEventSlotsTests
     [Test]
     public async Task ReleaseShouldFreeTheSlot()
     {
-        CustomEventSlots<Score> slots = new(Type, capacity: 1);
+        CustomEventSlots<Score> slots = new(Type, 1);
         _ = slots.TryAdd(new Score(1), out int code);
 
         slots.Release(code);
@@ -36,9 +36,8 @@ internal sealed class CustomEventSlotsTests
     [Test]
     public async Task ReleaseShouldIgnoreTheCodeOfAnEarlierUse()
     {
-        CustomEventSlots<Score> slots = new(Type, capacity: 1);
+        CustomEventSlots<Score> slots = new(Type, 1);
         _ = slots.TryAdd(new Score(1), out int earlier);
-
         slots.Release(earlier);
         _ = slots.TryAdd(new Score(2), out int current);
 
@@ -50,7 +49,7 @@ internal sealed class CustomEventSlotsTests
     [Test]
     public async Task TryAddShouldReturnFalseWhenEverySlotIsTaken()
     {
-        CustomEventSlots<Score> slots = new(Type, capacity: 1);
+        CustomEventSlots<Score> slots = new(Type, 1);
         _ = slots.TryAdd(new Score(1), out _);
 
         bool added = slots.TryAdd(new Score(2), out _);
@@ -61,7 +60,7 @@ internal sealed class CustomEventSlotsTests
     [Test]
     public async Task TryReadShouldGiveThePayloadItWasGiven()
     {
-        CustomEventSlots<Score> slots = new(Type, capacity: 4);
+        CustomEventSlots<Score> slots = new(Type, 4);
         _ = slots.TryAdd(new Score(42), out int code);
 
         _ = slots.TryRead(code, out Score payload);
@@ -72,7 +71,7 @@ internal sealed class CustomEventSlotsTests
     [Test]
     public async Task TryReadShouldReturnFalseForACodeOutsideTheSlots()
     {
-        CustomEventSlots<Score> slots = new(Type, capacity: 1);
+        CustomEventSlots<Score> slots = new(Type, 1);
 
         bool read = slots.TryRead(5, out _);
 
@@ -82,9 +81,8 @@ internal sealed class CustomEventSlotsTests
     [Test]
     public async Task TryReadShouldReturnFalseForTheCodeOfAnEarlierUse()
     {
-        CustomEventSlots<Score> slots = new(Type, capacity: 1);
+        CustomEventSlots<Score> slots = new(Type, 1);
         _ = slots.TryAdd(new Score(1), out int earlier);
-
         slots.Release(earlier);
         _ = slots.TryAdd(new Score(2), out _);
 
@@ -96,7 +94,7 @@ internal sealed class CustomEventSlotsTests
     [Test]
     public async Task TryReadShouldReturnFalseOnceTheSlotIsReleased()
     {
-        CustomEventSlots<Score> slots = new(Type, capacity: 1);
+        CustomEventSlots<Score> slots = new(Type, 1);
         _ = slots.TryAdd(new Score(1), out int code);
         slots.Release(code);
 

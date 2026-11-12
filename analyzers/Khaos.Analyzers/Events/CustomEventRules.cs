@@ -29,14 +29,12 @@ internal static class CustomEventRules
 
         AttributeData? attribute = FindAttribute(type);
         ImmutableArray<TypedConstant> listed = ListedEvents(attribute);
-
         AttributeArgumentListSyntax? arguments = (attribute?.ApplicationSyntaxReference?.GetSyntax(cancellationToken) as AttributeSyntax)?.ArgumentList;
         bool oneArgumentPerEvent = arguments is not null && arguments.Arguments.Count == listed.Length;
 
         List<CustomEventCase> cases = [];
         HashSet<ISymbol> seen = [with(SymbolEqualityComparer.Default)];
         Dictionary<string, string> names = [with(StringComparer.Ordinal)];
-
         int rejected = 0;
 
         for (int i = 0; i < listed.Length; i++)
@@ -54,7 +52,6 @@ internal static class CustomEventRules
             {
                 rejected++;
                 problems.Add(new CustomEventProblem(Descriptors.EventDuplicate, at, fullName, type.Name, "is listed twice; list it once"));
-
                 continue;
             }
 
@@ -64,7 +61,6 @@ internal static class CustomEventRules
             {
                 rejected++;
                 problems.Add(new CustomEventProblem(Descriptors.EventShape, at, listedType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat), type.Name, reason));
-
                 continue;
             }
 
@@ -72,7 +68,6 @@ internal static class CustomEventRules
             {
                 rejected++;
                 problems.Add(new CustomEventProblem(Descriptors.EventDuplicate, at, fullName, type.Name, $"has the same name as '{other}'; rename one of them"));
-
                 continue;
             }
 

@@ -14,6 +14,8 @@ internal static class Descriptors
     private const string EventGroupShapeDescription = "Khaos adds the members that let OnEvent match the events of the group to the group itself, so it has to be a partial struct it can extend, readonly like every event, at the top level of a namespace and not generic.";
     private const string EventShapeDescription = "Each event of a group is copied into the group and read from OnEvent, so it has to be an immutable value: a non-generic readonly record struct, at least as accessible as the group, that holds values and strings, not other objects.";
     private const string Events = "Events";
+    private const string Hosting = "Hosting";
+    private const string RedundantWindowDescription = "Game2D already gives a game its window through the Window property, usable from Initialize on. A Window parameter on the game's constructor receives the same instance, so it is a second way to reach it, and using it in the constructor fails because the window opens later.";
 
     internal static readonly DiagnosticDescriptor EventGroupShape = new(
         "KHAOS001",
@@ -74,4 +76,14 @@ internal static class Descriptors
         true,
         EventDuplicateDescription,
         $"{Documentation}khaos005.md");
+
+    internal static readonly DiagnosticDescriptor RedundantWindow = new(
+        "KHAOS006",
+        "a game takes its window as a constructor parameter",
+        "'{0}' takes the window as '{1}', but Game2D already gives it as Window; use Window from Initialize on",
+        Hosting,
+        DiagnosticSeverity.Warning,
+        true,
+        RedundantWindowDescription,
+        $"{Documentation}khaos006.md");
 }

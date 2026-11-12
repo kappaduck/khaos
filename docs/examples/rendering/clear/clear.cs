@@ -3,12 +3,11 @@
 
 #:property Product="Clear the screen"
 
-using KappaDuck.Khaos;
-using KappaDuck.Khaos.Graphics;
-using KappaDuck.Khaos.Graphics.Rendering;
 using System.Diagnostics;
 
-return new ClearGame().Run();
+return KhaosApplication.CreateBuilder(args)
+                       .Build<ClearGame>()
+                       .Run();
 
 internal sealed class ClearGame() : Game2D(960, 540)
 {

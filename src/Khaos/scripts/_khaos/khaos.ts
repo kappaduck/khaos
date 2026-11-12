@@ -440,17 +440,38 @@ function isExitStatus(error: unknown): error is ExitStatus {
  *
  * @remarks
  * A game that throws inside the loop has no caller to throw to: GameRunner calls `stopped`
- * with the whole exception, stack included. `ended` means the game exited. Interop/Browser/KhaosPage.cs
- * binds both by name: by hand on .NET 11, with [JSImport] on .NET 12.
+ * with the whole exception, stack included. `ended` means the game exited. `log` writes one log
+ * entry, exception included, so the console's level filters work. Interop/Browser/KhaosPage.cs
+ * binds them by name: by hand on .NET 11, with [JSImport] on .NET 12.
  */
 function listenToGame(runtime: RuntimeAPI, ui: Ui): void {
   runtime.setModuleImports('khaos', {
     ended: (): void => ui.ended(),
+    log: (level: number, line: string): void => log(level, line),
     stopped: (exception: string): void => {
       console.error(exception);
       ui.fail('The game stopped because of an error.', exception);
     },
   });
+}
+
+/**
+ * Writes a log entry with the console method of its level.
+ *
+ * @remarks
+ * The levels are those of .NET's LogLevel: 0 Trace, 1 Debug, 2 Information, 3 Warning, 4 Error,
+ * 5 Critical.
+ */
+function log(level: number, line: string): void {
+  if (level <= 1) {
+    console.debug(line);
+  } else if (level === 2) {
+    console.info(line);
+  } else if (level === 3) {
+    console.warn(line);
+  } else {
+    console.error(line);
+  }
 }
 
 /** Puts a crash of the WebAssembly side (an abort) on the page: it arrives as an uncaught RuntimeError. */

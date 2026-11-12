@@ -67,6 +67,42 @@ internal sealed class GraphicsOptionsTests
     }
 
     [Test]
+    public async Task ValueShouldNotLimitTheFrameRateByDefault()
+    {
+        GraphicsOptions options = Resolve(Configuration([]), static _ => { });
+
+        await options.MaxFrameRate.Should().BeEqualTo(0);
+    }
+
+    [Test]
+    public async Task PostConfigureShouldReadMaxFrameRate()
+    {
+        IConfiguration configuration = Configuration(new() { ["graphics:maxFrameRate"] = "60" });
+
+        GraphicsOptions options = Resolve(configuration, static graphics => graphics.MaxFrameRate = 30);
+
+        await options.MaxFrameRate.Should().BeEqualTo(60);
+    }
+
+    [Test]
+    public async Task ValueShouldThrowWhenMaxFrameRateIsNegativeInTheSettings()
+    {
+        IConfiguration configuration = Configuration(new() { ["graphics:maxFrameRate"] = "-5" });
+
+        KhaosException exception = Assert.Throws<KhaosException>(() => Resolve(configuration, static _ => { }));
+
+        await exception.Message.Should().Contain("graphics:maxFrameRate");
+    }
+
+    [Test]
+    public async Task ValueShouldThrowWhenMaxFrameRateIsNegativeInTheCode()
+    {
+        KhaosException exception = Assert.Throws<KhaosException>(() => Resolve(Configuration([]), static graphics => graphics.MaxFrameRate = -1));
+
+        await exception.Message.Should().Contain("-1");
+    }
+
+    [Test]
     public async Task ValueShouldThrowWhenVSyncIsUnknown()
     {
         IConfiguration configuration = Configuration(new() { ["graphics:vsync"] = "maybe" });
@@ -85,7 +121,7 @@ internal sealed class GraphicsOptionsTests
         ServiceCollection services = new();
 
         services.Configure(code);
-        services.ConfigureGraphics(configuration);
+        services.BindGraphicsSettings(configuration);
 
         return services.BuildServiceProvider().GetRequiredService<IOptions<GraphicsOptions>>().Value;
     }

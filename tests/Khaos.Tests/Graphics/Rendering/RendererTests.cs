@@ -3,8 +3,7 @@
 
 using KappaDuck.Khaos.Graphics;
 using KappaDuck.Khaos.Graphics.Rendering;
-using KappaDuck.Khaos.Hosting;
-using KappaDuck.Khaos.Tests.Helpers;
+using KappaDuck.Khaos.Hosting.Engine;
 using KappaDuck.Khaos.Windowing;
 using Microsoft.Extensions.Logging;
 using TUnit.Mocks.Logging;
@@ -18,6 +17,8 @@ internal sealed class RendererTests
     private readonly MockLogger<Renderer> _logger = Mock.Logger<Renderer>();
     private readonly WindowOptions _options = new() { Title = "Duck Quest", Width = 640, Height = 360 };
 
+    private readonly Window _spare = new();
+
     private NativeSession _session = null!;
     private Window _window = null!;
 
@@ -27,7 +28,8 @@ internal sealed class RendererTests
     public void StartEngine()
     {
         _session = NativeSession.Start(new AppMetadata() { Name = "Duck Quest" });
-        _window = Window.Open(_options);
+        _window = new Window();
+        _window.Open(_options);
 
         _renderer = Renderer.Create(_window, VSync.Disabled, _logger);
     }
@@ -36,6 +38,7 @@ internal sealed class RendererTests
     public void StopEngine()
     {
         _renderer.Destroy();
+        _spare.Close();
         _window.Close();
 
         _session.Dispose();
@@ -71,8 +74,8 @@ internal sealed class RendererTests
     [Test]
     public async Task CreateShouldTurnVSyncOff()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        Renderer renderer = Renderer.Create(scope.Window, VSync.Disabled, _logger);
+        _spare.Open(_options);
+        Renderer renderer = Renderer.Create(_spare, VSync.Disabled, _logger);
 
         int vsync = SDLRender.ReadVSync(renderer);
 
@@ -84,8 +87,8 @@ internal sealed class RendererTests
     [Test]
     public async Task CreateShouldTurnVSyncOn()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        Renderer renderer = Renderer.Create(scope.Window, VSync.Enabled, _logger);
+        _spare.Open(_options);
+        Renderer renderer = Renderer.Create(_spare, VSync.Enabled, _logger);
 
         int vsync = SDLRender.ReadVSync(renderer);
 
@@ -97,8 +100,8 @@ internal sealed class RendererTests
     [Test]
     public void CreateShouldNotLogWhenTheDriverAcceptsVSync()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        Renderer renderer = Renderer.Create(scope.Window, VSync.Disabled, _logger);
+        _spare.Open(_options);
+        Renderer renderer = Renderer.Create(_spare, VSync.Disabled, _logger);
 
         _logger.VerifyNoLogs();
 
@@ -109,8 +112,8 @@ internal sealed class RendererTests
     [OffscreenOnly]
     public async Task CreateShouldWaitForEveryRefreshWhenAdaptiveIsRefused()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        Renderer renderer = Renderer.Create(scope.Window, VSync.Adaptive, _logger);
+        _spare.Open(_options);
+        Renderer renderer = Renderer.Create(_spare, VSync.Adaptive, _logger);
 
         int vsync = SDLRender.ReadVSync(renderer);
 
@@ -123,8 +126,8 @@ internal sealed class RendererTests
     [OffscreenOnly]
     public async Task CreateShouldWaitForEveryRefreshWhenSeveralRefreshesAreRefused()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        Renderer renderer = Renderer.Create(scope.Window, VSync.Every(3), _logger);
+        _spare.Open(_options);
+        Renderer renderer = Renderer.Create(_spare, VSync.Every(3), _logger);
 
         int vsync = SDLRender.ReadVSync(renderer);
 
@@ -137,8 +140,8 @@ internal sealed class RendererTests
     [OffscreenOnly]
     public void CreateShouldLogTheRefusedVSyncAsInformation()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        Renderer renderer = Renderer.Create(scope.Window, VSync.Adaptive, _logger);
+        _spare.Open(_options);
+        Renderer renderer = Renderer.Create(_spare, VSync.Adaptive, _logger);
 
         _logger.VerifyLog()
             .AtLevel(LogLevel.Information)
@@ -151,8 +154,8 @@ internal sealed class RendererTests
     [Test]
     public async Task ClearShouldThrowOnceTheRendererIsDestroyed()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        Renderer renderer = Renderer.Create(scope.Window, VSync.Disabled, _logger);
+        _spare.Open(_options);
+        Renderer renderer = Renderer.Create(_spare, VSync.Disabled, _logger);
 
         renderer.Destroy();
 
@@ -162,8 +165,8 @@ internal sealed class RendererTests
     [Test]
     public async Task DestroyShouldDoNothingTheSecondTime()
     {
-        using WindowScope scope = WindowScope.Open(_options);
-        Renderer renderer = Renderer.Create(scope.Window, VSync.Disabled, _logger);
+        _spare.Open(_options);
+        Renderer renderer = Renderer.Create(_spare, VSync.Disabled, _logger);
 
         renderer.Destroy();
 
@@ -175,6 +178,6 @@ internal sealed class RendererTests
     {
         _window.Close();
 
-        await Assert.That(() => Renderer.Create(_window, VSync.Disabled, _logger)).Throws<ObjectDisposedException>();
+        await Assert.That(() => Renderer.Create(_window, VSync.Disabled, _logger)).Throws<InvalidOperationException>();
     }
 }

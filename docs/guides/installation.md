@@ -56,14 +56,12 @@ The template has a few options:
 | `--platform desktop`    | One project, for Windows and Linux                                                      |
 | `--platform browser`    | One project, for the browser: the quickest setup for a game jam                         |
 | `--title "My Game"`     | The game's title, shown in the readme and the browser tab. Defaults to the project name |
-| `--aot`                 | Publishes the desktop game as one native executable (NativeAOT), see below              |
 | `--khaos-version 0.2.0` | Uses another Khaos version than the template's own                                      |
 
-## A native executable with `--aot`
+## When publishing a desktop game
 
-By default, a published desktop game carries its own copy of .NET, so players run it without installing anything.
-With `--aot`, your game is compiled ahead of time instead (NativeAOT): one native executable, a smaller download.
-That step uses your system's C++ tools, which you install once:
+When you publish for Windows or Linux, Khaos turns your game into a single native executable that players run
+without installing .NET. That step, called NativeAOT, uses your system's C++ tools, which you install once:
 
 - **Windows**: Visual Studio, or the free Build Tools for Visual Studio, with the **Desktop development with C++**
   workload. Tick it in the Visual Studio Installer.
@@ -101,6 +99,7 @@ For the desktop:
   <PropertyGroup>
     <TargetFramework>net11.0</TargetFramework>
     <OutputType>Exe</OutputType>
+    <PublishAot>true</PublishAot>
   </PropertyGroup>
 
   <ItemGroup>

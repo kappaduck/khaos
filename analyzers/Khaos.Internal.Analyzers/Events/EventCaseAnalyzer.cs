@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 namespace KappaDuck.Khaos.Internal.Analyzers.Events;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-internal class EventCaseAnalyzer : DiagnosticAnalyzer
+public sealed class EventCaseAnalyzer : DiagnosticAnalyzer
 {
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
@@ -21,6 +21,7 @@ internal class EventCaseAnalyzer : DiagnosticAnalyzer
         Descriptors.EventCaseDuplicate
     ];
 
+    /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
         context.EnableConcurrentExecution();
@@ -43,7 +44,7 @@ internal class EventCaseAnalyzer : DiagnosticAnalyzer
     private static void Analyze(SymbolAnalysisContext context, INamedTypeSymbol attribute, ConcurrentBag<(EventCase Case, Location Location)> cases)
     {
         INamedTypeSymbol type = (INamedTypeSymbol)context.Symbol;
-        AttributeData? marker = type.GetAttributes().FirstOrDefault(d => SymbolEqualityComparer.Default.Equals(d.AttributeClass, attribute));
+        AttributeData? marker = type.GetAttributes().FirstOrDefault(data => SymbolEqualityComparer.Default.Equals(data.AttributeClass, attribute));
 
         if (marker is null)
             return;

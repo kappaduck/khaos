@@ -25,17 +25,23 @@ namespace KappaDuck.Khaos.Windowing;
 /// </remarks>
 public sealed class Window
 {
+    internal const string NotOpenYet = "The window opens before Initialize. Use it from Initialize or later.";
+
     private const uint CenteredMask = 0x2FFF0000u;
+    private const string Closed = "The window is closed: the game has exited.";
     private const int MaxTitleBytes = 256;
 
     private SDL_Window* _handle;
+    private bool _opened;
 
-    private Window(SDL_Window* handle) => _handle = handle;
+    internal Window()
+    {
+    }
 
     /// <summary>
     /// Gets or sets a value indicating whether the window has no title bar and no borders.
     /// </summary>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     public bool Borderless
     {
@@ -52,12 +58,12 @@ public sealed class Window
     /// <remarks>
     /// <see langword="false"/> on Linux with Wayland and in the browser, where the system places the window itself.
     /// </remarks>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     public bool CanMove
     {
         get
         {
-            ObjectDisposedException.ThrowIf(_handle is null, this);
+            ThrowIfNotOpen();
             return SDL3.GetCurrentVideoDriver() is "windows" or "x11";
         }
     }
@@ -69,7 +75,7 @@ public sealed class Window
     /// Setting a screen centers the window on it. To move a maximized window, use <see cref="Restore"/> first. Where
     /// <see cref="CanMove"/> is <see langword="false"/>, it does nothing.
     /// </remarks>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The screen could not be read, or the operating system refused the change.</exception>
     public Display Display
     {
@@ -84,7 +90,7 @@ public sealed class Window
     /// <remarks>
     /// <see langword="true"/> by default. A window that cannot take the focus receives no keys, which suits an overlay.
     /// </remarks>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     public bool Focusable
     {
@@ -100,7 +106,7 @@ public sealed class Window
     /// <remarks>
     /// Check it to pause the game when the player switches to another window.
     /// </remarks>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     public bool Focused => Has(SDL_WindowStates.InputFocus);
 
     /// <summary>
@@ -109,7 +115,7 @@ public sealed class Window
     /// <remarks>
     /// The window covers the screen it is on, and the screen keeps its resolution.
     /// </remarks>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     public bool Fullscreen
     {
@@ -122,13 +128,13 @@ public sealed class Window
     /// <summary>
     /// Gets a value indicating whether the window is hidden, with no trace on the desktop or in the taskbar.
     /// </summary>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     public bool Hidden => Has(SDL_WindowStates.Hidden);
 
     /// <summary>
     /// Gets a value indicating whether the window is maximized.
     /// </summary>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     public bool Maximized => Has(SDL_WindowStates.Maximized);
 
     /// <summary>
@@ -138,7 +144,7 @@ public sealed class Window
     /// A width or a height of 0, the default, means no limit on that side.
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">The width or the height is negative.</exception>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     public SizeI MaximumSize
     {
@@ -164,7 +170,7 @@ public sealed class Window
     /// <summary>
     /// Gets a value indicating whether the window is minimized to the taskbar.
     /// </summary>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     public bool Minimized => Has(SDL_WindowStates.Minimized);
 
     /// <summary>
@@ -174,7 +180,7 @@ public sealed class Window
     /// A width or a height of 0, the default, means no limit on that side.
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">The width or the height is negative.</exception>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     public SizeI MinimumSize
     {
@@ -203,7 +209,7 @@ public sealed class Window
     /// <remarks>
     /// Nobody can see the game while it is <see langword="true"/>, which makes it a good moment to pause.
     /// </remarks>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     public bool Occluded => Has(SDL_WindowStates.Occluded);
 
     /// <summary>
@@ -213,7 +219,7 @@ public sealed class Window
     /// In the browser, the window always stays opaque.
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">The value is below 0, above 1 or not a number.</exception>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     public float Opacity
     {
@@ -241,7 +247,7 @@ public sealed class Window
     /// <remarks>
     /// It changes when the player moves the window to another screen or changes the scale setting of their screen.
     /// </remarks>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The density could not be read.</exception>
     // SAFETY: Handle is a window that is not destroyed yet.
     public float PixelDensity => SDL3.ThrowIfZero(unsafe (SDL3.GetWindowDisplayScale(Handle)));
@@ -254,7 +260,7 @@ public sealed class Window
     /// To move a maximized window, use <see cref="Restore"/> first. Where <see cref="CanMove"/> is
     /// <see langword="false"/>, setting it does nothing.
     /// </remarks>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The position could not be read, or the operating system refused the change.</exception>
     public PointI Position
     {
@@ -274,7 +280,7 @@ public sealed class Window
     /// <summary>
     /// Gets or sets a value indicating whether the player can resize the window by dragging its edges.
     /// </summary>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     public bool Resizable
     {
@@ -291,7 +297,7 @@ public sealed class Window
     /// The operating system can keep the window smaller than asked, for example to fit it on the screen.
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">The width or the height is 0 or negative.</exception>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     public SizeI Size
     {
@@ -318,7 +324,7 @@ public sealed class Window
     /// <remarks>
     /// Equal to <see cref="Size"/> on a screen at 100 %; twice as large on a screen at 200 %.
     /// </remarks>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The size could not be read.</exception>
     public SizeI SizeInPixels
     {
@@ -337,7 +343,7 @@ public sealed class Window
     /// For a title that changes all the time, such as a frame counter, use
     /// <see cref="SetTitle(ref DefaultInterpolatedStringHandler)"/>.
     /// </remarks>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     public string Title
     {
@@ -352,7 +358,7 @@ public sealed class Window
     {
         get
         {
-            ObjectDisposedException.ThrowIf(_handle is null, this);
+            ThrowIfNotOpen();
             return _handle;
         }
     }
@@ -360,7 +366,7 @@ public sealed class Window
     /// <summary>
     /// Hides the window from the desktop and the taskbar. The game keeps running.
     /// </summary>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     // SAFETY: Handle is a window that is not destroyed yet.
     public void Hide() => SDL3.ThrowIfFailed(unsafe (SDL3.HideWindow(Handle)));
@@ -371,7 +377,7 @@ public sealed class Window
     /// <remarks>
     /// Only a window the player can resize can be maximized; see <see cref="Resizable"/>.
     /// </remarks>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     // SAFETY: Handle is a window that is not destroyed yet.
     public void Maximize() => SDL3.ThrowIfFailed(unsafe (SDL3.MaximizeWindow(Handle)));
@@ -379,7 +385,7 @@ public sealed class Window
     /// <summary>
     /// Minimizes the window to the taskbar.
     /// </summary>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     // SAFETY: Handle is a window that is not destroyed yet.
     public void Minimize() => SDL3.ThrowIfFailed(unsafe (SDL3.MinimizeWindow(Handle)));
@@ -393,7 +399,7 @@ public sealed class Window
     /// </remarks>
     /// <param name="display">The screen to move the window to.</param>
     /// <param name="position">The distance from the top-left corner of that screen to the top-left corner of the window.</param>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The screen could not be read, or the operating system refused the change.</exception>
     public void MoveTo(Display display, PointI position)
         => SDL3.ThrowIfFailed(TryPlaceOn(display, position.X, position.Y) || !CanMove);
@@ -401,7 +407,7 @@ public sealed class Window
     /// <summary>
     /// Brings a maximized or minimized window back to its size and place before.
     /// </summary>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     // SAFETY: Handle is a window that is not destroyed yet.
     public void Restore() => SDL3.ThrowIfFailed(unsafe (SDL3.RestoreWindow(Handle)));
@@ -414,7 +420,7 @@ public sealed class Window
     /// <see cref="Title"/> is just as good.
     /// </remarks>
     /// <param name="title">The new title, as an interpolated string.</param>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     public void SetTitle(ref DefaultInterpolatedStringHandler title)
     {
@@ -435,7 +441,7 @@ public sealed class Window
     /// For text you already hold, such as the name a player is typing.
     /// </remarks>
     /// <param name="title">The new title.</param>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     public void SetTitle(ReadOnlySpan<char> title)
     {
@@ -461,7 +467,7 @@ public sealed class Window
     /// <summary>
     /// Shows a window hidden with <see cref="Hide"/>.
     /// </summary>
-    /// <exception cref="ObjectDisposedException">The game has exited and the window is closed.</exception>
+    /// <exception cref="InvalidOperationException">The window is not open yet, or the game has exited and closed it.</exception>
     /// <exception cref="PlatformException">The operating system refused the change.</exception>
     // SAFETY: Handle is a window that is not destroyed yet.
     public void Show() => SDL3.ThrowIfFailed(unsafe (SDL3.ShowWindow(Handle)));
@@ -480,11 +486,11 @@ public sealed class Window
         _handle = null;
     }
 
-    // SAFETY: Handle is a window that is not destroyed yet.
-    internal bool Sync() => unsafe (SDL3.SyncWindow(Handle));
-
-    internal static Window Open(WindowOptions options, string? defaultTitle = null)
+    internal void Open(WindowOptions options, string? defaultTitle = null)
     {
+        if (_opened)
+            throw new InvalidOperationException("The window has already been opened. A window opens only once.");
+
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(options.Width);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(options.Height);
 
@@ -494,23 +500,25 @@ public sealed class Window
         Display display = options.Display is { Connected: true } chosen ? chosen : Display.Primary;
         string title = options.Title is { Length: > 0 } given ? given : defaultTitle ?? string.Empty;
 
-        Window window = new(Create(options, title, display));
+        _handle = Create(options, title, display);
+        _opened = true;
 
         try
         {
-            window.ScaleToLogical(new SizeI(options.Width, options.Height));
-            window.TryPlaceOn(display, options.Position?.X, options.Position?.Y);
+            ScaleToLogical(new SizeI(options.Width, options.Height));
+            TryPlaceOn(display, options.Position?.X, options.Position?.Y);
 
-            window.Show();
+            Show();
         }
         catch
         {
-            window.Close();
+            Close();
             throw;
         }
-
-        return window;
     }
+
+    // SAFETY: Handle is a window that is not destroyed yet.
+    internal bool Sync() => unsafe (SDL3.SyncWindow(Handle));
 
     private (SizeI Native, float ContentScale) GetNativeSize()
     {
@@ -527,6 +535,12 @@ public sealed class Window
     {
         if (WindowScale.ToNative(logical, GetNativeSize().ContentScale) != logical)
             Size = logical;
+    }
+
+    private void ThrowIfNotOpen()
+    {
+        if (_handle is null)
+            throw new InvalidOperationException(_opened ? Closed : NotOpenYet);
     }
 
     private bool TryMoveOn(Display display, int? x, int? y)

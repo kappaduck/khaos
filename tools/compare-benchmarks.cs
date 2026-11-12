@@ -184,7 +184,7 @@ static int Run(Options options, TextWriter output)
 
 static int SelfTest()
 {
-    Options options = new($"{SelfTestData}/base.json", $"{SelfTestData}/diff.json", "0.1.0", "0.2.0", "5%", Strict: true);
+    Options options = new($"{SelfTestData}/base.json", $"{SelfTestData}/diff.json", "0.1.0", "0.2.0", "5%", true);
     using StringWriter output = new() { NewLine = "\n" };
 
     int exitCode = Run(options, output);

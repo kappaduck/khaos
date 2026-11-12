@@ -1,10 +1,9 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
-using KappaDuck.Khaos.Allocations.Tests.Helpers;
 using KappaDuck.Khaos.Graphics;
 using KappaDuck.Khaos.Graphics.Rendering;
-using KappaDuck.Khaos.Hosting;
+using KappaDuck.Khaos.Hosting.Engine;
 using KappaDuck.Khaos.Windowing;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -24,7 +23,8 @@ internal sealed class RendererAllocationTests
     public void StartEngine()
     {
         _session = NativeSession.Start(new AppMetadata() { Name = "Duck Quest" });
-        _window = Window.Open(_options);
+        _window = new Window();
+        _window.Open(_options);
         _renderer = Renderer.Create(_window, VSync.Disabled, NullLogger<Renderer>.Instance);
     }
 

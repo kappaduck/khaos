@@ -55,7 +55,7 @@ The catalog follows your assets folder wherever it is. To keep your files in ano
 To get a class for one subfolder only, name it: `[AssetCatalog("sprites")]` lists the files of `assets/sprites/`.
 
 > [!NOTE]
-> The asset catalog arrives with Khaos 0.2.0 (see the [roadmap](roadmap.md)).
+> The asset catalog arrives with Khaos 0.3.0 (see the [roadmap](roadmap.md)).
 
 ## Which formats to use
 

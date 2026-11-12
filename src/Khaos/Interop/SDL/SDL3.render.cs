@@ -1,6 +1,8 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
+using KappaDuck.Khaos.Interop.SDL.Marshalling;
+
 namespace KappaDuck.Khaos.Interop.SDL;
 
 internal static partial class SDL3
@@ -10,6 +12,10 @@ internal static partial class SDL3
 
     [LibraryImport(nameof(SDL3), EntryPoint = "SDL_DestroyRenderer")]
     internal static unsafe partial void DestroyRenderer(SDL_Renderer* renderer);
+
+    [LibraryImport(nameof(SDL3), EntryPoint = "SDL_GetRendererName")]
+    [return: MarshalUsing(typeof(BorrowedUtf8StringMarshaller))]
+    internal static unsafe partial string? GetRendererName(SDL_Renderer* renderer);
 
     [LibraryImport(nameof(SDL3), EntryPoint = "SDL_RenderClear")]
     [return: MarshalAs(UnmanagedType.U1)]

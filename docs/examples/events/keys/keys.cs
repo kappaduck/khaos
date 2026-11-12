@@ -3,13 +3,9 @@
 
 #:property Product="Keys"
 
-using KappaDuck.Khaos;
-using KappaDuck.Khaos.Events;
-using KappaDuck.Khaos.Graphics;
-using KappaDuck.Khaos.Graphics.Rendering;
-using KappaDuck.Khaos.Input;
-
-return new KeysGame().Run();
+return KhaosApplication.CreateBuilder(args)
+                       .Build<KeysGame>()
+                       .Run();
 
 internal sealed class KeysGame() : Game2D(960, 540)
 {
@@ -19,31 +15,30 @@ internal sealed class KeysGame() : Game2D(960, 540)
 
     protected override void OnEvent(in Event e)
     {
-        if (e is KeyPressed { Code: Scancode.R })
+        switch (e)
         {
-            _color = Color.Crimson;
-            return;
-        }
+            case KeyPressed { Code: Scancode.R }:
+                _color = Color.Crimson;
+                break;
 
-        if (e is KeyPressed { Code: Scancode.G })
-        {
-            _color = Color.SeaGreen;
-            return;
-        }
+            case KeyPressed { Code: Scancode.G }:
+                _color = Color.SeaGreen;
+                break;
 
-        if (e is KeyPressed { Code: Scancode.B })
-        {
-            _color = Color.RoyalBlue;
-            return;
-        }
+            case KeyPressed { Code: Scancode.B }:
+                _color = Color.RoyalBlue;
+                break;
 
-        if (e is KeyReleased { Code: Scancode.R or Scancode.G or Scancode.B })
-        {
-            _color = Color.Teal;
-            return;
-        }
+            case KeyReleased { Code: Scancode.R or Scancode.G or Scancode.B }:
+                _color = Color.Teal;
+                break;
 
-        if (e is KeyPressed { Code: Scancode.Escape })
-            Exit();
+            case KeyPressed { Code: Scancode.Escape }:
+                Exit();
+                break;
+
+            default:
+                break;
+        }
     }
 }

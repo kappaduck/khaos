@@ -1,7 +1,6 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
-using KappaDuck.Khaos.Allocations.Tests.Helpers;
 using KappaDuck.Khaos.Events;
 using KappaDuck.Khaos.Input;
 using KappaDuck.Khaos.Interop.SDL.Primitives;
@@ -13,10 +12,10 @@ internal sealed class EventAllocationTests
 {
     private const int EscapeScancode = 41;
 
-    private static readonly SDL_Event _keyDown = new(new SDL_KeyboardEvent(SDL_EventType.KeyDown, EscapeScancode, repeat: 0));
+    private static readonly SDL_Event _keyDown = new(new SDL_KeyboardEvent(SDL_EventType.KeyDown, EscapeScancode, 0));
     private static readonly SDL_Event _quit = new(SDL_EventType.Quit);
     private static readonly SDL_Event _resized = new(new SDL_WindowEvent(SDL_EventType.WindowResized, 1280, 720));
-    private static readonly EventContext _scaled = new(contentScale: 2f);
+    private static readonly EventContext _scaled = new(2f);
 
     [Test]
     public async Task PropertyPatternShouldNotAllocate()

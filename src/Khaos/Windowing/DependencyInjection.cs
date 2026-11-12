@@ -10,7 +10,7 @@ internal static class DependencyInjection
 {
     extension(IServiceCollection services)
     {
-        internal IServiceCollection ConfigureWindow(IConfiguration configuration)
+        internal IServiceCollection BindWindowSettings(IConfiguration configuration)
         {
             IConfigurationSection section = configuration.GetSection(WindowOptions.Section);
 

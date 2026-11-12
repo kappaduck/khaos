@@ -1,9 +1,8 @@
 // Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
-using KappaDuck.Khaos.Allocations.Tests.Helpers;
 using KappaDuck.Khaos.Events;
-using KappaDuck.Khaos.Hosting;
+using KappaDuck.Khaos.Hosting.Engine;
 using KappaDuck.Khaos.Input;
 using KappaDuck.Khaos.Interop.SDL.Primitives;
 
@@ -21,7 +20,7 @@ internal sealed class KhaosEngineAllocationTests
     [Before(Test)]
     public void StartEngine()
     {
-        _engine = KhaosEngine.Start(new SpyGame());
+        _engine = TestEngine.Start(new SpyGame());
     }
 
     [After(Test)]

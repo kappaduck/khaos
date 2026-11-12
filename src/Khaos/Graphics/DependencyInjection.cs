@@ -10,7 +10,7 @@ internal static class DependencyInjection
 {
     extension(IServiceCollection services)
     {
-        internal IServiceCollection ConfigureGraphics(IConfiguration configuration)
+        internal IServiceCollection BindGraphicsSettings(IConfiguration configuration)
         {
             IConfigurationSection section = configuration.GetSection(GraphicsOptions.Section);
 
@@ -20,6 +20,9 @@ internal static class DependencyInjection
 
                 section.Bind(settings);
                 settings.ApplyTo(options);
+
+                if (options.MaxFrameRate < 0)
+                    throw new KhaosException($"The setting {GraphicsOptions.Section}:maxFrameRate must be 0 or more, but it is {options.MaxFrameRate}.");
             });
         }
     }
