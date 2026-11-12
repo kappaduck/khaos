@@ -5,6 +5,14 @@ namespace KappaDuck.Khaos.Interop.SDL;
 
 internal static partial class SDL3
 {
+    internal const string AppMetadataCopyright = "SDL.app.metadata.copyright";
+    internal const string AppMetadataCreator = "SDL.app.metadata.creator";
+    internal const string AppMetadataIdentifier = "SDL.app.metadata.identifier";
+    internal const string AppMetadataName = "SDL.app.metadata.name";
+    internal const string AppMetadataType = "SDL.app.metadata.type";
+    internal const string AppMetadataUrl = "SDL.app.metadata.url";
+    internal const string AppMetadataVersion = "SDL.app.metadata.version";
+
     [LibraryImport(nameof(SDL3), EntryPoint = "SDL_Init")]
     [return: MarshalAs(UnmanagedType.U1)]
     internal static safe partial bool Init(SDL_Subsystems flags);

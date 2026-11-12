@@ -19,13 +19,11 @@ internal sealed class KhaosEngineTests
 {
     private readonly Mock<Game2D> _game = Game2D.Mock("Test", 1280, 720);
 
-    private const string MainCallbackRate = "SDL_MAIN_CALLBACK_RATE";
-
     [After(Test)]
     public void ClearAppContext() => GameMetadata.Clear();
 
     [After(Test)]
-    public void ForgetEnvironment() => SDLEnvironment.Unset(MainCallbackRate);
+    public void ForgetEnvironment() => SDLEnvironment.Unset(NativeNames.MainCallbackRate);
 
     [Test]
     [OffscreenOnly]
@@ -35,7 +33,7 @@ internal sealed class KhaosEngineTests
 
         using KhaosEngine engine = TestEngine.Start(_game, options);
 
-        await SDLRender.NameOf(engine.Window).Should().NotBeEqualTo("direct3d11");
+        await SDLRender.NameOf(engine.Window).Should().NotBeEqualTo(NativeNames.Direct3D11Renderer);
     }
 
     [Test]
@@ -45,7 +43,7 @@ internal sealed class KhaosEngineTests
 
         using KhaosEngine engine = TestEngine.Start(_game, options);
 
-        await SDLRender.NameOf(engine.Window).Should().BeEqualTo("software");
+        await SDLRender.NameOf(engine.Window).Should().BeEqualTo(NativeNames.SoftwareRenderer);
     }
 
     [Test]
@@ -90,12 +88,12 @@ internal sealed class KhaosEngineTests
     [Test]
     public async Task StartShouldLetAnEnvironmentVariableWinOverMaxFrameRate()
     {
-        SDLEnvironment.Set(MainCallbackRate, "30");
+        SDLEnvironment.Set(NativeNames.MainCallbackRate, "30");
         GraphicsOptions graphics = new() { VSync = VSync.Disabled, MaxFrameRate = 60 };
 
         using KhaosEngine _ = TestEngine.Start(_game, graphics);
 
-        await SDLHints.Get(MainCallbackRate).Should().BeEqualTo("30");
+        await SDLHints.Get(NativeNames.MainCallbackRate).Should().BeEqualTo("30");
     }
 
     [Test]
@@ -105,7 +103,7 @@ internal sealed class KhaosEngineTests
 
         using KhaosEngine _ = TestEngine.Start(_game, graphics);
 
-        await SDLHints.Get(MainCallbackRate).Should().BeEqualTo("30");
+        await SDLHints.Get(NativeNames.MainCallbackRate).Should().BeEqualTo("30");
     }
 
     [Test]
@@ -113,7 +111,7 @@ internal sealed class KhaosEngineTests
     {
         using KhaosEngine _ = TestEngine.Start(_game);
 
-        await SDLHints.Get(MainCallbackRate).Should().BeEqualTo("0");
+        await SDLHints.Get(NativeNames.MainCallbackRate).Should().BeEqualTo("0");
     }
 
     [Test]
@@ -509,19 +507,19 @@ internal sealed class KhaosEngineTests
 
         engine.Dispatch(in minimized);
 
-        await SDLHints.Get(MainCallbackRate).Should().BeEqualTo("waitevent");
+        await SDLHints.Get(NativeNames.MainCallbackRate).Should().BeEqualTo(NativeNames.WaitForEvents);
     }
 
     [Test]
     public async Task DispatchShouldWaitForEventsEvenWhenAnEnvironmentVariableSetsTheRate()
     {
-        SDLEnvironment.Set(MainCallbackRate, "30");
+        SDLEnvironment.Set(NativeNames.MainCallbackRate, "30");
         using KhaosEngine engine = TestEngine.Start(_game);
         Event minimized = new(new WindowMinimized());
 
         engine.Dispatch(in minimized);
 
-        await SDLHints.Get(MainCallbackRate).Should().BeEqualTo("waitevent");
+        await SDLHints.Get(NativeNames.MainCallbackRate).Should().BeEqualTo(NativeNames.WaitForEvents);
     }
 
     [Test]
@@ -535,13 +533,13 @@ internal sealed class KhaosEngineTests
         engine.Dispatch(in minimized);
         engine.Dispatch(in restored);
 
-        await SDLHints.Get(MainCallbackRate).Should().BeEqualTo("30");
+        await SDLHints.Get(NativeNames.MainCallbackRate).Should().BeEqualTo("30");
     }
 
     [Test]
     public async Task DispatchShouldBringBackTheEnvironmentRateOnceTheWindowIsRestored()
     {
-        SDLEnvironment.Set(MainCallbackRate, "30");
+        SDLEnvironment.Set(NativeNames.MainCallbackRate, "30");
         GraphicsOptions graphics = new() { VSync = VSync.Disabled, MaxFrameRate = 60 };
         using KhaosEngine engine = TestEngine.Start(_game, graphics);
         Event minimized = new(new WindowMinimized());
@@ -550,7 +548,7 @@ internal sealed class KhaosEngineTests
         engine.Dispatch(in minimized);
         engine.Dispatch(in restored);
 
-        await SDLHints.Get(MainCallbackRate).Should().BeEqualTo("30");
+        await SDLHints.Get(NativeNames.MainCallbackRate).Should().BeEqualTo("30");
     }
 
     [Test]
@@ -576,7 +574,7 @@ internal sealed class KhaosEngineTests
 
         engine.Dispatch(in minimized);
 
-        await SDLHints.Get(MainCallbackRate).Should().BeEqualTo("0");
+        await SDLHints.Get(NativeNames.MainCallbackRate).Should().BeEqualTo("0");
     }
 
     [Test]

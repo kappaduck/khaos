@@ -7,5 +7,5 @@ namespace KappaDuck.Khaos.Testing.Engine;
 internal sealed class OffscreenOnlyAttribute() : SkipAttribute("The test relies on the offscreen video driver.")
 {
     public override Task<bool> ShouldSkip(TestRegisteredContext context)
-        => Task.FromResult(!string.Equals(VideoDriverSetup.Driver, "offscreen", StringComparison.OrdinalIgnoreCase));
+        => Task.FromResult(!string.Equals(VideoDriverSetup.Driver, NativeNames.OffscreenVideoDriver, StringComparison.OrdinalIgnoreCase));
 }

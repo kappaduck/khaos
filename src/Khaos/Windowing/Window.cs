@@ -25,11 +25,10 @@ namespace KappaDuck.Khaos.Windowing;
 /// </remarks>
 public sealed class Window
 {
-    internal const string NotOpenYet = "The window opens before Initialize. Use it from Initialize or later.";
-
-    private const uint CenteredMask = 0x2FFF0000u;
     private const string Closed = "The window is closed: the game has exited.";
     private const int MaxTitleBytes = 256;
+
+    internal const string NotOpenYet = "The window opens before Initialize. Use it from Initialize or later.";
 
     private SDL_Window* _handle;
     private bool _opened;
@@ -64,7 +63,7 @@ public sealed class Window
         get
         {
             ThrowIfNotOpen();
-            return SDL3.GetCurrentVideoDriver() is "windows" or "x11";
+            return SDL3.GetCurrentVideoDriver() is SDL3.WindowsVideoDriver or SDL3.X11VideoDriver;
         }
     }
 
@@ -574,7 +573,7 @@ public sealed class Window
         return TryMoveOn(target, x, y);
     }
 
-    private static int CenteredOn(uint display) => (int)(CenteredMask | display);
+    private static int CenteredOn(uint display) => (int)(SDL3.WindowposCenteredMask | display);
 
     private static SDL_Window* Create(WindowOptions options, string title, Display display)
     {
@@ -583,12 +582,12 @@ public sealed class Window
 
         try
         {
-            SDL3.ThrowIfFailed(SDL3.SetStringProperty(properties, "SDL.window.create.title", title));
-            SDL3.ThrowIfFailed(SDL3.SetNumberProperty(properties, "SDL.window.create.width", options.Width));
-            SDL3.ThrowIfFailed(SDL3.SetNumberProperty(properties, "SDL.window.create.height", options.Height));
-            SDL3.ThrowIfFailed(SDL3.SetNumberProperty(properties, "SDL.window.create.flags", ToState(options)));
-            SDL3.ThrowIfFailed(SDL3.SetNumberProperty(properties, "SDL.window.create.x", centered));
-            SDL3.ThrowIfFailed(SDL3.SetNumberProperty(properties, "SDL.window.create.y", centered));
+            SDL3.ThrowIfFailed(SDL3.SetStringProperty(properties, SDL3.WindowCreateTitle, title));
+            SDL3.ThrowIfFailed(SDL3.SetNumberProperty(properties, SDL3.WindowCreateWidth, options.Width));
+            SDL3.ThrowIfFailed(SDL3.SetNumberProperty(properties, SDL3.WindowCreateHeight, options.Height));
+            SDL3.ThrowIfFailed(SDL3.SetNumberProperty(properties, SDL3.WindowCreateFlags, ToState(options)));
+            SDL3.ThrowIfFailed(SDL3.SetNumberProperty(properties, SDL3.WindowCreateX, centered));
+            SDL3.ThrowIfFailed(SDL3.SetNumberProperty(properties, SDL3.WindowCreateY, centered));
 
             return SDL3.ThrowIfNull(SDL3.CreateWindowWithProperties(properties));
         }

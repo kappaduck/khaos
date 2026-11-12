@@ -8,6 +8,20 @@ namespace KappaDuck.Khaos.Interop.SDL;
 
 internal static partial class SDL3
 {
+    internal const string WindowCreateFlags = "SDL.window.create.flags";
+    internal const string WindowCreateHeight = "SDL.window.create.height";
+    internal const string WindowCreateTitle = "SDL.window.create.title";
+    internal const string WindowCreateWidth = "SDL.window.create.width";
+    internal const string WindowCreateX = "SDL.window.create.x";
+    internal const string WindowCreateY = "SDL.window.create.y";
+    internal const uint WindowposCenteredMask = 0x2FFF0000u;
+    internal const string WindowsVideoDriver = "windows";
+    internal const string X11VideoDriver = "x11";
+    internal const string WaylandVideoDriver = "wayland";
+    internal const string EmscriptenVideoDriver = "emscripten";
+    internal const string OffscreenVideoDriver = "offscreen";
+
+
     [LibraryImport(nameof(SDL3), EntryPoint = "SDL_CreateWindowWithProperties")]
     internal static safe partial SDL_Window* CreateWindowWithProperties(uint properties);
 
