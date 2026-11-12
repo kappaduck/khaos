@@ -12,7 +12,6 @@ namespace KappaDuck.Khaos.Tests.Hosting.Engine;
 [NotInParallel(Sequential.Engine)]
 internal sealed class NativeSessionTests
 {
-    private const string AllowScreenSaver = "SDL_VIDEO_ALLOW_SCREENSAVER";
     private const SDL_Subsystems InitializedSubsystems = SDL_Subsystems.Video | SDL_Subsystems.Events;
     private const string MissingDriver = "khaos-missing";
 
@@ -29,14 +28,14 @@ internal sealed class NativeSessionTests
     [After(Test)]
     public void ForgetEnvironment()
     {
-        SDLEnvironment.Unset(AllowScreenSaver);
-        SDLEnvironment.Unset(SDLHints.NoSignalHandlers);
+        SDLEnvironment.Unset(NativeNames.AllowScreenSaver);
+        SDLEnvironment.Unset(NativeNames.NoSignalHandlers);
     }
 
     [Test]
     public async Task StartShouldApplyANativeSettingBeforeInit()
     {
-        using NativeSession _ = NativeSession.Start(_metadata, Native(AllowScreenSaver, "1"));
+        using NativeSession _ = NativeSession.Start(_metadata, Native(NativeNames.AllowScreenSaver, "1"));
 
         await SDLVideo.ScreenSaverEnabled().Should().BeTrue();
     }
@@ -44,9 +43,9 @@ internal sealed class NativeSessionTests
     [Test]
     public async Task StartShouldLetAnEnvironmentVariableWinOverANativeSetting()
     {
-        SDLEnvironment.Set(AllowScreenSaver, "0");
+        SDLEnvironment.Set(NativeNames.AllowScreenSaver, "0");
 
-        using NativeSession _ = NativeSession.Start(_metadata, Native(AllowScreenSaver, "1"));
+        using NativeSession _ = NativeSession.Start(_metadata, Native(NativeNames.AllowScreenSaver, "1"));
 
         await SDLVideo.ScreenSaverEnabled().Should().BeFalse();
     }
@@ -54,11 +53,11 @@ internal sealed class NativeSessionTests
     [Test]
     public async Task StartShouldKeepTheSignalHandlersOfSDLOffWhateverTheEnvironmentSays()
     {
-        SDLEnvironment.Set(SDLHints.NoSignalHandlers, "0");
+        SDLEnvironment.Set(NativeNames.NoSignalHandlers, "0");
 
         using NativeSession _ = NativeSession.Start(_metadata);
 
-        await SDLHints.Get(SDLHints.NoSignalHandlers).Should().BeEqualTo("1");
+        await SDLHints.Get(NativeNames.NoSignalHandlers).Should().BeEqualTo("1");
     }
 
     [Test]
@@ -68,7 +67,7 @@ internal sealed class NativeSessionTests
     {
         using NativeSession _ = NativeSession.Start(_metadata, new EngineOptions { VideoDriver = VideoDriver.Wayland });
 
-        await SDLVideo.GetCurrentVideoDriver().Should().BeEqualTo("windows");
+        await SDLVideo.GetCurrentVideoDriver().Should().BeEqualTo(NativeNames.WindowsVideoDriver);
     }
 
     [Test]
@@ -77,7 +76,7 @@ internal sealed class NativeSessionTests
     {
         using NativeSession _ = NativeSession.Start(_metadata, new EngineOptions { VideoDriver = VideoDriver.X11 });
 
-        await SDLVideo.GetCurrentVideoDriver().Should().BeEqualTo("offscreen");
+        await SDLVideo.GetCurrentVideoDriver().Should().BeEqualTo(NativeNames.OffscreenVideoDriver);
     }
 
     [Test]
@@ -86,7 +85,7 @@ internal sealed class NativeSessionTests
     {
         using NativeSession _ = NativeSession.Start(_metadata, new EngineOptions { VideoDriver = VideoDriver.Offscreen });
 
-        await SDLVideo.GetCurrentVideoDriver().Should().BeEqualTo("offscreen");
+        await SDLVideo.GetCurrentVideoDriver().Should().BeEqualTo(NativeNames.OffscreenVideoDriver);
     }
 
     [Test]
@@ -126,7 +125,7 @@ internal sealed class NativeSessionTests
     {
         using NativeSession _ = NativeSession.Start(_metadata);
 
-        string? hint = SDLHints.Get(SDLHints.NoSignalHandlers);
+        string? hint = SDLHints.Get(NativeNames.NoSignalHandlers);
 
         await hint.Should().BeEqualTo("1");
     }

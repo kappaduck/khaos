@@ -6,9 +6,7 @@ namespace KappaDuck.Khaos.Testing.Engine;
 internal static class VideoDriverSetup
 {
     private const string Default = "default";
-    private const string Headless = "offscreen";
     private const string Parameter = "video-driver";
-    private const string VideoDriverVariable = "SDL_VIDEO_DRIVER";
 
     internal static string? Driver { get; } = ReadDriver();
 
@@ -17,18 +15,18 @@ internal static class VideoDriverSetup
     {
         if (Driver is null)
         {
-            SDLEnvironment.Unset(VideoDriverVariable);
+            SDLEnvironment.Unset(NativeNames.VideoDriver);
             return;
         }
 
-        SDLEnvironment.Set(VideoDriverVariable, Driver);
+        SDLEnvironment.Set(NativeNames.VideoDriver, Driver);
     }
 
     private static string? ReadDriver()
     {
         string driver = TestContext.Parameters.TryGetValue(Parameter, out List<string>? values) && values.Count > 0
             ? values[^1]
-            : Headless;
+            : NativeNames.OffscreenVideoDriver;
 
         return string.Equals(driver, Default, StringComparison.OrdinalIgnoreCase) ? null : driver;
     }

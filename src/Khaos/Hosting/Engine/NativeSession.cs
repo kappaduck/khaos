@@ -9,14 +9,6 @@ namespace KappaDuck.Khaos.Hosting.Engine;
 
 internal sealed class NativeSession : IDisposable
 {
-    private const string AppMetadataCopyrightProperty = "SDL.app.metadata.copyright";
-    private const string AppMetadataCreatorProperty = "SDL.app.metadata.creator";
-    private const string AppMetadataIdentifierProperty = "SDL.app.metadata.identifier";
-    private const string AppMetadataNameProperty = "SDL.app.metadata.name";
-    private const string AppMetadataTypeProperty = "SDL.app.metadata.type";
-    private const string AppMetadataUrlProperty = "SDL.app.metadata.url";
-    private const string AppMetadataVersionProperty = "SDL.app.metadata.version";
-
     private static bool _started;
     private bool _disposed;
 
@@ -49,7 +41,7 @@ internal sealed class NativeSession : IDisposable
                 NativeHints.Apply(engine.Native, logger);
 
             if (!OperatingSystem.IsBrowser())
-                NativeHints.Force(NativeHints.NoSignalHandlers, "1");
+                NativeHints.Force(SDL3.NoSignalHandlers, "1");
 
             Init(chosen, logger);
         }
@@ -67,7 +59,7 @@ internal sealed class NativeSession : IDisposable
         if (driver == VideoDriver.Auto)
             return VideoDriver.Auto;
 
-        return NativeHints.Set(NativeHints.VideoDriverHint, NativeHints.NameOf(driver), logger) ? driver : VideoDriver.Auto;
+        return NativeHints.Set(SDL3.VideoDriver, NativeHints.NameOf(driver), logger) ? driver : VideoDriver.Auto;
     }
 
     private static void Init(VideoDriver chosen, ILogger logger)
@@ -78,7 +70,7 @@ internal sealed class NativeSession : IDisposable
                 return;
 
             NativeHints.DriverMissing(logger, NativeHints.VideoDriverSetting, NativeHints.NameOf(chosen), SDL3.GetError());
-            NativeHints.Reset(NativeHints.VideoDriverHint);
+            NativeHints.Reset(SDL3.VideoDriver);
         }
 
         SDL3.ThrowIfFailed(SDL3.Init(SDL_Subsystems.Video));
@@ -86,13 +78,13 @@ internal sealed class NativeSession : IDisposable
 
     private static void SetMetadata(AppMetadata metadata)
     {
-        Set(AppMetadataNameProperty, metadata.Name);
-        Set(AppMetadataVersionProperty, metadata.Version);
-        Set(AppMetadataIdentifierProperty, metadata.Identifier);
-        Set(AppMetadataCreatorProperty, metadata.Creator);
-        Set(AppMetadataCopyrightProperty, metadata.Copyright);
-        Set(AppMetadataUrlProperty, metadata.Url?.AbsoluteUri);
-        Set(AppMetadataTypeProperty, "game");
+        Set(SDL3.AppMetadataName, metadata.Name);
+        Set(SDL3.AppMetadataVersion, metadata.Version);
+        Set(SDL3.AppMetadataIdentifier, metadata.Identifier);
+        Set(SDL3.AppMetadataCreator, metadata.Creator);
+        Set(SDL3.AppMetadataCopyright, metadata.Copyright);
+        Set(SDL3.AppMetadataUrl, metadata.Url?.AbsoluteUri);
+        Set(SDL3.AppMetadataType, "game");
 
         static void Set(string property, string? value)
         {

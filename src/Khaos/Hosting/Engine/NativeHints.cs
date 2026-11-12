@@ -8,22 +8,18 @@ namespace KappaDuck.Khaos.Hosting.Engine;
 
 internal static partial class NativeHints
 {
-    internal const string MainCallbackRate = "SDL_MAIN_CALLBACK_RATE";
-    internal const string NoSignalHandlers = "SDL_NO_SIGNAL_HANDLERS";
-    internal const string RenderDriverHint = "SDL_RENDER_DRIVER";
     internal const string RenderDriverSetting = "engine:renderDriver";
-    internal const string VideoDriverHint = "SDL_VIDEO_DRIVER";
     internal const string VideoDriverSetting = "engine:videoDriver";
 
     private const string Prefix = "SDL_";
 
-    private static readonly FrozenSet<string> _invariants = FrozenSet.Create(StringComparer.OrdinalIgnoreCase, NoSignalHandlers);
+    private static readonly FrozenSet<string> _invariants = FrozenSet.Create(StringComparer.OrdinalIgnoreCase, SDL3.NoSignalHandlers);
 
     private static readonly FrozenDictionary<string, string> _ownedByOptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
     {
-        [MainCallbackRate] = "graphics:maxFrameRate",
-        [RenderDriverHint] = RenderDriverSetting,
-        [VideoDriverHint] = VideoDriverSetting
+        [SDL3.MainCallbackRate] = "graphics:maxFrameRate",
+        [SDL3.RenderDriver] = RenderDriverSetting,
+        [SDL3.VideoDriver] = VideoDriverSetting
     }.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
     internal static void Apply(IDictionary<string, string> native, ILogger logger)
@@ -37,22 +33,22 @@ internal static partial class NativeHints
 
     internal static string NameOf(RenderDriver driver) => driver switch
     {
-        RenderDriver.Direct3D11 => "direct3d11",
-        RenderDriver.Direct3D12 => "direct3d12",
-        RenderDriver.OpenGL => "opengl",
-        RenderDriver.OpenGLES2 => "opengles2",
-        RenderDriver.Vulkan => "vulkan",
-        RenderDriver.Gpu => "gpu",
-        RenderDriver.Software => "software",
+        RenderDriver.Direct3D11 => SDL3.Direct3D11Renderer,
+        RenderDriver.Direct3D12 => SDL3.Direct3D12Renderer,
+        RenderDriver.OpenGL => SDL3.OpenGLRenderer,
+        RenderDriver.OpenGLES2 => SDL3.OpenGLES2Renderer,
+        RenderDriver.Vulkan => SDL3.VulkanRenderer,
+        RenderDriver.Gpu => SDL3.GpuRenderer,
+        RenderDriver.Software => SDL3.SoftwareRenderer,
         RenderDriver.Auto => throw new ArgumentOutOfRangeException(nameof(driver), driver, "Auto has no name: Khaos leaves the hint unset."),
         _ => throw new ArgumentOutOfRangeException(nameof(driver), driver, null)
     };
 
     internal static string NameOf(VideoDriver driver) => driver switch
     {
-        VideoDriver.Wayland => "wayland",
-        VideoDriver.X11 => "x11",
-        VideoDriver.Offscreen => "offscreen",
+        VideoDriver.Wayland => SDL3.WaylandVideoDriver,
+        VideoDriver.X11 => SDL3.X11VideoDriver,
+        VideoDriver.Offscreen => SDL3.OffscreenVideoDriver,
         VideoDriver.Auto => throw new ArgumentOutOfRangeException(nameof(driver), driver, "Auto has no name: Khaos leaves the hint unset."),
         _ => throw new ArgumentOutOfRangeException(nameof(driver), driver, null)
     };

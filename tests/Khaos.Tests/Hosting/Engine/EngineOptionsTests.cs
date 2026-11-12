@@ -11,12 +11,6 @@ namespace KappaDuck.Khaos.Tests.Hosting.Engine;
 [NotInParallel(Sequential.Engine)]
 internal sealed class EngineOptionsTests
 {
-    private const string AllowScreenSaver = "SDL_VIDEO_ALLOW_SCREENSAVER";
-    private const string MainCallbackRate = "SDL_MAIN_CALLBACK_RATE";
-    private const string NoSignalHandlers = "SDL_NO_SIGNAL_HANDLERS";
-    private const string RenderDriverHint = "SDL_RENDER_DRIVER";
-    private const string VideoDriverHint = "SDL_VIDEO_DRIVER";
-
     private readonly TestHost _host = new();
 
     [Before(Test)]
@@ -28,11 +22,11 @@ internal sealed class EngineOptionsTests
     [Test]
     public async Task ConfigureEngineShouldReachTheEngineOptions()
     {
-        KhaosApplicationBuilder builder = _host.Create().ConfigureEngine(static engine => engine.Native[AllowScreenSaver] = "1");
+        KhaosApplicationBuilder builder = _host.Create().ConfigureEngine(static engine => engine.Native[NativeNames.AllowScreenSaver] = "1");
 
         EngineOptions engine = EngineOf(builder);
 
-        await engine.Native[AllowScreenSaver].Should().BeEqualTo("1");
+        await engine.Native[NativeNames.AllowScreenSaver].Should().BeEqualTo("1");
     }
 
     [Test]
@@ -70,39 +64,39 @@ internal sealed class EngineOptionsTests
     [Test]
     public async Task EngineSettingsShouldFillNative()
     {
-        _host.Write("appsettings.json", $$"""{ "engine": { "native": { "{{AllowScreenSaver}}": "0" } } }""");
+        _host.Write("appsettings.json", $$"""{ "engine": { "native": { "{{NativeNames.AllowScreenSaver}}": "0" } } }""");
 
         EngineOptions engine = EngineOf(_host.Create());
 
-        await engine.Native[AllowScreenSaver].Should().BeEqualTo("0");
+        await engine.Native[NativeNames.AllowScreenSaver].Should().BeEqualTo("0");
     }
 
     [Test]
     public async Task EngineSettingsShouldPreferTheCommandLineOverAppSettings()
     {
-        _host.Write("appsettings.json", $$"""{ "engine": { "native": { "{{AllowScreenSaver}}": "0" } } }""");
+        _host.Write("appsettings.json", $$"""{ "engine": { "native": { "{{NativeNames.AllowScreenSaver}}": "0" } } }""");
 
-        EngineOptions engine = EngineOf(_host.Create($"--engine:native:{AllowScreenSaver}=1"));
+        EngineOptions engine = EngineOf(_host.Create($"--engine:native:{NativeNames.AllowScreenSaver}=1"));
 
-        await engine.Native[AllowScreenSaver].Should().BeEqualTo("1");
+        await engine.Native[NativeNames.AllowScreenSaver].Should().BeEqualTo("1");
     }
 
     [Test]
     public async Task EngineSettingsShouldWinOverProgram()
     {
-        KhaosApplicationBuilder builder = _host.Create($"--engine:native:{AllowScreenSaver}=0")
-            .ConfigureEngine(static engine => engine.Native[AllowScreenSaver] = "1");
+        KhaosApplicationBuilder builder = _host.Create($"--engine:native:{NativeNames.AllowScreenSaver}=0")
+            .ConfigureEngine(static engine => engine.Native[NativeNames.AllowScreenSaver] = "1");
 
         EngineOptions engine = EngineOf(builder);
 
-        await engine.Native[AllowScreenSaver].Should().BeEqualTo("0");
+        await engine.Native[NativeNames.AllowScreenSaver].Should().BeEqualTo("0");
     }
 
     [Test]
     public async Task NativeShouldIgnoreTheCaseOfNames()
     {
         KhaosApplicationBuilder builder = _host.Create("--engine:native:sdl_video_allow_screensaver=0")
-            .ConfigureEngine(static engine => engine.Native[AllowScreenSaver] = "1");
+            .ConfigureEngine(static engine => engine.Native[NativeNames.AllowScreenSaver] = "1");
 
         EngineOptions engine = EngineOf(builder);
 
@@ -112,15 +106,15 @@ internal sealed class EngineOptionsTests
     [Test]
     public async Task NativeShouldRefuseAnEngineInvariant()
     {
-        KhaosApplicationBuilder builder = _host.Create($"--engine:native:{NoSignalHandlers}=0");
+        KhaosApplicationBuilder builder = _host.Create($"--engine:native:{NativeNames.NoSignalHandlers}=0");
 
-        await Assert.That(() => EngineOf(builder)).ThrowsExactly<KhaosException>().WithMessageContaining(NoSignalHandlers);
+        await Assert.That(() => EngineOf(builder)).ThrowsExactly<KhaosException>().WithMessageContaining(NativeNames.NoSignalHandlers);
     }
 
     [Test]
     public async Task NativeShouldRefuseANameOwnedByAnOption()
     {
-        KhaosApplicationBuilder builder = _host.Create($"--engine:native:{MainCallbackRate}=30");
+        KhaosApplicationBuilder builder = _host.Create($"--engine:native:{NativeNames.MainCallbackRate}=30");
 
         await Assert.That(() => EngineOf(builder)).ThrowsExactly<KhaosException>().WithMessageContaining("graphics:maxFrameRate");
     }
@@ -136,7 +130,7 @@ internal sealed class EngineOptionsTests
     [Test]
     public async Task NativeShouldRefuseTheRenderDriver()
     {
-        KhaosApplicationBuilder builder = _host.Create($"--engine:native:{RenderDriverHint}=software");
+        KhaosApplicationBuilder builder = _host.Create($"--engine:native:{NativeNames.RenderDriver}=software");
 
         await Assert.That(() => EngineOf(builder)).ThrowsExactly<KhaosException>().WithMessageContaining("engine:renderDriver");
     }
@@ -144,7 +138,7 @@ internal sealed class EngineOptionsTests
     [Test]
     public async Task NativeShouldRefuseTheVideoDriver()
     {
-        KhaosApplicationBuilder builder = _host.Create($"--engine:native:{VideoDriverHint}=x11");
+        KhaosApplicationBuilder builder = _host.Create($"--engine:native:{NativeNames.VideoDriver}=x11");
 
         await Assert.That(() => EngineOf(builder)).ThrowsExactly<KhaosException>().WithMessageContaining("engine:videoDriver");
     }

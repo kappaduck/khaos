@@ -113,6 +113,8 @@ Follow the .NET [native interop best practices](https://learn.microsoft.com/dotn
 Pass what the caller owns by `in`, `out` or `ref`: a blittable value is pinned, not copied. Keep a pointer only for a
 native handle stored in a field, for memory SDL owns, or where `NULL` means something.
 
+A native name (a hint, a property, a driver name, a mask) is declared once, as a constant in the SDL3.*.cs file of its header, named after its macro without the SDL_ prefix: SDL_HINT_VIDEO_DRIVER is SDL3.HintVideoDriver. The tests keep their own literals, spelled once in tests/Shared/Engine/NativeNames.cs: a test that reads a name back through the production constant cannot catch a typo in it.
+
 ### Documentation
 
 Everything public has XML documentation: classes, structs, enums and their values, properties, methods, events.

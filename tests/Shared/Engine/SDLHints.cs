@@ -9,14 +9,11 @@ namespace KappaDuck.Khaos.Testing.Engine;
 
 internal static partial class SDLHints
 {
-    private const string VideoDriver = "SDL_VIDEO_DRIVER";
     private const int Override = 2;
-
-    internal const string NoSignalHandlers = "SDL_NO_SIGNAL_HANDLERS";
 
     internal static void UseVideoDriver(string driver)
     {
-        if (!SetHintWithPriority(VideoDriver, driver, Override))
+        if (!SetHintWithPriority(NativeNames.VideoDriver, driver, Override))
             throw new InvalidOperationException($"SDL refused the video driver hint '{driver}'.");
     }
 

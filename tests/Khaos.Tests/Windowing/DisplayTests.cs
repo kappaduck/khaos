@@ -288,7 +288,7 @@ internal sealed class DisplayTests
     public async Task UsableAreaShouldLeaveOutWhatTheSystemReserves()
     {
         const string TaskbarOf40 = "0,0,1024,728";
-        const string UsableBoundsHint = "SDL_DISPLAY_USABLE_BOUNDS";
+        const string UsableBoundsHint = NativeNames.DisplayUsableBounds;
         SDLHints.Set(UsableBoundsHint, TaskbarOf40);
 
         RectI area = Display.Primary.UsableArea;

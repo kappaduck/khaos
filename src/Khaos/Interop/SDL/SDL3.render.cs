@@ -7,6 +7,14 @@ namespace KappaDuck.Khaos.Interop.SDL;
 
 internal static partial class SDL3
 {
+    internal const string SoftwareRenderer = "software";
+    internal const string GpuRenderer = "gpu";
+    internal const string Direct3D11Renderer = "direct3d11";
+    internal const string Direct3D12Renderer = "direct3d12";
+    internal const string OpenGLRenderer = "opengl";
+    internal const string OpenGLES2Renderer = "opengles2";
+    internal const string VulkanRenderer = "vulkan";
+
     [LibraryImport(nameof(SDL3), EntryPoint = "SDL_CreateRenderer", StringMarshalling = StringMarshalling.Utf8)]
     internal static unsafe partial SDL_Renderer* CreateRenderer(SDL_Window* window, string? name);
 

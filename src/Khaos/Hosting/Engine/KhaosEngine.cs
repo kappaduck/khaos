@@ -17,8 +17,6 @@ internal sealed partial class KhaosEngine : IDisposable
 {
     internal const string Category = "KappaDuck.Khaos.Hosting";
 
-    private const string WaitForEvents = "waitevent";
-
     private readonly string _frameRate;
     private readonly ILogger _logger;
     private readonly LoopClock _loop;
@@ -127,7 +125,7 @@ internal sealed partial class KhaosEngine : IDisposable
                 Window.Close();
 
                 if (_paused)
-                    NativeHints.Reset(NativeHints.MainCallbackRate);
+                    NativeHints.Reset(SDL3.MainCallbackRate);
 
                 _session.Dispose();
             }
@@ -230,7 +228,7 @@ internal sealed partial class KhaosEngine : IDisposable
         if (driver == RenderDriver.Auto)
             return RenderDriver.Auto;
 
-        return NativeHints.Set(NativeHints.RenderDriverHint, NativeHints.NameOf(driver), logger) ? driver : RenderDriver.Auto;
+        return NativeHints.Set(SDL3.RenderDriver, NativeHints.NameOf(driver), logger) ? driver : RenderDriver.Auto;
     }
 
     private static Renderer CreateRenderer(Window window, VSync vsync, RenderDriver chosen, ILoggerFactory loggers, ILogger logger)
@@ -273,18 +271,18 @@ internal sealed partial class KhaosEngine : IDisposable
     private void Pause()
     {
         _paused = true;
-        NativeHints.Force(NativeHints.MainCallbackRate, WaitForEvents);
+        NativeHints.Force(SDL3.MainCallbackRate, SDL3.MainCallbackRateWaitEvent);
     }
 
     private void Resume()
     {
         _paused = false;
-        NativeHints.Reset(NativeHints.MainCallbackRate);
+        NativeHints.Reset(SDL3.MainCallbackRate);
         SetFrameRate();
         _loop.Resume(_time.GetTimestamp());
     }
 
-    private void SetFrameRate() => _ = NativeHints.Set(NativeHints.MainCallbackRate, _frameRate, _logger);
+    private void SetFrameRate() => _ = NativeHints.Set(SDL3.MainCallbackRate, _frameRate, _logger);
 
     [LoggerMessage(Level = LogLevel.Information, SkipEnabledCheck = true, Message = "Khaos {Version} started on {VideoDriver} with {Renderer} (native {NativeVersion}).")]
     private static partial void Started(ILogger logger, string version, string videoDriver, string renderer, string nativeVersion);
