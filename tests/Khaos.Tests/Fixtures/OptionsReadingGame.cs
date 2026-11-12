@@ -11,5 +11,5 @@ internal sealed class OptionsReadingGame : Game2D
 {
     public OptionsReadingGame(IOptions<WindowOptions> options) : base(320, 180) => _ = options.Value;
 
-    protected internal override void Draw(Renderer renderer) => Exit();
+    protected internal override void Draw(Renderer renderer, in Frame frame) => Exit();
 }

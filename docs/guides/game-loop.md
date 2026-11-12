@@ -16,7 +16,7 @@ frame. You override the ones you need.
 | :---------------------------------------- | :------------------------------------------------------------------------------- | :-------------------------------------------------------------- |
 | `Initialize()`                            | Once, before the first frame                                                     | Load your images, sounds and fonts, and set up the game         |
 | `OnEvent(in Event e)`                     | For each thing that happened: a key pressed, a mouse click, a gamepad plugged in | React to the player                                             |
-| `FixedUpdate(in GameTime time)`           | At a steady rate, for example 60 times per second                                | Move things, check collisions, apply the rules of your game     |
+| `FixedUpdate(in GameTime time)`           | At a steady rate, 60 times per second by default                                 | Move things, check collisions, apply the rules of your game     |
 | `Update(in GameTime time)`                | Once per frame                                                                   | Animate what only looks nice, such as a spinning coin or a menu |
 | `Draw(Renderer renderer, in Frame frame)` | Once per frame, last                                                             | Draw the frame                                                  |
 | `Shutdown()`                              | Once, after the last frame, while the window is still open                       | Save the player's settings, such as the size of the window      |
@@ -30,7 +30,7 @@ never in `Dispose`.
 
 ## Why two kinds of update
 
-Not every computer draws at the same speed such as a gaming PC may draw 144 frames per second or a browser tab on a laptop 30.
+Not every computer draws at the same speed: a gaming PC may draw 144 frames per second, a browser tab on a laptop 30.
 If your character moved a little every frame, it would run five times faster on the gaming PC. Khaos avoids that by
 splitting the work in two:
 
@@ -43,6 +43,64 @@ splitting the work in two:
 When in doubt, put it in `FixedUpdate`.
 
 So a faster screen never changes your game, only how smooth it looks: see [Frame rate](#frame-rate).
+
+Each method gets its own clock in `time`:
+
+| Property     | In `FixedUpdate`                      | In `Update`                      |
+| :----------- | :------------------------------------ | :------------------------------- |
+| `time.Delta` | The length of a step, always the same | The time since the last frame    |
+| `time.Total` | The steps so far times `Delta`        | The frame times so far, added up |
+| `time.Count` | The number of the step, from 1        | The number of the frame, from 1  |
+
+`Delta` and `Total` are in seconds. In `FixedUpdate`, `Total` is computed from `Count`, so a replay of the same steps
+finds exactly the same values.
+
+## Steps per second
+
+`FixedUpdate` runs 60 times per second by default, the usual rate for a 2D game. A racing game or a fast shooter can
+ask for more in its [settings](configuration.md):
+
+```json
+{
+  "loop": {
+    "fixedRate": 120,
+    "maxFrameTime": 0.25
+  }
+}
+```
+
+| Setting              | What it does                                                        | Default |
+| :------------------- | :------------------------------------------------------------------ | :------ |
+| `fixedRate`          | How many times per second `FixedUpdate` runs                        | `60`    |
+| `maxFrameTime`       | The most time one frame counts, in seconds, from one step up to `1` | `0.25`  |
+| `pauseWhenMinimized` | Whether the game stops while its window is minimized                | `true`  |
+
+In code, set them in `Program.cs`:
+
+```csharp
+builder.ConfigureLoop(loop => loop.FixedRate = 120);
+```
+
+`maxFrameTime` protects the game when a frame comes very late: the debugger stopped on a breakpoint, the browser tab
+was hidden. Khaos counts that frame as a quarter of a second at most, so `FixedUpdate` catches up with at most 15
+steps, and the game goes on where it was instead of rushing through everything it missed. `Update` gets the same
+capped time, so an animation does not jump either.
+
+## When the window is minimized
+
+On the desktop, the game stops while its window is minimized. `FixedUpdate`, `Update` and `Draw` are not called, and
+the game uses no processor time. When the window comes back, the game picks up exactly where it was, as if no time
+had passed.
+
+`OnEvent` still receives `WindowMinimized` and `WindowRestored`. A game that must keep running, or that wants to
+handle it itself (show its own pause menu, lower the music), turns the pause off and reacts to those events:
+
+```csharp
+builder.ConfigureLoop(loop => loop.PauseWhenMinimized = false);
+```
+
+In the browser, a hidden tab is slowed down by the browser itself, to about one frame per second. With the cap of
+`maxFrameTime`, the game then runs at a quarter of its speed until the tab comes back.
 
 ## Smooth drawing
 
@@ -67,7 +125,7 @@ internal sealed class MyGame() : Game2D("Ball", 1280, 720)
     protected override void FixedUpdate(in GameTime time)
     {
         _previous = _position;
-        _position += _velocity * (float)time.Delta;
+        _position += _velocity * time.Delta;
     }
 
     protected override void Draw(Renderer renderer, in Frame frame)

@@ -129,7 +129,7 @@ internal sealed class KhaosEngineTests
     {
         using KhaosEngine _ = TestEngine.Start(_game);
 
-        _game.Draw(Any()).WasNeverCalled();
+        _game.Draw(Any(), Any()).WasNeverCalled();
     }
 
     [Test]
@@ -206,7 +206,7 @@ internal sealed class KhaosEngineTests
 
         _ = engine.Iterate();
 
-        _game.Draw(Any()).WasCalled(Times.Once);
+        _game.Draw(Any(), Any()).WasCalled(Times.Once);
     }
 
     [Test]
@@ -238,7 +238,138 @@ internal sealed class KhaosEngineTests
 
         _ = engine.Iterate();
 
-        _game.Draw(Any()).WasNeverCalled();
+        _game.Draw(Any(), Any()).WasNeverCalled();
+    }
+
+    [Test]
+    public void IterateShouldNotRunAFixedStepBeforeAStepOfTime()
+    {
+        SteppedClock clock = new();
+        using KhaosEngine engine = TestEngine.Start(_game, clock);
+
+        clock.Advance(SteppedClock.TicksPerStepAt60Hz - 1);
+        _ = engine.Iterate();
+
+        _game.FixedUpdate(Any()).WasNeverCalled();
+    }
+
+    [Test]
+    public void IterateShouldRunOneFixedStepPerStepOfTime()
+    {
+        SteppedClock clock = new();
+        using KhaosEngine engine = TestEngine.Start(_game, clock);
+
+        clock.Advance(2 * SteppedClock.TicksPerStepAt60Hz);
+        _ = engine.Iterate();
+
+        _game.FixedUpdate(Any()).WasCalled(Times.Exactly(2));
+    }
+
+    [Test]
+    public void IterateShouldUpdateOncePerFrame()
+    {
+        SteppedClock clock = new();
+        using KhaosEngine engine = TestEngine.Start(_game, clock);
+
+        clock.Advance(2 * SteppedClock.TicksPerStepAt60Hz);
+        _ = engine.Iterate();
+
+        _game.Update(Any()).WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task IterateShouldRunTheFixedStepsThenUpdateThenDraw()
+    {
+        SteppedClock clock = new();
+        using KhaosEngine engine = TestEngine.Start(_game, clock);
+
+        clock.Advance(SteppedClock.TicksPerStepAt60Hz);
+        _ = engine.Iterate();
+
+        await Assert.That(() => Mock.VerifyInOrder(() =>
+        {
+            _game.FixedUpdate(Any()).WasCalled();
+            _game.Update(Any()).WasCalled();
+            _game.Draw(Any(), Any()).WasCalled();
+        })).ThrowsNothing();
+    }
+
+    [Test]
+    public void IterateShouldGiveTheStepToFixedUpdate()
+    {
+        SteppedClock clock = new();
+        using KhaosEngine engine = TestEngine.Start(_game, clock);
+
+        clock.Advance(2 * SteppedClock.TicksPerStepAt60Hz);
+        _ = engine.Iterate();
+
+        _game.FixedUpdate(static time => time.Count == 2).WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task IterateShouldGiveTheFrameTimeToUpdate()
+    {
+        SteppedClock clock = new();
+        Arg<GameTime> time = Any<GameTime>();
+        _game.Update(time);
+        using KhaosEngine engine = TestEngine.Start(_game, clock);
+
+        clock.Advance(SteppedClock.TicksPerFrameAt144Hz);
+        _ = engine.Iterate();
+
+        await time.Latest.Delta.Should().BeEqualTo(1f / 144);
+    }
+
+    [Test]
+    public async Task IterateShouldGiveTheAlphaToDraw()
+    {
+        SteppedClock clock = new();
+        Arg<Frame> frame = Any<Frame>();
+        _game.Draw(Any(), frame);
+        using KhaosEngine engine = TestEngine.Start(_game, clock);
+
+        clock.Advance(SteppedClock.TicksPerStepAt60Hz + (SteppedClock.TicksPerStepAt60Hz / 2));
+        _ = engine.Iterate();
+
+        await frame.Latest.Alpha.Should().BeEqualTo(0.5f);
+    }
+
+    [Test]
+    public void IterateShouldFollowTheFixedRate()
+    {
+        SteppedClock clock = new();
+        LoopOptions loop = new() { FixedRate = 30 };
+        using KhaosEngine engine = TestEngine.Start(_game, loop, clock);
+
+        clock.Advance(SteppedClock.TicksPerStepAt60Hz);
+        _ = engine.Iterate();
+
+        _game.FixedUpdate(Any()).WasNeverCalled();
+    }
+
+    [Test]
+    public void IterateShouldNotUpdateOnceTheGameExits()
+    {
+        SteppedClock clock = new();
+        using KhaosEngine engine = TestEngine.Start(_game, clock);
+        _game.Object.Exit();
+
+        clock.Advance(SteppedClock.TicksPerStepAt60Hz);
+        _ = engine.Iterate();
+
+        _game.Update(Any()).WasNeverCalled();
+    }
+
+    [Test]
+    public void StartShouldStartTheClockAfterInitialize()
+    {
+        SteppedClock clock = new();
+        _game.Initialize().Callback(() => clock.Advance(SteppedClock.Frequency));
+        using KhaosEngine engine = TestEngine.Start(_game, clock);
+
+        _ = engine.Iterate();
+
+        _game.FixedUpdate(Any()).WasNeverCalled();
     }
 
     [Test]
@@ -286,6 +417,177 @@ internal sealed class KhaosEngineTests
         engine.Dispatch(in e);
 
         await _game.Object.ExitRequested.Should().BeFalse();
+    }
+
+    [Test]
+    public void IterateShouldNotUpdateWhileTheWindowIsMinimized()
+    {
+        SteppedClock clock = new();
+        using KhaosEngine engine = TestEngine.Start(_game, clock);
+        Event minimized = new(new WindowMinimized());
+
+        engine.Dispatch(in minimized);
+        clock.Advance(SteppedClock.TicksPerStepAt60Hz);
+        _ = engine.Iterate();
+
+        _game.Update(Any()).WasNeverCalled();
+    }
+
+    [Test]
+    public void IterateShouldNotDrawWhileTheWindowIsMinimized()
+    {
+        using KhaosEngine engine = TestEngine.Start(_game);
+        Event minimized = new(new WindowMinimized());
+
+        engine.Dispatch(in minimized);
+        _ = engine.Iterate();
+
+        _game.Draw(Any(), Any()).WasNeverCalled();
+    }
+
+    [Test]
+    public async Task IterateShouldContinueWhileTheWindowIsMinimized()
+    {
+        using KhaosEngine engine = TestEngine.Start(_game);
+        Event minimized = new(new WindowMinimized());
+
+        engine.Dispatch(in minimized);
+        SDL_AppResult result = engine.Iterate();
+
+        await result.Should().BeEqualTo(SDL_AppResult.Continue);
+    }
+
+    [Test]
+    public async Task IterateShouldSucceedWhenTheGameExitsWhileMinimized()
+    {
+        using KhaosEngine engine = TestEngine.Start(_game);
+        Event minimized = new(new WindowMinimized());
+
+        engine.Dispatch(in minimized);
+        _game.Object.Exit();
+        SDL_AppResult result = engine.Iterate();
+
+        await result.Should().BeEqualTo(SDL_AppResult.Success);
+    }
+
+    [Test]
+    public void IterateShouldUpdateOnceTheWindowIsRestored()
+    {
+        using KhaosEngine engine = TestEngine.Start(_game);
+        Event minimized = new(new WindowMinimized());
+        Event restored = new(new WindowRestored());
+
+        engine.Dispatch(in minimized);
+        engine.Dispatch(in restored);
+        _ = engine.Iterate();
+
+        _game.Update(Any()).WasCalled(Times.Once);
+    }
+
+    [Test]
+    public void IterateShouldNotCatchUpTheTimeSpentMinimized()
+    {
+        SteppedClock clock = new();
+        using KhaosEngine engine = TestEngine.Start(_game, clock);
+        Event minimized = new(new WindowMinimized());
+        Event restored = new(new WindowRestored());
+
+        engine.Dispatch(in minimized);
+        clock.Advance(10 * SteppedClock.Frequency);
+        engine.Dispatch(in restored);
+        clock.Advance(SteppedClock.TicksPerStepAt60Hz);
+        _ = engine.Iterate();
+
+        _game.FixedUpdate(Any()).WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task DispatchShouldWaitForEventsWhileTheWindowIsMinimized()
+    {
+        using KhaosEngine engine = TestEngine.Start(_game);
+        Event minimized = new(new WindowMinimized());
+
+        engine.Dispatch(in minimized);
+
+        await SDLHints.Get(MainCallbackRate).Should().BeEqualTo("waitevent");
+    }
+
+    [Test]
+    public async Task DispatchShouldWaitForEventsEvenWhenAnEnvironmentVariableSetsTheRate()
+    {
+        SDLEnvironment.Set(MainCallbackRate, "30");
+        using KhaosEngine engine = TestEngine.Start(_game);
+        Event minimized = new(new WindowMinimized());
+
+        engine.Dispatch(in minimized);
+
+        await SDLHints.Get(MainCallbackRate).Should().BeEqualTo("waitevent");
+    }
+
+    [Test]
+    public async Task DispatchShouldBringBackTheFrameRateOnceTheWindowIsRestored()
+    {
+        GraphicsOptions graphics = new() { VSync = VSync.Disabled, MaxFrameRate = 30 };
+        using KhaosEngine engine = TestEngine.Start(_game, graphics);
+        Event minimized = new(new WindowMinimized());
+        Event restored = new(new WindowRestored());
+
+        engine.Dispatch(in minimized);
+        engine.Dispatch(in restored);
+
+        await SDLHints.Get(MainCallbackRate).Should().BeEqualTo("30");
+    }
+
+    [Test]
+    public async Task DispatchShouldBringBackTheEnvironmentRateOnceTheWindowIsRestored()
+    {
+        SDLEnvironment.Set(MainCallbackRate, "30");
+        GraphicsOptions graphics = new() { VSync = VSync.Disabled, MaxFrameRate = 60 };
+        using KhaosEngine engine = TestEngine.Start(_game, graphics);
+        Event minimized = new(new WindowMinimized());
+        Event restored = new(new WindowRestored());
+
+        engine.Dispatch(in minimized);
+        engine.Dispatch(in restored);
+
+        await SDLHints.Get(MainCallbackRate).Should().BeEqualTo("30");
+    }
+
+    [Test]
+    public void IterateShouldUpdateWhileMinimizedWhenThePauseIsOff()
+    {
+        SteppedClock clock = new();
+        LoopOptions loop = new() { PauseWhenMinimized = false };
+        using KhaosEngine engine = TestEngine.Start(_game, loop, clock);
+        Event minimized = new(new WindowMinimized());
+
+        engine.Dispatch(in minimized);
+        _ = engine.Iterate();
+
+        _game.Update(Any()).WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task DispatchShouldKeepTheFrameRateWhileMinimizedWhenThePauseIsOff()
+    {
+        LoopOptions loop = new() { PauseWhenMinimized = false };
+        using KhaosEngine engine = TestEngine.Start(_game, loop, new SteppedClock());
+        Event minimized = new(new WindowMinimized());
+
+        engine.Dispatch(in minimized);
+
+        await SDLHints.Get(MainCallbackRate).Should().BeEqualTo("0");
+    }
+
+    [Test]
+    public void DispatchShouldPassWindowMinimizedToOnEvent()
+    {
+        using KhaosEngine engine = TestEngine.Start(_game);
+        Event minimized = new(new WindowMinimized());
+
+        engine.Dispatch(in minimized);
+
+        _game.OnEvent(static received => received is WindowMinimized).WasCalled(Times.Once);
     }
 
     [Test]

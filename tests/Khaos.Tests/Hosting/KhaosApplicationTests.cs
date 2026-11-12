@@ -235,6 +235,39 @@ internal sealed class KhaosApplicationTests
     }
 
     [Test]
+    public async Task ConfigureLoopShouldChangeTheLoop()
+    {
+        KhaosApplicationBuilder builder = _host.Create();
+        builder.Services.AddSingleton<TimeProvider>(new SteppedClock { TicksPerRead = SteppedClock.TicksPerStepAt60Hz });
+        builder.ConfigureLoop(static loop => loop.FixedRate = 120);
+
+        _ = builder.Build<ProbedGame>().Run();
+
+        await _host.Probe.FixedSteps.Should().BeEqualTo(2);
+    }
+
+    [Test]
+    public async Task ConfigureLoopShouldReturnTheBuilder()
+    {
+        KhaosApplicationBuilder builder = _host.Create();
+
+        KhaosApplicationBuilder returned = builder.ConfigureLoop(static _ => { });
+
+        await returned.Should().BeSameReferenceAs(builder);
+    }
+
+    [Test]
+    public async Task RunShouldTimeTheLoopWithTheClockOfTheServices()
+    {
+        KhaosApplicationBuilder builder = _host.Create();
+        builder.Services.AddSingleton<TimeProvider>(new SteppedClock { TicksPerRead = SteppedClock.TicksPerStepAt60Hz });
+
+        _ = builder.Build<ProbedGame>().Run();
+
+        await _host.Probe.FixedSteps.Should().BeEqualTo(1);
+    }
+
+    [Test]
     public async Task RunShouldGiveTheRendererTheVSyncOfTheSettings()
     {
         KhaosApplication application = _host.Create("--graphics:vsync", "false").Build<ProbedGame>();

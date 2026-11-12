@@ -55,7 +55,7 @@ internal sealed class PongGame() : Game2D("Pong!", 1280, 720)
     protected override void FixedUpdate(in GameTime time)
     {
         _previous = _position;
-        _position += _velocity * (float)time.Delta;
+        _position += _velocity * time.Delta;
     }
 
     protected override void Draw(Renderer renderer, in Frame frame)

@@ -38,6 +38,7 @@ public sealed class KhaosApplicationBuilder
         services.AddSingleton<IHostEnvironment>(environment);
         services.BindWindowSettings(Configuration);
         services.BindGraphicsSettings(Configuration);
+        services.BindLoopSettings(Configuration);
         services.BindEngineSettings(Configuration);
         services.BindConsoleSettings(Configuration);
         services.AddLogging();
@@ -98,6 +99,7 @@ public sealed class KhaosApplicationBuilder
 
         Services.AddSingleton<IConfiguration>(Configuration);
         Services.AddSingleton(window);
+        Services.TryAddSingleton(TimeProvider.System);
         Services.AddSingleton<TGame>();
         Services.Insert(0, ServiceDescriptor.Singleton<IConfigureOptions<WindowOptions>, GameWindowDefaults<TGame>>());
 

@@ -13,6 +13,8 @@ internal sealed class GameProbe
 
     internal bool Disposed { get; set; }
 
+    internal int FixedSteps { get; set; }
+
     internal Window? GameWindow { get; set; }
 
     internal bool ShutDown { get; set; }

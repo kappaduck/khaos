@@ -3,7 +3,7 @@
 
 using KappaDuck.Khaos.Events;
 
-namespace KappaDuck.Khaos.Benchmarks.Frame;
+namespace KappaDuck.Khaos.Benchmarks.Frames;
 
 internal readonly record struct ScoreChanged(int Points);
 

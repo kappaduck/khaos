@@ -6,7 +6,7 @@ using KappaDuck.Khaos.Hosting.Engine;
 using KappaDuck.Khaos.Windowing;
 using System.Runtime.InteropServices;
 
-namespace KappaDuck.Khaos.Benchmarks.Frame;
+namespace KappaDuck.Khaos.Benchmarks.Frames;
 
 internal static partial class Headless
 {
@@ -14,14 +14,25 @@ internal static partial class Headless
     private const string Offscreen = "offscreen";
     private const int Override = 2;
 
-    internal static KhaosEngine Start(Game2D game)
+    internal static KhaosEngine Start(Game2D game) => Start(game, TimeProvider.System);
+
+    internal static KhaosEngine Start(Game2D game, TimeProvider clock)
     {
         UseOffscreen();
 
         WindowOptions window = new();
         game.ApplyTo(window);
 
-        return KhaosEngine.Start(new EngineArguments(game, new Window(), window, new GraphicsOptions { VSync = VSync.Disabled }, new EngineOptions(), null, null));
+        return KhaosEngine.Start(new EngineArguments(
+            game,
+            new Window(),
+            window,
+            new GraphicsOptions { VSync = VSync.Disabled },
+            new LoopOptions(),
+            new EngineOptions(),
+            clock,
+            null,
+            null));
     }
 
     private static void UseOffscreen()

@@ -15,12 +15,14 @@ internal sealed class KhaosEngineAllocationTests
     private static readonly SDL_Event _keyDown = new(new SDL_KeyboardEvent(SDL_EventType.KeyDown, (int)Scancode.Space, 0));
     private static readonly SDL_Event _resized = new(new SDL_WindowEvent(SDL_EventType.WindowResized, 640, 360));
 
+    private readonly SteppedClock _clock = new();
+
     private KhaosEngine _engine = null!;
 
     [Before(Test)]
     public void StartEngine()
     {
-        _engine = TestEngine.Start(new SpyGame());
+        _engine = TestEngine.Start(new SpyGame(), _clock);
     }
 
     [After(Test)]
@@ -43,6 +45,18 @@ internal sealed class KhaosEngineAllocationTests
     public async Task IterateShouldNotAllocate()
     {
         long allocated = Allocated.By(_engine, static engine => engine.Iterate());
+
+        await allocated.Should().BeEqualTo(0L);
+    }
+
+    [Test]
+    public async Task IterateShouldNotAllocateWithFixedSteps()
+    {
+        long allocated = Allocated.By((_engine, _clock), static state =>
+        {
+            state._clock.Advance(4 * SteppedClock.TicksPerStepAt60Hz);
+            state._engine.Iterate();
+        });
 
         await allocated.Should().BeEqualTo(0L);
     }

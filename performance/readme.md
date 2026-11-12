@@ -14,7 +14,7 @@ Each kind answers its own question. A measurement belongs to exactly one of them
 | Kind         | Measures                                    | It answers                                             | Lives in                           |
 | :----------- | :------------------------------------------ | :----------------------------------------------------- | :--------------------------------- |
 | **Micro**    | One method                                  | How fast is it, and does it allocate?                  | `benchmarks/Micro/<Namespace>/`    |
-| **Frame**    | One whole frame, headless                   | What does a frame cost before the game adds anything?  | `benchmarks/Frame/`                |
+| **Frame**    | One whole frame, headless                   | What does a frame cost before the game adds anything?  | `benchmarks/Frames/`               |
 | **Scenario** | A recorded game, replayed from start to end | How does a whole game behave over thousands of frames? | One project per demo, here (later) |
 
 **Micro** benchmarks cover the hot paths, the code a game runs every frame. On a hot path, the expected result is
@@ -26,7 +26,7 @@ nanoseconds and bytes. The empty frame is the baseline every feature is compared
 Micro and Frame are BenchmarkDotNet benchmarks, in `benchmarks/`. To run one kind only, filter on its folder:
 
 ```bash
-dotnet run -c Release --project performance/benchmarks -- --filter '*.Frame.*'
+dotnet run -c Release --project performance/benchmarks -- --filter '*.Frames.*'
 ```
 
 A **Scenario** replays a game someone recorded in a demo, headless and with VSync off, so every run plays exactly
@@ -59,7 +59,7 @@ installed, and the `DisassemblyDiagnoser` does not work with it.
 ## Writing a benchmark
 
 - One class per subject, named `<Subject>Benchmarks`. A micro benchmark goes in `Micro/<Namespace>/`, the namespace
-  it measures; a frame benchmark goes in `Frame/`.
+  it measures; a frame benchmark goes in `Frames/`.
 - Build the inputs in `[GlobalSetup]`, with a fixed seed. The benchmark method only does the work being measured.
 - Return the result, so the JIT cannot remove the call.
 - Use `[Params]` for the sizes that matter to a game, such as a handful of items, a screenful or a level.
@@ -85,8 +85,8 @@ On your computer, which is quieter than a runner, to confirm a doubtful `Slower`
 
 ```bash
 git worktree add ../khaos-base v0.1.0
-dotnet run -c Release --project ../khaos-base/performance/benchmarks -- --filter '*.Frame.*'
-dotnet run -c Release --project performance/benchmarks -- --filter '*.Frame.*'
+dotnet run -c Release --project ../khaos-base/performance/benchmarks -- --filter '*.Frames.*'
+dotnet run -c Release --project performance/benchmarks -- --filter '*.Frames.*'
 dotnet tools/compare-benchmarks.cs --base ../khaos-base/artifacts/benchmarks/results --diff artifacts/benchmarks/results --base-name 0.1.0 --diff-name local
 ```
 

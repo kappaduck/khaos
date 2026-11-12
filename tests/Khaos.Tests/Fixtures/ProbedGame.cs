@@ -19,11 +19,13 @@ internal sealed class ProbedGame : Game2D, IDisposable
 
     public void Dispose() => _probe.Disposed = true;
 
-    protected internal override void Draw(Renderer renderer)
+    protected internal override void Draw(Renderer renderer, in Frame frame)
     {
         _probe.VSync = SDLRender.ReadVSync(renderer);
         Exit();
     }
+
+    protected internal override void FixedUpdate(in GameTime time) => _probe.FixedSteps++;
 
     protected internal override void Initialize()
     {

@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace KappaDuck.Khaos.Hosting;
 
 /// <summary>
-/// Sets up the game from <c>Program.cs</c>: the engine, the graphics, the logging and the window.
+/// Sets up the game from <c>Program.cs</c>: the engine, the graphics, the logging, the loop and the window.
 /// </summary>
 public static class KhaosApplicationBuilderExtensions
 {
@@ -56,6 +56,21 @@ public static class KhaosApplicationBuilderExtensions
             ArgumentNullException.ThrowIfNull(configure);
 
             configure(builder.Logging);
+            return builder;
+        }
+
+        /// <summary>
+        /// Sets how the game loop keeps time, such as the rate of the fixed steps. The <c>loop</c> section of the
+        /// settings replaces what it sets.
+        /// </summary>
+        /// <param name="configure">Changes the options of the loop.</param>
+        /// <returns>The builder, to keep setting up the game.</returns>
+        public KhaosApplicationBuilder ConfigureLoop(Action<LoopOptions> configure)
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+            ArgumentNullException.ThrowIfNull(configure);
+
+            builder.Services.Configure(configure);
             return builder;
         }
 

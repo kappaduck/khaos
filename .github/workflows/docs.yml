@@ -113,7 +113,7 @@ jobs:
         run: |
           shopt -s nullglob
           page=docs/performance/index.md
-          frame=(artifacts/benchmarks/*.Frame.*-report-github.md)
+          frame=(artifacts/benchmarks/*.Frames.*-report-github.md)
           micro=(artifacts/benchmarks/*.Micro.*-report-github.md)
           (( ${#frame[@]} + ${#micro[@]} > 0 )) || { echo "::warning::No benchmark results to publish."; exit 0; }
           sed -i '/^> \[!NOTE\]/,$d' "$page"

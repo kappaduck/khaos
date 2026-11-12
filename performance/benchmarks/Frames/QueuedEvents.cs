@@ -8,7 +8,7 @@ using KappaDuck.Khaos.Interop.SDL;
 using KappaDuck.Khaos.Interop.SDL.Primitives;
 using System.Runtime.InteropServices;
 
-namespace KappaDuck.Khaos.Benchmarks.Frame;
+namespace KappaDuck.Khaos.Benchmarks.Frames;
 
 internal static partial class QueuedEvents
 {

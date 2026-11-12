@@ -11,7 +11,7 @@ internal sealed class KeysGame() : Game2D(960, 540)
 {
     private Color _color = Color.Teal;
 
-    protected override void Draw(Renderer renderer) => renderer.Clear(_color);
+    protected override void Draw(Renderer renderer, in Frame frame) => renderer.Clear(_color);
 
     protected override void OnEvent(in Event e)
     {

@@ -12,7 +12,8 @@ namespace KappaDuck.Khaos;
 /// The base class of a 2D game: Khaos opens its window, then calls its methods once per frame.
 /// </summary>
 /// <remarks>
-/// Override <see cref="Draw"/>, and <see cref="Initialize"/> when the game has something to prepare.
+/// Override <see cref="Draw"/>, <see cref="FixedUpdate"/> for the gameplay, and <see cref="Initialize"/> when the game
+/// has something to prepare.
 /// </remarks>
 public abstract class Game2D
 {
@@ -56,10 +57,20 @@ public abstract class Game2D
     public void Exit() => ExitRequested = true;
 
     /// <summary>
-    /// Draws the frame. Khaos calls it once per frame, and shows what you drew when it returns.
+    /// Draws the frame. Khaos calls it once per frame, last, and shows what you drew when it returns.
     /// </summary>
     /// <param name="renderer">The renderer to draw the frame with.</param>
-    protected internal abstract void Draw(Renderer renderer);
+    /// <param name="frame">The frame, with how far it is between two fixed steps.</param>
+    protected internal abstract void Draw(Renderer renderer, in Frame frame);
+
+    /// <summary>
+    /// Moves the game forward by one fixed step. Khaos calls it at a steady rate, 60 times per second by default, so
+    /// zero, one or several times per frame.
+    /// </summary>
+    /// <param name="time">The fixed clock, whose <see cref="GameTime.Delta"/> never changes.</param>
+    protected internal virtual void FixedUpdate(in GameTime time)
+    {
+    }
 
     /// <summary>
     /// Prepares the game. Khaos calls it once, after the window opens and before the first frame.
@@ -82,6 +93,14 @@ public abstract class Game2D
     /// <see cref="Initialize"/> has run.
     /// </summary>
     protected internal virtual void Shutdown()
+    {
+    }
+
+    /// <summary>
+    /// Updates what follows the real time, such as an animation. Khaos calls it once per frame, after the fixed steps.
+    /// </summary>
+    /// <param name="time">The frame clock, with the real time since the last frame.</param>
+    protected internal virtual void Update(in GameTime time)
     {
     }
 

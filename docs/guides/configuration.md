@@ -91,8 +91,9 @@ builder.ConfigureWindow(window =>
 });
 ```
 
-`builder.ConfigureGraphics(…)` does the same for the [`graphics` section](game-loop.md#frame-rate). Both are short
-for the [options pattern](https://learn.microsoft.com/dotnet/core/extensions/options), so
+`builder.ConfigureGraphics(…)` does the same for the [`graphics` section](game-loop.md#frame-rate), and
+`builder.ConfigureLoop(…)` for the [`loop` section](game-loop.md#steps-per-second). All are short for the
+[options pattern](https://learn.microsoft.com/dotnet/core/extensions/options), so
 `builder.Services.Configure<WindowOptions>(…)` works too.
 
 While the game runs, change the same things through its `Window`: `Window.Title`, `Window.Size`,

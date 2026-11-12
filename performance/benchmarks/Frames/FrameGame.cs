@@ -7,17 +7,23 @@ using KappaDuck.Khaos.Graphics.Rendering;
 using KappaDuck.Khaos.Input;
 using KappaDuck.Khaos.Mathematics;
 
-namespace KappaDuck.Khaos.Benchmarks.Frame;
+namespace KappaDuck.Khaos.Benchmarks.Frames;
 
 internal sealed class FrameGame() : Game2D("Benchmarks", 1280, 720)
 {
+    internal float Height { get; private set; }
+
     internal int Jumps { get; private set; }
 
     internal int Score { get; private set; }
 
+    internal double Seconds { get; private set; }
+
     internal SizeI Size { get; private set; }
 
-    protected internal override void Draw(Renderer renderer) => renderer.Clear(Color.Black);
+    protected internal override void Draw(Renderer renderer, in Frame frame) => renderer.Clear(Color.Black);
+
+    protected internal override void FixedUpdate(in GameTime time) => Height += 9.81f * time.Delta;
 
     protected internal override void OnEvent(in Event e)
     {
@@ -36,4 +42,6 @@ internal sealed class FrameGame() : Game2D("Benchmarks", 1280, 720)
                 break;
         }
     }
+
+    protected internal override void Update(in GameTime time) => Seconds = time.Total;
 }
