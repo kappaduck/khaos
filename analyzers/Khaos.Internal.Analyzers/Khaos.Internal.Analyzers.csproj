@@ -1,5 +1,0 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup Label="Shared code">
-    <Compile Include="$(MSBuildThisFileDirectory)../Shared/**/*.cs" LinkBase="Shared" />
-  </ItemGroup>
-</Project>

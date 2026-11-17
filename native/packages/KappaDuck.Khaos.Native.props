@@ -1,5 +1,0 @@
-<Project>
-  <PropertyGroup>
-    <KhaosWasmNativeRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', 'wasm'))</KhaosWasmNativeRoot>
-  </PropertyGroup>
-</Project>
