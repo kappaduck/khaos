@@ -1,0 +1,87 @@
+name: Bug report
+description: Report a bug or unexpected behavior in Khaos
+labels: ["triage"]
+type: Bug
+assignees: [beauchama]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug in Khaos! Please fill in the details below to help us understand and reproduce the issue.
+        Please search existing issues if your bug has already been reported ([khaos/issues](https://github.com/kappaduck/khaos/issues)).
+  - type: textarea
+    id: what-happens
+    attributes:
+      label: What happens?
+      description: What you did, step by step, and what Khaos did. Include the full error message and stack trace if there is one.
+      placeholder: |
+        1. Resize the window while the game is paused
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      placeholder: The game should...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Code to reproduce it
+      description: The smallest code that shows the bug. A new game from `dotnet new khaos` with a few lines changed is ideal.
+      render: csharp
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Where does it happen?
+      description: A bug in the browser often does not reproduce on desktop, and the other way around.
+      multiple: true
+      options:
+        - Windows
+        - Linux
+        - Browser (desktop)
+        - Browser (phone)
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and host
+      description: Only for a bug in the browser.
+      placeholder: Firefox on itch.io, Safari on an iPhone with dotnet run
+  - type: input
+    id: os
+    attributes:
+      label: Operating system and version
+      placeholder: Windows 11 24H2, Ubuntu 24.04, Android 15
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        To find the versions of Khaos, SDL and .NET, open a terminal in your game's folder (the one with the `.csproj` file) and run these two commands:
+
+        ```shell
+        dotnet package list --include-transitive
+        dotnet --version
+        ```
+  - type: textarea
+    id: versions
+    attributes:
+      label: Khaos and .NET versions
+      description: The `KappaDuck.Khaos` lines from the first command, then the output of the second one. The `KappaDuck.Khaos.Native` version tells which SDL libraries your game runs.
+      placeholder: |
+        > KappaDuck.Khaos           0.1.0
+        > KappaDuck.Khaos.Native    1.2.1
+        11.0.100
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: anything-else
+    attributes:
+      label: Is there anything else you'd like to add?
+      description: Additional context, screenshots, or information that may help us address the issue.
+      placeholder: Additional information...

@@ -1,0 +1,47 @@
+name: Feature request
+description: Suggest an idea to improve or add to Khaos
+labels: ["triage"]
+type: Feature
+assignees: [beauchama]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest an idea to improve Khaos! Please fill in the details below to help us understand your request.
+        Please search existing issues if your idea has already been suggested ([khaos/issues](https://github.com/kappaduck/khaos/issues)).
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do in your game?
+      description: The need before the solution. What you want to make, and what gets in the way today.
+      placeholder: My player picks up coins, and I want...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like Khaos to offer?
+      description: A new feature, or a change to an existing one.
+      placeholder: I would like to see...
+  - type: textarea
+    id: example
+    attributes:
+      label: How would you like to use it?
+      description: A short sketch of the game code you would like to write.
+      render: csharp
+  - type: textarea
+    id: other-engines
+    attributes:
+      label: Does another engine do it well?
+      description: Godot, Unity, MonoGame, raylib, LÖVE or another one. A link to its documentation helps.
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Which platforms does it concern?
+      description: Leave it empty if it concerns every platform.
+      multiple: true
+      options:
+        - Windows
+        - Linux
+        - Browser (desktop)
+        - Browser (phone)

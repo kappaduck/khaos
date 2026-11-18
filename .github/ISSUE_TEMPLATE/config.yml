@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Troubleshooting
+    url: https://khaos.kappaduck.com/guides/troubleshooting.html
+    about: Common problems and their fixes, worth a look before reporting a bug.
+  - name: Documentation
+    url: https://khaos.kappaduck.com
+    about: API reference and guides.

@@ -1,0 +1,16 @@
+* text=auto
+
+.gitattributes export-ignore
+.gitignore     export-ignore
+
+*.config  text eol=crlf
+*.json    text eol=crlf
+*.props   text eol=crlf
+*.slnx    text eol=crlf
+*.targets text eol=crlf
+*.txt     text eol=crlf
+*.yml     text eol=lf
+
+# Others
+codeowners text
+*.md       text diff=markdown
