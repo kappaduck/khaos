@@ -1,0 +1,33 @@
+<Project>
+  <PropertyGroup>
+    <KhaosRoot>$(MSBuildThisFileDirectory)</KhaosRoot>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AnalysisLevel>latest-all</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <IsPackable>false</IsPackable>
+
+    <ArtifactsPath>$(KhaosRoot)artifacts</ArtifactsPath>
+    <AssemblyName>KappaDuck.$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>$(AssemblyName)</RootNamespace>
+
+    <!-- Experimental feature: https://github.com/dotnet/core/blob/main/release-notes/11.0/preview/rc1/csharp.md#unsafe-evolution-refinements -->
+    <Features Condition="'$(FileBasedProgram)' != 'true'">$(Features);updated-memory-safety-rules</Features>
+
+    <!-- Configure packages which are only Development dependency -->
+    <!-- https://github.com/NuGet/Home/wiki/DevelopmentDependency-support-for-PackageReference -->
+    <DevAssets>runtime;build;native;contentfiles;analyzers;buildtransitive</DevAssets>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <GlobalAnalyzerConfigFiles Include="$(KhaosRoot)rules/*.editorconfig" />
+  </ItemGroup>
+</Project>

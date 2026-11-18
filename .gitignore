@@ -1,0 +1,12 @@
+# Claude files
+CLAUDE.local.md
+
+# Visual Studio/Visual Code files
+
+*.lscache
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
