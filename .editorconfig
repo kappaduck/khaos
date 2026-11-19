@@ -1,5 +1,6 @@
 root = true
 
+# All files
 [*]
 charset = utf-8
 indent_style = space
@@ -7,11 +8,13 @@ indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.{config,json,props,slnx,targets,yml}]
+[*.{config,csproj,css,html,js,json,nuspec,props,slnf,slnx,targets,ts,yml}]
 indent_size = 2
 
-[*.{config,props,slnx,targets}]
+# Windows files
+[*.{config,cs,csproj,props,slnf,slnx,targets}]
 end_of_line = crlf
 
+# Linux files
 [*.{yml}]
 end_of_line = lf

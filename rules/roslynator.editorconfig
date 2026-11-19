@@ -1,5 +1,10 @@
 is_global = true
 
+# RCS0063: Remove unnecessary blank line
+# No blank line after an opening brace, before a closing brace, or twice in a row
+# https://josefpihrt.github.io/docs/roslynator/analyzers/RCS0063/
+dotnet_diagnostic.RCS0063.severity = warning
+
 # RCS1110: Declare class inside namespace
 # file-based app/top-level can have class without namespace
 # https://josefpihrt.github.io/docs/roslynator/analyzers/RCS1110/
