@@ -77,6 +77,11 @@ dotnet_diagnostic.IDE0058.severity = none
 # https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0061
 csharp_style_expression_bodied_local_functions = when_on_single_line:warning
 
+# IDE0073: The file header is missing or not located at the top of the file
+# Always has a file header
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0073
+dotnet_diagnostic.IDE0073.severity = warning
+
 # IDE0090: Use 'new(...)' instead of 'new ...'
 # Always use 'new(...)'
 # https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0090
