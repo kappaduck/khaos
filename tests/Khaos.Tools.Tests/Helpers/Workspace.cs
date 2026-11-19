@@ -15,21 +15,7 @@ internal sealed class Workspace : IDisposable
 
     public void Dispose() => _temp.Dispose();
 
-    internal static Workspace Copy(string path)
-    {
-        Workspace workspace = new();
-        Folders.Copy(GetDataPath(path), workspace.Root);
-
-        return workspace;
-    }
-
     internal static Workspace Empty() => new();
-
-    internal static string GetDataPath(string relative) => Path.Combine(AppContext.BaseDirectory, "Data", relative);
-
-    internal static string ReadData(string relative) => ReadNormalized(GetDataPath(relative));
-
-    internal string Read(string relative) => ReadNormalized(Path.Combine(Root, relative));
 
     internal string Write(string relative, string content)
     {
