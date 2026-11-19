@@ -37,7 +37,6 @@ internal sealed class ChangelogTests : IDisposable
     private static readonly DateOnly _releaseDay = new(2026, 11, 19);
 
     private readonly Workspace _workspace = Workspace.Empty();
-
     private readonly string _path;
 
     public ChangelogTests() => _path = _workspace.Write(ChangelogPath, Unreleased);

@@ -1,11 +1,11 @@
-﻿// Copyright (c) KappaDuck.
+// Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
 using System.Diagnostics;
 
 namespace KappaDuck.Khaos.Tools.Markdown;
 
-internal sealed class MarkdownTable
+public sealed class MarkdownTable
 {
     private const int MinimumWidth = 3;
 
