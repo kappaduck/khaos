@@ -3,7 +3,7 @@
     <KhaosRoot>$(MSBuildThisFileDirectory)</KhaosRoot>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <PropertyGroup Label="Configure .csproj">
     <TargetFramework>net11.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
@@ -27,7 +27,7 @@
     <DevAssets>runtime;build;native;contentfiles;analyzers;buildtransitive</DevAssets>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Label="Configure analyzer rules">
     <GlobalAnalyzerConfigFiles Include="$(KhaosRoot)rules/*.editorconfig" />
   </ItemGroup>
 </Project>

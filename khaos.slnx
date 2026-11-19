@@ -15,4 +15,13 @@
     <File Path="rules/underscore.editorconfig" />
     <File Path="rules/vsthrd.editorconfig" />
   </Folder>
+  <Folder Name="/tests/">
+    <File Path="tests/.editorconfig" />
+    <File Path="tests/Directory.Build.props" />
+    <File Path="tests/Directory.Packages.props" />
+    <Project Path="tests/Khaos.Tools.Tests/Khaos.Tools.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Khaos.Tools/Khaos.Tools.csproj" />
+  </Folder>
 </Solution>
