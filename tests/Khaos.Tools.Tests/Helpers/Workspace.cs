@@ -26,6 +26,4 @@ internal sealed class Workspace : IDisposable
 
         return path;
     }
-
-    private static string ReadNormalized(string path) => File.ReadAllText(path).ReplaceLineEndings("\n");
 }

@@ -7,8 +7,4 @@
     <PackageReference Include="TUnit.Mocks.Http" />
     <PackageReference Include="Verify.TUnit" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Data/**" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
 </Project>
