@@ -6,7 +6,7 @@ using System.Globalization;
 
 namespace KappaDuck.Khaos.Tools.Packages;
 
-internal static class LocalFeed
+public static class LocalFeed
 {
     private const string TemplatePackage = "KappaDuck.Khaos.Templates";
 

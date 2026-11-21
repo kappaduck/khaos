@@ -24,6 +24,10 @@
   <Folder Name="/tools/">
     <Project Path="tools/Khaos.Tools/Khaos.Tools.csproj" />
   </Folder>
+  <Folder Name="/tools/packages/">
+    <File Path="tools/packages/check-template.cs" />
+    <File Path="tools/packages/pack-local.cs" />
+  </Folder>
   <Folder Name="/tools/release/">
     <File Path="tools/release/check.cs" />
     <File Path="tools/release/next.cs" />
