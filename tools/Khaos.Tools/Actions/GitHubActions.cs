@@ -3,11 +3,11 @@
 
 namespace KappaDuck.Khaos.Tools.Actions;
 
-internal static class GitHubActions
+public static class GitHubActions
 {
     private static readonly bool _inWorkflow = Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
 
-    internal static void AppendStepSummary(string markdown)
+    public static void AppendStepSummary(string markdown)
     {
         string? file = Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY");
 
@@ -15,7 +15,7 @@ internal static class GitHubActions
             File.AppendAllText(file, markdown);
     }
 
-    internal static void Error(string message)
+    public static void Error(string message)
     {
         if (_inWorkflow)
         {
@@ -26,9 +26,9 @@ internal static class GitHubActions
         Console.Error.WriteLine($"error: {message}");
     }
 
-    internal static void Notice(string message) => Console.WriteLine(_inWorkflow ? $"::notice::{message}" : message);
+    public static void Notice(string message) => Console.WriteLine(_inWorkflow ? $"::notice::{message}" : message);
 
-    internal static void SetOutput(string name, string value)
+    public static void SetOutput(string name, string value)
     {
         string line = $"{name}={value}";
         string? file = Environment.GetEnvironmentVariable("GITHUB_OUTPUT");
@@ -42,5 +42,5 @@ internal static class GitHubActions
         File.AppendAllText(file, line + "\n");
     }
 
-    internal static void Warning(string message) => Console.WriteLine(_inWorkflow ? $"::warning::{message}" : $"warning: {message}");
+    public static void Warning(string message) => Console.WriteLine(_inWorkflow ? $"::warning::{message}" : $"warning: {message}");
 }

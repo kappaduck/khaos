@@ -24,4 +24,10 @@
   <Folder Name="/tools/">
     <Project Path="tools/Khaos.Tools/Khaos.Tools.csproj" />
   </Folder>
+  <Folder Name="/tools/release/">
+    <File Path="tools/release/check.cs" />
+    <File Path="tools/release/next.cs" />
+    <File Path="tools/release/prepare.cs" />
+    <File Path="tools/release/resolve-version.cs" />
+  </Folder>
 </Solution>

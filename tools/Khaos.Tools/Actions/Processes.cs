@@ -5,9 +5,9 @@ using System.Diagnostics;
 
 namespace KappaDuck.Khaos.Tools.Actions;
 
-internal static class Processes
+public static class Processes
 {
-    internal static Task<ProcessOutput> GitAsync(params IEnumerable<string> arguments) => ReadAsync("git", arguments);
+    public static Task<ProcessOutput> GitAsync(params IEnumerable<string> arguments) => ReadAsync("git", arguments);
 
     internal static async Task<ProcessOutput> ReadAsync(string fileName, params IEnumerable<string> arguments)
     {

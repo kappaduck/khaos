@@ -20,7 +20,7 @@ public sealed class MarkdownTable
         _rows = rows;
     }
 
-    public ReadOnlySpan<string> Headers => _header;
+    public ReadOnlySpan<string> Header => _header;
 
     public int RowCount => _rows.Count;
 

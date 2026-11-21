@@ -7,8 +7,8 @@ namespace KappaDuck.Khaos.Tools.Actions;
 
 public static class Script
 {
+    private const int WrongUsage = 2;
     public const int Failed = 1;
-    public const int WrongUsage = 2;
 
     public static async Task<int> RunAsync(Func<Task<int>> body, string? afterError = null)
     {

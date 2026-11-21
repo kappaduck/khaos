@@ -33,7 +33,7 @@ internal sealed class NuGetVersionsTests : IDisposable
     {
         _http.Handler.OnGet(IndexPath).RespondWithJson("""{ "versions": ["0.1.0-beta.1", "0.1.0-beta.2"] }""");
 
-        IReadOnlyList<string> versions = (await NuGetVersions.FetchAsync(_http, PackageId))!;
+        string[] versions = (await NuGetVersions.FetchAsync(_http, PackageId))!;
 
         await versions[0].Should().BeEqualTo("0.1.0-beta.1");
         await versions[1].Should().BeEqualTo("0.1.0-beta.2");

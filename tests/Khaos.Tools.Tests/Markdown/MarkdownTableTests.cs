@@ -31,8 +31,8 @@ internal sealed class MarkdownTableTests
     {
         MarkdownTable table = MarkdownTable.Parse([_header, _separator]);
 
-        await table.Headers[0].Should().BeEqualTo("Name");
-        await table.Headers[1].Should().BeEqualTo("Version");
+        await table.Header[0].Should().BeEqualTo("Name");
+        await table.Header[1].Should().BeEqualTo("Version");
     }
 
     [Test]

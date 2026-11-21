@@ -7,7 +7,7 @@ namespace KappaDuck.Khaos.Tools.Releases;
 
 public static class NuGetVersions
 {
-    public static async Task<IReadOnlyList<string>?> FetchAsync(HttpClient http, string packageId)
+    public static async Task<string[]?> FetchAsync(HttpClient http, string packageId)
     {
         ArgumentNullException.ThrowIfNull(http);
         ArgumentNullException.ThrowIfNull(packageId);
