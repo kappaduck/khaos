@@ -7,7 +7,7 @@ namespace KappaDuck.Khaos.Tools.Releases;
 
 public sealed class AnalyzerProject
 {
-    public const string Folder = "analyzers";
+    private const string Folder = "analyzers";
 
     private const string ReleasePrefix = "## Release ";
     private const string RuleIdHeader = "Rule ID";
@@ -33,7 +33,7 @@ public sealed class AnalyzerProject
 
     public IReadOnlyList<string> ShippedRules { get; private set; } = [];
 
-    public static async Task<IReadOnlyList<AnalyzerProject>> FindAsync(string root)
+    internal static async Task<IReadOnlyList<AnalyzerProject>> FindAsync(string root)
     {
         string folder = Path.Combine(root, Folder);
 
@@ -59,7 +59,7 @@ public sealed class AnalyzerProject
         return analyzers;
     }
 
-    public async Task SaveAsync()
+    internal async Task SaveAsync()
     {
         if (ShippedRules.Count == 0)
             return;
@@ -70,7 +70,7 @@ public sealed class AnalyzerProject
         static string Join(string[] lines) => lines.Length == 0 ? string.Empty : string.Join('\n', lines) + '\n';
     }
 
-    public void Ship(Version version)
+    internal void Ship(Version version)
     {
         string heading = string.Create(CultureInfo.InvariantCulture, $"{ReleasePrefix}{version}");
 

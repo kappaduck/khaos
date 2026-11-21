@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace KappaDuck.Khaos.Tools.Markdown;
 
-public sealed class MarkdownTable
+internal sealed class MarkdownTable
 {
     private const int MinimumWidth = 3;
 
@@ -20,13 +20,13 @@ public sealed class MarkdownTable
         _rows = rows;
     }
 
-    public ReadOnlySpan<string> Header => _header;
+    internal ReadOnlySpan<string> Header => _header;
 
-    public int RowCount => _rows.Count;
+    internal int RowCount => _rows.Count;
 
-    public ReadOnlySpan<string> this[int row] => _rows[row];
+    internal ReadOnlySpan<string> this[int row] => _rows[row];
 
-    public string this[int row, int column]
+    internal string this[int row, int column]
     {
         get => _rows[row][column];
         set
@@ -56,11 +56,11 @@ public sealed class MarkdownTable
         return new(header, alignments, rows);
     }
 
-    public int ColumnIndexOf(string name) => Array.IndexOf(_header, name);
+    internal int ColumnIndexOf(string name) => Array.IndexOf(_header, name);
 
-    public void Insert(int index, params ReadOnlySpan<string> cells) => _rows.Insert(index, ToRow(cells));
+    internal void Insert(int index, params ReadOnlySpan<string> cells) => _rows.Insert(index, ToRow(cells));
 
-    public string[] Render()
+    internal string[] Render()
     {
         Span<int> widths = stackalloc int[_header.Length];
 
@@ -84,9 +84,9 @@ public sealed class MarkdownTable
         return lines;
     }
 
-    public void Replace(int index, params ReadOnlySpan<string> cells) => _rows[index] = ToRow(cells);
+    internal void Replace(int index, params ReadOnlySpan<string> cells) => _rows[index] = ToRow(cells);
 
-    public int RowIndexOf(int column, string value)
+    internal int RowIndexOf(int column, string value)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(column);
         ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(column, _header.Length);

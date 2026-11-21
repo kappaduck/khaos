@@ -52,8 +52,7 @@ internal sealed class AnalyzerProjectTests : IDisposable
         using Workspace empty = Workspace.Empty();
 
         await Assert.That(async () => await AnalyzerProject.FindAsync(empty.Root))
-                    .ThrowsExactly<DirectoryNotFoundException>()
-                    .WithMessage($"Cannot find the '{AnalyzerProject.Folder}' folder.");
+                    .ThrowsExactly<DirectoryNotFoundException>();
     }
 
     [Test]
