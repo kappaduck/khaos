@@ -30,4 +30,7 @@
     <File Path="tools/release/prepare.cs" />
     <File Path="tools/release/resolve-version.cs" />
   </Folder>
+  <Folder Name="/tools/site/">
+    <File Path="tools/site/publish-games.cs" />
+  </Folder>
 </Solution>
