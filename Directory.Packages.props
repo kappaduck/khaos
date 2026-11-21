@@ -7,5 +7,10 @@
   <ItemGroup Label="Global analyzers">
     <GlobalPackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="18.12.1" />
     <GlobalPackageReference Include="Roslynator.Analyzers" Version="5.0.1" />
+    <GlobalPackageReference Include="Roslynator.Formatting.Analyzers" Version="5.0.1" />
+  </ItemGroup>
+
+  <ItemGroup Label="Global build">
+    <GlobalPackageReference Include="DotNet.ReproducibleBuilds" Version="2.0.5" />
   </ItemGroup>
 </Project>

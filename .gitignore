@@ -1,8 +1,18 @@
+# Build outputs
+[Aa]rtifacts/
+[Bb]in/
+[Oo]bj/
+
 # Claude files
 CLAUDE.local.md
 
-# Visual Studio/Visual Code files
+# Test outputs
+[Tt]est[Rr]esults/
 
+# Verify files
+*.received.*
+
+# Visual Studio/Visual Code files
 *.lscache
 *.rsuser
 *.suo

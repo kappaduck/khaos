@@ -1,5 +1,6 @@
 root = true
 
+# All files
 [*]
 charset = utf-8
 indent_style = space
@@ -7,11 +8,27 @@ indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.{config,json,props,slnx,targets,yml}]
+[*.{config,csproj,css,html,js,json,nuspec,props,slnf,slnx,targets,ts,yml}]
 indent_size = 2
 
-[*.{config,props,slnx,targets}]
+# Windows files
+[*.{config,cs,csproj,props,slnf,slnx,targets}]
 end_of_line = crlf
 
+# Linux files
 [*.{yml}]
 end_of_line = lf
+
+[*.cs]
+dotnet_sort_system_directives_first = false
+file_header_template = Copyright (c) KappaDuck.\nLicensed under the MIT license.
+
+# Verify's snapshots, written by Verify as they are: last, so they override the sections above
+[*.{received,verified}.{cs,md,props,txt}]
+charset = utf-8-bom
+end_of_line = lf
+insert_final_newline = false
+trim_trailing_whitespace = false
+indent_size = unset
+indent_style = unset
+tab_width = unset

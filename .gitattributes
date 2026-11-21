@@ -1,16 +1,39 @@
+# All
 * text=auto
 
+# Exclude files from exporting
 .gitattributes export-ignore
 .gitignore     export-ignore
 
+# Windows files
 *.config  text eol=crlf
+*.cs      text eol=crlf diff=csharp
+*.csproj  text eol=crlf
 *.json    text eol=crlf
+*.nuspec  text eol=crlf
 *.props   text eol=crlf
+*.slnf    text eol=crlf
 *.slnx    text eol=crlf
 *.targets text eol=crlf
-*.txt     text eol=crlf
-*.yml     text eol=lf
+
+# Linux files
+*.cmake text eol=lf
+*.env   text eol=lf
+*.sh    text eol=lf diff=bash
+*.yml   text eol=lf
 
 # Others
 codeowners text
+*.css      text diff=css
+*.html     text diff=html
 *.md       text diff=markdown
+
+# Graphics
+*.ico binary
+*.png binary
+
+# Verify snapshot files, last so they override the lines above
+*.verified.cs    text eol=lf working-tree-encoding=UTF-8
+*.verified.md    text eol=lf working-tree-encoding=UTF-8
+*.verified.props text eol=lf working-tree-encoding=UTF-8
+*.verified.txt   text eol=lf working-tree-encoding=UTF-8
