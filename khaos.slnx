@@ -22,7 +22,11 @@
     <Project Path="tests/Khaos.Tools.Tests/Khaos.Tools.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
+    <File Path="tools/readme.md" />
     <Project Path="tools/Khaos.Tools/Khaos.Tools.csproj" />
+  </Folder>
+  <Folder Name="/tools/native/">
+    <File Path="tools/native/update-sdl.cs" />
   </Folder>
   <Folder Name="/tools/packages/">
     <File Path="tools/packages/check-template.cs" />
