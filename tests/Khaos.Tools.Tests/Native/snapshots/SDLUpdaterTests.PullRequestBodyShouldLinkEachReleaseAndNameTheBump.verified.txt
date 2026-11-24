@@ -1,0 +1,11 @@
+﻿Newer stable SDL releases are available. This updates the versions in `native/sdl.env`, which `native.yml` builds for the desktop and for WebAssembly once this is merged.
+
+| Library | Current | Latest |
+| :---: | :---: | :---: |
+| `SDL3` | `3.4.20` | [`3.4.22`](https://github.com/libsdl-org/SDL/releases/tag/release-3.4.22) |
+| `SDL3_TTF` | `3.2.2` | [`3.2.6`](https://github.com/libsdl-org/SDL_ttf/releases/tag/release-3.2.6) |
+
+`KappaDuck.Khaos.Native` is bumped from `1.2.1` to `1.2.2`, the SDL tables in `readme.md` and `native/packages/readme.md` are updated, and so is its line in the [Unreleased] section of `changelog.md`.
+
+> [!IMPORTANT]
+> The bump level follows the SDL version change. If a patch release adds native API, change the bump to a minor version before merging.

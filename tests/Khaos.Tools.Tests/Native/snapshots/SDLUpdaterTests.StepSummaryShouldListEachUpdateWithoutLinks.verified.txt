@@ -1,0 +1,6 @@
+﻿### SDL updates
+
+| Library | Current | Latest |
+| :---: | :---: | :---: |
+| `SDL3` | `3.4.20` | 3.4.22 |
+| `SDL3_TTF` | `3.2.2` | 3.2.6 |

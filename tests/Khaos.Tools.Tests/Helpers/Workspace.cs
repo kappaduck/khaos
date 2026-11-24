@@ -13,9 +13,7 @@ internal sealed class Workspace : IDisposable
 
     internal string Root => _temp.Path;
 
-    public void Dispose() => _temp.Dispose();
-
-    public static Workspace Copy(string data)
+    internal static Workspace Copy(string data)
     {
         Workspace workspace = new();
         Folders.Copy(DataPath(data), workspace.Root);
@@ -26,6 +24,8 @@ internal sealed class Workspace : IDisposable
     }
 
     internal static Workspace Empty() => new();
+
+    public void Dispose() => _temp.Dispose();
 
     internal string Write(string relative, string content)
     {

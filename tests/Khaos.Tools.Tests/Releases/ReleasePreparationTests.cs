@@ -75,20 +75,24 @@ internal sealed class ReleasePreparationTests : IDisposable
     [Arguments("", "0.2.0")]
     [Arguments("0.1.1", "0.1.1")]
     [Arguments("1.0.0", "1.0.0")]
-    public async Task NextVersionShouldTakeTheVersionRequestedOrTheNextMinor(string? requested, string expected)
+    public async Task OpenNextAsyncShouldTakeTheVersionRequestedOrTheNextMinor(string? requested, string expected)
     {
-        Version next = ReleasePreparation.NextVersion(requested, new Version(0, 1, 0));
+        await ReleasePreparation.PrepareAsync(_workspace.Root, _releaseDay);
 
-        await next.Should().BeEqualTo(Version.Parse(expected));
+        NextVersion opened = await ReleasePreparation.OpenNextAsync(_workspace.Root, requested, 2026);
+
+        await opened.Next.Should().BeEqualTo(Version.Parse(expected));
     }
 
     [Test]
     [Arguments("1.0")]
     [Arguments("1.0.0.0")]
     [Arguments("next")]
-    public async Task NextVersionShouldRefuseAVersionThatIsNotMajorMinorPatch(string requested)
+    public async Task OpenNextAsyncShouldRefuseAVersionThatIsNotMajorMinorPatch(string requested)
     {
-        await Assert.That(() => ReleasePreparation.NextVersion(requested, new Version(0, 1, 0)))
+        await ReleasePreparation.PrepareAsync(_workspace.Root, _releaseDay);
+
+        await Assert.That(async () => await ReleasePreparation.OpenNextAsync(_workspace.Root, requested, 2026))
                     .ThrowsExactly<FormatException>()
                     .WithMessage($"'{requested}' is not a major.minor.patch version.");
     }

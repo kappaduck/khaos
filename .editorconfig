@@ -24,7 +24,7 @@ dotnet_sort_system_directives_first = false
 file_header_template = Copyright (c) KappaDuck.\nLicensed under the MIT license.
 
 # Verify's snapshots, written by Verify as they are: last, so they override the sections above
-[*.{received,verified}.{cs,md,props,txt}]
+[*.{received,verified}.{cs,env,md,nuspec,props,txt}]
 charset = utf-8-bom
 end_of_line = lf
 insert_final_newline = false
