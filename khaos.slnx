@@ -25,6 +25,10 @@
     <File Path="tools/readme.md" />
     <Project Path="tools/Khaos.Tools/Khaos.Tools.csproj" />
   </Folder>
+  <Folder Name="/tools/benchmarks/">
+    <File Path="tools/benchmarks/add-results.cs" />
+    <File Path="tools/benchmarks/compare.cs" />
+  </Folder>
   <Folder Name="/tools/native/">
     <File Path="tools/native/update-sdl.cs" />
   </Folder>
