@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup Label="Test packages">
+    <PackageVersion Include="Basic.Reference.Assemblies.Net110" Version="1.8.15" />
     <PackageVersion Include="TUnit" Version="$(TUnitVersion)" />
     <PackageVersion Include="TUnit.Mocks" Version="$(TUnitVersion)" />
     <PackageVersion Include="TUnit.Mocks.Assertions" Version="$(TUnitVersion)" />

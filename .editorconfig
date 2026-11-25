@@ -12,11 +12,11 @@ trim_trailing_whitespace = true
 indent_size = 2
 
 # Windows files
-[*.{config,cs,csproj,props,slnf,slnx,targets}]
+[*.{config,cs,csproj,json,nuspec,props,slnf,slnx,targets}]
 end_of_line = crlf
 
 # Linux files
-[*.{yml}]
+[*.{cmake,env,sh,yml}]
 end_of_line = lf
 
 [*.cs]

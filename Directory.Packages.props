@@ -15,6 +15,10 @@
     <GlobalPackageReference Include="DotNet.ReproducibleBuilds" Version="2.0.5" />
   </ItemGroup>
 
+  <ItemGroup Label="Build">
+    <PackageVersion Include="PolySharp" Version="1.17.0" />
+  </ItemGroup>
+
   <ItemGroup Label="Benchmarks">
     <PackageVersion Include="BenchmarkDotNet" Version="0.16.0-preview.2" />
     <PackageVersion Include="Perfolizer" Version="0.7.5" />
@@ -22,5 +26,15 @@
 
   <ItemGroup Label="Native">
     <PackageVersion Include="KappaDuck.Khaos.Native" Version="$(KhaosNativeVersion)" />
+  </ItemGroup>
+
+  <!--
+    Roslyn: shared by the analyzer projects and their tests, so the tests compile like the SDK does.
+    Pinned to the compiler of the minimum supported SDK (.NET 11.0.100 ships 5.12): a newer minor version fails to
+    load for users (CS8032). A patch keeps the assembly version of its minor (5.12.x is 5.12.0.0), so 5.12.x is fine.
+  -->
+  <ItemGroup Label="Roslyn">
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.12.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.12.0" />
   </ItemGroup>
 </Project>

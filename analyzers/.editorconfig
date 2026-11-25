@@ -1,0 +1,13 @@
+[Shared/**.cs]
+
+# IDE0130: Namespace does not match folder structure
+# Reason: shared files are linked into several projects, each with its own root namespace
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0130
+dotnet_diagnostic.IDE0130.severity = none
+
+[*.cs]
+
+# CA1062: Validate arguments of public methods
+# Reason: Roslyn never passes null to Initialize(AnalysisContext)
+# https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1062
+dotnet_diagnostic.CA1062.severity = none

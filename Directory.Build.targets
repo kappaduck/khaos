@@ -4,6 +4,12 @@
     <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
   </PropertyGroup>
 
+  <ItemGroup Label="Khaos analyzers and source generators" Condition="'$(UseKhaosAnalyzers)' == 'true'">
+    <ProjectReference Include="$(KhaosRoot)analyzers/Khaos.Analyzers/Khaos.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false">
+      <PrivateAssets Condition="'$(IsPackable)' == 'true'">all</PrivateAssets>
+    </ProjectReference>
+  </ItemGroup>
+
     <!--
     SafeDirectories covers the application directory on Windows only. NativeAOT searches the application directory
     on Linux only with AssemblyDirectory, so the native libraries next to the assembly are found on both.

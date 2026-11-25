@@ -1,4 +1,10 @@
 <Solution>
+  <Folder Name="/analyzers/">
+    <File Path="analyzers/.editorconfig" />
+    <File Path="analyzers/Directory.Build.props" />
+    <Project Path="analyzers/Khaos.Analyzers/Khaos.Analyzers.csproj" />
+    <Project Path="analyzers/Khaos.Internal.Analyzers/Khaos.Internal.Analyzers.csproj" />
+  </Folder>
   <Folder Name="/config/">
     <File Path=".editorconfig" />
     <File Path=".gitattributes" />
@@ -39,6 +45,7 @@
     <File Path="tests/.editorconfig" />
     <File Path="tests/Directory.Build.props" />
     <File Path="tests/Directory.Packages.props" />
+    <Project Path="tests/Khaos.Analyzers.Tests/Khaos.Analyzers.Tests.csproj" />
     <Project Path="tests/Khaos.Tools.Tests/Khaos.Tools.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
@@ -67,11 +74,14 @@
     <File Path="tools/site/publish-games.cs" />
   </Folder>
   <Folder Name="/workflows/">
-    <File Path=".github/dependabot.yml" />
     <File Path=".github/workflows/benchmarks.yml" />
+    <File Path=".github/workflows/codeql.yml" />
+    <File Path=".github/dependabot.yml" />
     <File Path=".github/workflows/docs.yml" />
     <File Path=".github/workflows/khaos.yml" />
     <File Path=".github/workflows/labels.yml" />
+    <File Path=".github/workflows/native.yml" />
     <File Path=".github/workflows/pull-request.yml" />
+    <File Path=".github/workflows/update-sdl.yml" />
   </Folder>
 </Solution>
