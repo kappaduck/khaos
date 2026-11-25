@@ -8,6 +8,10 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
   </PropertyGroup>
 
+  <ItemGroup Label="Shared code">
+    <Compile Include="$(MSBuildThisFileDirectory)Shared/**/*.cs" LinkBase="Shared" />
+  </ItemGroup>
+
   <ItemGroup Label="Internals">
     <InternalsVisibleTo Include="KappaDuck.Khaos.Analyzers.Tests" />
   </ItemGroup>
