@@ -3,7 +3,7 @@
 
 using System.Runtime.CompilerServices;
 
-namespace KappaDuck.Khaos.Tools.Tests.Helpers;
+namespace KappaDuck.Khaos.Tools.Tests;
 
 internal static class SetupVerify
 {

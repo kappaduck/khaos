@@ -39,6 +39,12 @@
     <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage" />
   </ItemGroup>
 
+  <ItemGroup Label="Fixtures and helpers">
+    <Using Include="$(RootNamespace).Fixtures" Condition="Exists('$(MSBuildProjectDirectory)/Fixtures')" />
+    <Using Include="$(RootNamespace).Helpers" Condition="Exists('$(MSBuildProjectDirectory)/Helpers')" />
+    <Using Include="$(RootNamespace).Helpers.Native" Condition="Exists('$(MSBuildProjectDirectory)/Helpers/Native')" />
+  </ItemGroup>
+
   <ItemGroup Label="Global usings">
     <Using Include="TUnit" />
     <Using Include="TUnit.Mocks" />

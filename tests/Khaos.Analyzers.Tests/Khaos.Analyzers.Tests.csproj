@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="$(KhaosRoot)analyzers/Khaos.Analyzers/Khaos.Analyzers.csproj" />
+    <ProjectReference Include="$(KhaosRoot)analyzers/Khaos.Internal.Analyzers/Khaos.Internal.Analyzers.csproj" Aliases="InternalAnalyzers" />
+  </ItemGroup>
+
+  <ItemGroup Label="Harness">
+    <PackageReference Include="Basic.Reference.Assemblies.Net110" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Verify.SourceGenerators" />
+    <PackageReference Include="Verify.TUnit" />
+  </ItemGroup>
+
+  <ItemGroup Label="The rule pages">
+    <None Include="$(KhaosRoot)docs/rules/khaos*.md" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

@@ -2,6 +2,7 @@
   "solution": {
     "path": "khaos.slnx",
     "projects": [
+      "tests\\Khaos.Analyzers.Tests\\Khaos.Analyzers.Tests.csproj",
       "tests\\Khaos.Tools.Tests\\Khaos.Tools.Tests.csproj"
     ]
   }
