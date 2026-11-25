@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 using KappaDuck.Khaos.Analyzers.Shared;
+using System.Runtime.CompilerServices;
 
 namespace KappaDuck.Khaos.Analyzers.Tests.Shared;
 
@@ -132,11 +133,7 @@ internal sealed class CodeSourceBuilderTests : IDisposable
 
         _builder.AppendLine($"private const byte {name} = {tag};");
 
-        long before = GC.GetAllocatedBytesForCurrentThread();
-
-        _builder.AppendLine($"private const byte {name} = {tag};");
-
-        long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+        long allocated = AllocatedBy(_builder, static builder => builder.AppendLine($"private const byte {name} = {tag};"));
 
         await allocated.Should().BeEqualTo(0L);
     }
@@ -343,5 +340,15 @@ internal sealed class CodeSourceBuilderTests : IDisposable
         string source = _builder.ToString();
 
         await Verify(source, "cs");
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static long AllocatedBy(CodeSourceBuilder builder, Action<CodeSourceBuilder> write)
+    {
+        long before = GC.GetAllocatedBytesForCurrentThread();
+
+        write(builder);
+
+        return GC.GetAllocatedBytesForCurrentThread() - before;
     }
 }
