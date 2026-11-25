@@ -1,3 +1,11 @@
 {
-  "dotnet.defaultSolution": "khaos.slnx"
+  "dotnet.defaultSolution": "khaos.slnx",
+    "files.exclude": {
+      "**/artifacts": true,
+      "docs/_site": true
+    },
+    "search.exclude": {
+      "**/artifacts": true,
+      "docs/_site": true
+    }
 }
