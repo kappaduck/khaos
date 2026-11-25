@@ -1,0 +1,16 @@
+name: Check the template
+description: Packs the packages, then creates and builds every variant of the template and the samples of the readmes.
+
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET
+      uses: ./.github/actions/setup-dotnet
+
+    - name: Install the wasm-tools workload
+      shell: bash
+      run: dotnet workload install wasm-tools
+
+    - name: Create and build the three variants and the readme samples
+      shell: bash
+      run: dotnet tools/packages/check-template.cs --platform all

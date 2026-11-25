@@ -1,4 +1,4 @@
-﻿// Copyright (c) KappaDuck.
+// Copyright (c) KappaDuck.
 // Licensed under the MIT license.
 
 namespace KappaDuck.Khaos.Tools;
@@ -14,5 +14,11 @@ internal static class Folders
 
         foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
             File.Copy(file, Path.Combine(destination, Path.GetRelativePath(source, file)), overwrite);
+    }
+
+    internal static string[] Sorted(string[] folders)
+    {
+        Array.Sort(folders, StringComparer.Ordinal);
+        return folders;
     }
 }

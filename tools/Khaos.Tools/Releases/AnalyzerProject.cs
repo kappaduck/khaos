@@ -42,7 +42,7 @@ public sealed class AnalyzerProject
 
         List<AnalyzerProject> analyzers = [];
 
-        foreach (string directory in Directory.GetDirectories(folder))
+        foreach (string directory in Folders.Sorted(Directory.GetDirectories(folder)))
         {
             string shippedPath = Path.Combine(directory, ShippedFile);
             string unshippedPath = Path.Combine(directory, UnshippedFile);

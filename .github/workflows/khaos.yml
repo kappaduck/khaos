@@ -1,0 +1,137 @@
+name: Khaos
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Build, test and pack a beta, then keep the packages as an artifact instead of publishing them
+        type: boolean
+        default: false
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  publish:
+    name: Publish ${{ github.event_name == 'release' && !github.event.release.prerelease && 'release' || 'beta' }}${{ inputs.dry-run && ' (dry run)' || '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: ${{ github.event_name == 'release' && !github.event.release.prerelease && 'nuget-release' || 'nuget-beta' }}
+    permissions:
+      contents: read
+      id-token: write
+
+    outputs:
+      latest: ${{ steps.latest.outputs.latest }}
+      previous: ${{ steps.latest.outputs.previous }}
+
+    env:
+      Channel: ${{ github.event_name == 'release' && !github.event.release.prerelease && 'release' || 'beta' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: ./.github/actions/setup-dotnet
+
+      - name: Read version
+        id: versions
+        run: echo "Khaos=$(dotnet msbuild src/Khaos/Khaos.csproj -getProperty:VersionPrefix)" >> "$GITHUB_OUTPUT"
+
+      - name: Check the release tag
+        if: github.event_name == 'release'
+        env:
+          Tag: ${{ github.event.release.tag_name }}
+          Prefix: ${{ steps.versions.outputs.Khaos }}
+        run: dotnet tools/release/check.cs tag
+
+      - name: Check the release branch
+        if: env.Channel == 'release'
+        env:
+          Tag: ${{ github.event.release.tag_name }}
+        run: dotnet tools/release/check.cs branch
+
+      - name: Check the release is the latest
+        id: latest
+        if: env.Channel == 'release'
+        env:
+          Tag: ${{ github.event.release.tag_name }}
+        run: dotnet tools/release/check.cs latest
+
+      - name: Resolve version
+        id: package
+        env:
+          Khaos: ${{ steps.versions.outputs.Khaos }}
+          Tag: ${{ github.event.release.tag_name }}
+        run: dotnet tools/release/resolve.cs KappaDuck.Khaos "$Khaos" "$Channel" "$Tag"
+
+      - name: Test
+        if: env.Channel != 'release'
+        run: dotnet test --solution tests.slnf --configuration release
+
+      - name: Build
+        env:
+          Suffix: ${{ steps.package.outputs.Suffix }}
+        run: dotnet build packages.slnf --configuration release -p:VersionSuffix="$Suffix"
+
+      - name: Package
+        env:
+          Suffix: ${{ steps.package.outputs.Suffix }}
+        run: dotnet pack packages.slnf --no-build --configuration release --output artifacts/packages -p:VersionSuffix="$Suffix"
+
+      - name: Check packages
+        env:
+          Version: ${{ steps.package.outputs.Version }}
+        run: |
+          ls artifacts/packages
+          for id in KappaDuck.Khaos KappaDuck.Khaos.Templates; do
+            test -f "artifacts/packages/$id.$Version.nupkg" || { echo "::error::$id was not packed"; exit 1; }
+          done
+
+      - name: Upload the packages of the dry run
+        if: inputs.dry-run
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages
+          path: artifacts/packages
+          retention-days: 7
+
+      - name: Generate key
+        if: ${{ !inputs.dry-run }}
+        id: nuget
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: ${{ vars.USER }}
+
+      - name: Publish to NuGet
+        if: ${{ !inputs.dry-run }}
+        env:
+          ApiKey: ${{ steps.nuget.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push "artifacts/packages/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key "$ApiKey" --skip-duplicate
+
+  docs:
+    name: Documentation
+    needs: publish
+    if: github.event_name == 'release' && !github.event.release.prerelease && needs.publish.outputs.latest == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/docs.yml
+    with:
+      stage: production
+      benchmarks: true
+      benchmarks-base: ${{ needs.publish.outputs.previous }}
+    secrets: inherit

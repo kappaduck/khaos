@@ -16,7 +16,7 @@
     <IsPackable>false</IsPackable>
 
     <ArtifactsPath>$(KhaosRoot)artifacts</ArtifactsPath>
-    <AssemblyName>KappaDuck.$(MSBuildProjectName)</AssemblyName>
+    <AssemblyName Condition="'$(FileBasedProgram)' != 'true'">KappaDuck.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>$(AssemblyName)</RootNamespace>
 
     <!-- Experimental feature: https://github.com/dotnet/core/blob/main/release-notes/11.0/preview/rc1/csharp.md#unsafe-evolution-refinements -->

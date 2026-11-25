@@ -1,0 +1,111 @@
+name: CodeQL
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main, 'release/**']
+  push:
+    branches: [main, 'release/**']
+  schedule:
+    - cron: '0 12 * * 2'
+      timezone: America/Toronto
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  actions:
+    name: Analyze actions
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: actions
+          build-mode: none
+          queries: security-extended
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:actions
+
+  csharp:
+    name: Analyze C#
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: ./.github/actions/setup-dotnet
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: csharp
+          build-mode: none
+          queries: security-extended
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:csharp
+
+  audit:
+    name: Audit the packages
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: ./.github/actions/setup-dotnet
+
+      - name: Install the wasm-tools workload
+        run: dotnet workload install wasm-tools
+
+      - name: List the vulnerable packages
+        run: |
+          dotnet package list --project khaos.slnx --vulnerable --include-transitive --format json > vulnerable.json
+          count=$(jq '[.. | objects | select(has("vulnerabilities"))] | length' vulnerable.json)
+          if (( count > 0 )); then
+            jq -r '.projects[] | .path as $project | .frameworks[]? | (.topLevelPackages[]?, .transitivePackages[]?)
+              | select(has("vulnerabilities")) | "::error::\($project): \(.id) \(.resolvedVersion), \([.vulnerabilities[].advisoryurl] | join(", "))"' vulnerable.json
+            exit 1
+          fi
+          echo "No package with a known vulnerability."

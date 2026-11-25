@@ -1,0 +1,43 @@
+# What every job builds with: the SDK, the build settings, the analyzers and the CI itself.
+shared: &shared
+  - global.json
+  - nuget.config
+  - Directory.Build.props
+  - Directory.Build.targets
+  - Directory.Packages.props
+  - .editorconfig
+  - rules/**
+  - analyzers/**
+  - .github/filters.yml
+  - .github/actions/setup-dotnet/**
+  - .github/workflows/pull-request.yml
+
+# tests.slnf, and the tool manifest of the coverage and publish jobs.
+build:
+  - *shared
+  - khaos.slnx
+  - tests.slnf
+  - .config/dotnet-tools.json
+  - src/**
+  - tests/**
+  - tools/Khaos.Tools/**
+
+# tools/packages/check-template.cs packs packages.slnf, then builds the games of the template and the samples of
+# TemplateCheck.Readmes.
+template:
+  - *shared
+  - khaos.slnx
+  - packages.slnf
+  - src/**
+  - build/**
+  - assets/**
+  - readme.md
+  - tools/Khaos.Tools/**
+  - tools/packages/**
+  - .github/actions/check-template/**
+
+# Every file-based app of tools/ and its library.
+tools:
+  - *shared
+  - tools/**
+  - .github/actions/check-tools/**
