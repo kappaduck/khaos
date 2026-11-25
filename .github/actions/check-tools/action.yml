@@ -1,0 +1,17 @@
+name: Check the tools
+description: Builds every file-based app of tools/, where a warning fails the build as it does when they run.
+
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET
+      uses: ./.github/actions/setup-dotnet
+
+    - name: Build the scripts
+      shell: bash
+      run: |
+        status=0
+        for script in $(grep -l '^#!/usr/bin/env dotnet' tools/*/*.cs); do
+          dotnet build "$script" || { echo "::error file=$script::$script does not build."; status=1; }
+        done
+        exit $status

@@ -1,0 +1,28 @@
+name: Run the benchmarks
+description: Runs performance/benchmarks with a BenchmarkDotNet filter and the runtimes to measure.
+
+inputs:
+  filter:
+    description: BenchmarkDotNet filter (--filter), for example *Renderer*.
+    required: true
+  runtimes:
+    description: Runtimes to measure (--runtimes), separated by spaces; the first one is the baseline.
+    default: ''
+  working-directory:
+    description: The folder of the repository to run from.
+    default: .
+
+runs:
+  using: composite
+  steps:
+    - name: Run the benchmarks
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        Filter: ${{ inputs.filter }}
+        Runtimes: ${{ inputs.runtimes }}
+      run: |
+        read -ra runtimes <<< "$Runtimes"
+        args=(--filter "$Filter")
+        (( ${#runtimes[@]} > 0 )) && args+=(--runtimes "${runtimes[@]}")
+        dotnet run --configuration Release --project performance/benchmarks -- "${args[@]}"

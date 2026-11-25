@@ -1,0 +1,26 @@
+name: Setup .NET
+description: Installs the .NET SDK that a global.json names and, on request, what the NativeAOT compiler needs on Linux.
+
+inputs:
+  global-json-file:
+    description: The global.json that names the SDK.
+    default: ./global.json
+  native-aot:
+    description: true to install clang and zlib on Linux, which the NativeAOT compiler links with.
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        global-json-file: ${{ inputs.global-json-file }}
+
+    # The NativeAOT compiler links with clang and zlib: https://learn.microsoft.com/dotnet/core/deploying/native-aot/#prerequisites
+    - name: Install the NativeAOT prerequisites
+      if: inputs.native-aot == 'true' && runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install --yes --no-install-recommends clang zlib1g-dev

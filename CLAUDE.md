@@ -164,7 +164,7 @@ here.
 | A design                                      | `design` (this repository)                          |
 | Interop, a native call, a crash at the border | `dotnet-pinvoke`                                    |
 | Performance, allocations, a benchmark         | `analyzing-dotnet-performance`, `microbenchmarking` |
-| A trace or a dump                             | `dotnet-trace-collect`, `dump-collect`              |
+| A trace                                       | `dotnet-trace-collect`                              |
 | NativeAOT and trimming                        | `dotnet-aot-compat`                                 |
 | A change to a shipped public member           | `dotnet-breaking-changes`                           |
 | The build, a `.binlog`                        | `msbuild` and the `dotnet-msbuild` plugin           |
