@@ -12,7 +12,7 @@ public static class GamePublisher
 
     public static async Task<bool> PublishAsync()
     {
-        foreach (string directory in Directory.GetDirectories("demo"))
+        foreach (string directory in Folders.Sorted(Directory.GetDirectories("demo")))
         {
             string name = Path.GetFileName(directory);
             string project = Path.Combine(directory, $"{name}.Web", $"{name}.Web.csproj");
@@ -34,9 +34,9 @@ public static class GamePublisher
                 return false;
         }
 
-        foreach (string category in Directory.GetDirectories("docs/examples"))
+        foreach (string category in Folders.Sorted(Directory.GetDirectories("docs/examples")))
         {
-            foreach (string directory in Directory.GetDirectories(category))
+            foreach (string directory in Folders.Sorted(Directory.GetDirectories(category)))
             {
                 if (!File.Exists(Path.Combine(directory, "readme.md")))
                     continue;
