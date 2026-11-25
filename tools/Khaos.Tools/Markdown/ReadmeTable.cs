@@ -3,7 +3,7 @@
 
 namespace KappaDuck.Khaos.Tools.Markdown;
 
-public abstract class ReadmeTable
+internal abstract class ReadmeTable
 {
     private readonly string[] _lines;
     private readonly string _newLine;
@@ -40,7 +40,7 @@ public abstract class ReadmeTable
 
     protected MarkdownTable Table { get; }
 
-    public Task SaveAsync()
+    internal Task SaveAsync()
     {
         string[] lines = [.. _lines.AsSpan(.._start), .. Table.Render(), .. _lines.AsSpan((_start + _length)..)];
         return File.WriteAllTextAsync(Path, string.Join(_newLine, lines));

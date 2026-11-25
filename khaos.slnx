@@ -22,12 +22,27 @@
     <Project Path="tests/Khaos.Tools.Tests/Khaos.Tools.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
+    <File Path="tools/readme.md" />
     <Project Path="tools/Khaos.Tools/Khaos.Tools.csproj" />
+  </Folder>
+  <Folder Name="/tools/benchmarks/">
+    <File Path="tools/benchmarks/add-results.cs" />
+    <File Path="tools/benchmarks/compare.cs" />
+  </Folder>
+  <Folder Name="/tools/native/">
+    <File Path="tools/native/update-sdl.cs" />
+  </Folder>
+  <Folder Name="/tools/packages/">
+    <File Path="tools/packages/check-template.cs" />
+    <File Path="tools/packages/pack-local.cs" />
   </Folder>
   <Folder Name="/tools/release/">
     <File Path="tools/release/check.cs" />
     <File Path="tools/release/next.cs" />
     <File Path="tools/release/prepare.cs" />
     <File Path="tools/release/resolve-version.cs" />
+  </Folder>
+  <Folder Name="/tools/site/">
+    <File Path="tools/site/publish-games.cs" />
   </Folder>
 </Solution>

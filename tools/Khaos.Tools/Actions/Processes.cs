@@ -9,18 +9,7 @@ public static class Processes
 {
     public static Task<ProcessOutput> GitAsync(params IEnumerable<string> arguments) => ReadAsync("git", arguments);
 
-    internal static async Task<ProcessOutput> ReadAsync(string fileName, params IEnumerable<string> arguments)
-    {
-        ProcessStartInfo info = new(fileName, arguments) { RedirectStandardOutput = true, RedirectStandardError = true };
-        StopWithTool(info);
-
-        ProcessTextOutput result = await Process.RunAndCaptureTextAsync(info);
-        await Console.Error.WriteAsync(result.StandardError);
-
-        return new ProcessOutput(result.ExitStatus.ExitCode, result.StandardOutput);
-    }
-
-    internal static Task<int> RunAsync(string fileName, params IEnumerable<string> arguments)
+    public static Task<int> RunAsync(string fileName, params IEnumerable<string> arguments)
         => RunAsync(new Dictionary<string, string>(), fileName, arguments);
 
     internal static async Task<int> RunAsync(IReadOnlyDictionary<string, string> environment, string fileName, params IEnumerable<string> arguments)
@@ -39,6 +28,17 @@ public static class Processes
 
         ProcessExitStatus status = await Process.RunAsync(info);
         return status.ExitCode;
+    }
+
+    private static async Task<ProcessOutput> ReadAsync(string fileName, params IEnumerable<string> arguments)
+    {
+        ProcessStartInfo info = new(fileName, arguments) { RedirectStandardOutput = true, RedirectStandardError = true };
+        StopWithTool(info);
+
+        ProcessTextOutput result = await Process.RunAndCaptureTextAsync(info);
+        await Console.Error.WriteAsync(result.StandardError);
+
+        return new ProcessOutput(result.ExitStatus.ExitCode, result.StandardOutput);
     }
 
     private static void StopWithTool(ProcessStartInfo info)

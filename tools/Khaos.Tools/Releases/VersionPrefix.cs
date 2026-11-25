@@ -47,7 +47,7 @@ internal sealed class VersionPrefix
         Version = version;
     }
 
-    public Task SaveAsync() => File.WriteAllTextAsync(_path, _content);
+    internal Task SaveAsync() => File.WriteAllTextAsync(_path, _content);
 
     private static (int Start, int Length) GetVersionRange(string content, string path)
     {

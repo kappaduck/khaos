@@ -4,6 +4,10 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
+	<ItemGroup>
+		<PackageReference Include="Perfolizer" />
+	</ItemGroup>
+
 	<ItemGroup Label="Internals">
 		<InternalsVisibleTo Include="$(AssemblyName).Tests" />
 	</ItemGroup>

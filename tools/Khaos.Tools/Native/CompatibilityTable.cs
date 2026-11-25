@@ -5,7 +5,7 @@ using KappaDuck.Khaos.Tools.Markdown;
 
 namespace KappaDuck.Khaos.Tools.Native;
 
-public sealed class CompatibilityTable : ReadmeTable
+internal sealed class CompatibilityTable : ReadmeTable
 {
     private const string Source = "`source`";
 
@@ -21,9 +21,9 @@ public sealed class CompatibilityTable : ReadmeTable
             throw new FormatException($"The SDL compatibility table in '{path}' needs a Khaos and a Native column.");
     }
 
-    public static async Task<CompatibilityTable> ParseAsync(string path) => new(path, await File.ReadAllTextAsync(path));
+    internal static async Task<CompatibilityTable> ParseAsync(string path) => new(path, await File.ReadAllTextAsync(path));
 
-    public void AddRelease(Version khaos, Version native)
+    internal void AddRelease(Version khaos, Version native)
     {
         EnsureSourceRow();
 
@@ -45,7 +45,7 @@ public sealed class CompatibilityTable : ReadmeTable
         Table.Insert(1, release);
     }
 
-    public IReadOnlyList<KeyValuePair<string, Version>> ChangedSinceRelease()
+    internal IReadOnlyList<KeyValuePair<string, Version>> ChangedSinceRelease()
     {
         EnsureSourceRow();
 
@@ -69,7 +69,7 @@ public sealed class CompatibilityTable : ReadmeTable
         return changed;
     }
 
-    public void SetSource(Version native, IReadOnlyDictionary<string, Version> bundled)
+    internal void SetSource(Version native, IReadOnlyDictionary<string, Version> bundled)
     {
         ArgumentNullException.ThrowIfNull(bundled);
 

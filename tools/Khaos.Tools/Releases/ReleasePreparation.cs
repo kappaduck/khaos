@@ -8,28 +8,15 @@ namespace KappaDuck.Khaos.Tools.Releases;
 
 public static class ReleasePreparation
 {
+    private const string PackagesPath = "Directory.Packages.props";
     private const string NativeOpenTag = "<KhaosNativeVersion>";
     private const string NativeCloseTag = "</KhaosNativeVersion>";
 
     public const string ProjectPath = "Directory.Build.props";
-    public const string PackagesPath = "Directory.Packages.props";
     public const string ChangelogPath = "changelog.md";
     public const string ReadmePath = "readme.md";
 
     public static IReadOnlyList<string> Files { get; } = [ProjectPath, ChangelogPath, ReadmePath, PackagesPath];
-
-    public static Version NextVersion(string? requested, Version current)
-    {
-        ArgumentNullException.ThrowIfNull(current);
-
-        if (string.IsNullOrEmpty(requested))
-            return new Version(current.Major, current.Minor + 1, 0);
-
-        if (!Version.TryParse(requested, out Version? parsed) || parsed.Build < 0 || parsed.Revision >= 0)
-            throw new FormatException($"'{requested}' is not a major.minor.patch version.");
-
-        return parsed;
-    }
 
     public static async Task<NextVersion> OpenNextAsync(string root, string? requested, int year)
     {
@@ -73,6 +60,19 @@ public static class ReleasePreparation
             await analyzer.SaveAsync();
 
         return new PreparedRelease(project.Version, native, analyzers);
+    }
+
+    internal static Version NextVersion(string? requested, Version current)
+    {
+        ArgumentNullException.ThrowIfNull(current);
+
+        if (string.IsNullOrEmpty(requested))
+            return new Version(current.Major, current.Minor + 1, 0);
+
+        if (!Version.TryParse(requested, out Version? parsed) || parsed.Build < 0 || parsed.Revision >= 0)
+            throw new FormatException($"'{requested}' is not a major.minor.patch version.");
+
+        return parsed;
     }
 
     private static Version ReadNativeVersion(string[] lines, string path)

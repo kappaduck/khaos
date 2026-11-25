@@ -33,7 +33,9 @@ codeowners text
 *.png binary
 
 # Verify snapshot files, last so they override the lines above
-*.verified.cs    text eol=lf working-tree-encoding=UTF-8
-*.verified.md    text eol=lf working-tree-encoding=UTF-8
+*.verified.cs text eol=lf working-tree-encoding=UTF-8
+*.verified.env text eol=lf working-tree-encoding=UTF-8
+*.verified.md text eol=lf working-tree-encoding=UTF-8
+*.verified.nuspec text eol=lf working-tree-encoding=UTF-8
 *.verified.props text eol=lf working-tree-encoding=UTF-8
-*.verified.txt   text eol=lf working-tree-encoding=UTF-8
+*.verified.txt text eol=lf working-tree-encoding=UTF-8
