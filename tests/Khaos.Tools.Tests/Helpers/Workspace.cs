@@ -19,9 +19,9 @@ internal sealed class Workspace : IDisposable
         Folders.Copy(DataPath(data), workspace.Root);
 
         return workspace;
-
-        static string DataPath(string relative) => Path.Combine(AppContext.BaseDirectory, "Data", relative);
     }
+
+    internal static string DataPath(string relative) => Path.Combine(AppContext.BaseDirectory, "Data", relative);
 
     internal static Workspace Empty() => new();
 
