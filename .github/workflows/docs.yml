@@ -1,0 +1,191 @@
+name: Docs
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: Where to deploy
+        type: choice
+        options: [staging, production]
+        default: staging
+      benchmarks:
+        description: Run the benchmarks and publish their results
+        type: boolean
+        default: false
+      benchmarks-base:
+        description: A tag to compare the benchmarks with (v0.1.0); empty to skip
+        type: string
+        default: ''
+  workflow_call:
+    inputs:
+      stage:
+        description: staging or production
+        type: string
+        required: true
+      benchmarks:
+        description: Run the benchmarks and publish their results
+        type: boolean
+        default: false
+      benchmarks-base:
+        description: A tag to compare the benchmarks with (v0.1.0); empty to skip
+        type: string
+        default: ''
+    secrets:
+      CLOUDFLARE_API_TOKEN:
+        required: true
+      CLOUDFLARE_ACCOUNT_ID:
+        required: true
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'demo/**'
+      - 'src/**'
+      - 'tools/Khaos.Tools/**'
+      - 'tools/benchmarks/add-results.cs'
+      - 'tools/site/**'
+      - '.config/dotnet-tools.json'
+      - '.github/actions/**'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'demo/**'
+      - 'src/**'
+      - 'tools/Khaos.Tools/**'
+      - 'tools/benchmarks/add-results.cs'
+      - 'tools/site/**'
+      - '.config/dotnet-tools.json'
+      - '.github/actions/**'
+      - '.github/workflows/docs.yml'
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  benchmarks:
+    name: Benchmarks
+    if: inputs.benchmarks
+    uses: ./.github/workflows/benchmarks.yml
+    with:
+      base: ${{ inputs.benchmarks-base }}
+      strict: false
+
+  build:
+    name: Build the site
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: benchmarks
+    if: ${{ !cancelled() && needs.benchmarks.result != 'cancelled' }}
+    concurrency:
+      group: docs-build-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+    outputs:
+      stage: ${{ steps.target.outputs.stage }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Choose the stage
+        id: target
+        env:
+          Requested: ${{ inputs.stage }}
+          Event: ${{ github.event_name }}
+        run: |
+          case "$Event" in
+            pull_request) echo "stage=" >> "$GITHUB_OUTPUT" ;;
+            push) echo "stage=staging" >> "$GITHUB_OUTPUT" ;;
+            *) echo "stage=$Requested" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Setup .NET
+        uses: ./.github/actions/setup-dotnet
+
+      - name: Build
+        run: |
+          dotnet build src/Khaos/Khaos.csproj --configuration release
+
+      - name: Download the benchmark results
+        if: inputs.benchmarks
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          name: benchmarks
+          path: artifacts/benchmarks
+
+      - name: Add the benchmark results
+        if: inputs.benchmarks
+        run: dotnet tools/benchmarks/add-results.cs
+
+      - name: Build the site
+        run: dotnet tool exec docfx --yes --allow-roll-forward -- docs/docfx.json
+
+      - name: Install the wasm-tools workload
+        if: steps.target.outputs.stage != ''
+        run: dotnet workload install wasm-tools
+
+      - name: Publish the games
+        if: steps.target.outputs.stage != ''
+        run: dotnet tools/site/publish-games.cs
+
+      - name: Upload the site
+        if: steps.target.outputs.stage != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs
+          path: docs/_site
+
+  deploy:
+    name: Deploy to docs-${{ needs.build.outputs.stage }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build
+    if: ${{ !cancelled() && needs.build.result == 'success' && needs.build.outputs.stage != '' }}
+    permissions:
+      contents: read
+    environment:
+      name: docs-${{ needs.build.outputs.stage }}
+      url: ${{ needs.build.outputs.stage == 'production' && 'https://khaos.kappaduck.com' || steps.deploy.outputs.pages-deployment-alias-url }}
+    concurrency:
+      group: docs-${{ needs.build.outputs.stage }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Download the site
+        uses: actions/download-artifact@v8
+        with:
+          name: docs
+          path: site
+
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name khaos --branch ${{ needs.build.outputs.stage }}
+
+      - name: Summary
+        env:
+          ENVIRONMENT: docs-${{ needs.build.outputs.stage }}
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          ALIAS_URL: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
+        run: |
+          {
+            echo "## Documentation deployed to $ENVIRONMENT"
+            echo
+            echo "| | |"
+            echo "| :-- | :-- |"
+            echo "| This deployment | $DEPLOYMENT_URL |"
+            [[ -n "$ALIAS_URL" ]] && echo "| Branch alias | $ALIAS_URL |"
+            echo "| Commit | \`${GITHUB_SHA::8}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

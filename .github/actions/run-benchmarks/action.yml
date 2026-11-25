@@ -25,4 +25,4 @@ runs:
         read -ra runtimes <<< "$Runtimes"
         args=(--filter "$Filter")
         (( ${#runtimes[@]} > 0 )) && args+=(--runtimes "${runtimes[@]}")
-        dotnet run --configuration Release --project performance/benchmarks -- "${args[@]}"
+        dotnet run --configuration release --project performance/benchmarks -- "${args[@]}"

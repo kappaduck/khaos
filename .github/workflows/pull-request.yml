@@ -74,11 +74,11 @@ jobs:
         run: dotnet restore tests.slnf
 
       - name: Build
-        run: dotnet build tests.slnf --no-restore --configuration Release
+        run: dotnet build tests.slnf --no-restore --configuration release
 
       - name: Test
         run: >
-          dotnet test --solution tests.slnf --no-build --configuration Release
+          dotnet test --solution tests.slnf --no-build --configuration release
           --results-directory ${{ github.workspace }}/artifacts/test-results
           --no-artifact-post-processing
           --
@@ -87,7 +87,7 @@ jobs:
           --coverage-output-format cobertura
 
       - name: Publish the allocation tests as NativeAOT
-        run: dotnet publish tests/Khaos.Allocations.Tests --configuration Release
+        run: dotnet publish tests/Khaos.Allocations.Tests --configuration release
 
       - name: Test on NativeAOT
         shell: bash
