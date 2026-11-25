@@ -8,6 +8,26 @@
     <File Path="Directory.Packages.props" />
     <File Path="global.json" />
   </Folder>
+  <Folder Name="/native/">
+    <File Path="native/emscripten.env" />
+    <File Path="native/readme.md" />
+    <File Path="native/sdl.env" />
+  </Folder>
+  <Folder Name="/native/packages/">
+    <File Path="native/packages/KappaDuck.Khaos.Native.props" />
+    <File Path="native/packages/KappaDuck.Khaos.Native.targets" />
+    <File Path="native/packages/Native.nuspec" />
+    <File Path="native/packages/readme.md" />
+  </Folder>
+  <Folder Name="/native/scripts/">
+    <File Path="native/scripts/build-linux.sh" />
+    <File Path="native/scripts/build-wasm.sh" />
+    <File Path="native/scripts/build-windows.sh" />
+    <File Path="native/scripts/check-wasm.sh" />
+    <File Path="native/scripts/dependencies.sh" />
+    <File Path="native/scripts/mingw.cmake" />
+    <File Path="native/scripts/options.sh" />
+  </Folder>
   <Folder Name="/rules/">
     <File Path="rules/code.style.editorconfig" />
     <File Path="rules/disabled.editorconfig" />
@@ -30,6 +50,7 @@
     <File Path="tools/benchmarks/compare.cs" />
   </Folder>
   <Folder Name="/tools/native/">
+    <File Path="tools/native/smoke-test.cs" />
     <File Path="tools/native/update-sdl.cs" />
   </Folder>
   <Folder Name="/tools/packages/">
