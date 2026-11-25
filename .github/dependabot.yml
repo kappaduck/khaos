@@ -1,0 +1,56 @@
+version: 2
+
+updates:
+  - package-ecosystem: dotnet-sdk
+    directory: /
+    schedule:
+      interval: weekly
+      day: thursday
+      time: '11:30'
+      timezone: America/Toronto
+    cooldown:
+      default-days: 1
+      exclude: ['*']
+    labels: [dependencies]
+    assignees: [beauchama]
+    commit-message:
+      prefix: 'SDK:'
+
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+      day: thursday
+      time: '11:30'
+      timezone: America/Toronto
+    cooldown:
+      default-days: 1
+      exclude: ['*']
+    labels: [dependencies]
+    assignees: [beauchama]
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: 'NuGet:'
+    ignore:
+      # Pinned to the compiler of the minimum supported SDK (.NET 11.0.100 ships Roslyn 5.12): a newer minor
+      # version fails to load for users (CS8032). A patch keeps the assembly version of its minor, so 5.12.x is fine.
+      - dependency-name: 'Microsoft.CodeAnalysis.*'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
+    groups:
+      nugets:
+        patterns: ['*']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: thursday
+      time: '11:30'
+      timezone: America/Toronto
+    labels: [dependencies]
+    assignees: [beauchama]
+    commit-message:
+      prefix: 'Actions:'
+    groups:
+      actions:
+        patterns: ['*']
