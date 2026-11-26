@@ -17,6 +17,8 @@ internal static class TestCompilation
 
     internal static CSharpCompilation WithoutReferences(params ReadOnlySpan<string> sources) => Compile(Parsing.Preview, sources, []);
 
+    internal static string FileName(int index) => $"Source{index}.cs";
+
     internal static CSharpCompilation Edit(CSharpCompilation compilation, params ReadOnlySpan<string> edited)
     {
         ImmutableArray<SyntaxTree> trees = compilation.SyntaxTrees;
@@ -40,7 +42,7 @@ internal static class TestCompilation
         SyntaxTree[] trees = new SyntaxTree[sources.Length];
 
         for (int i = 0; i < sources.Length; i++)
-            trees[i] = CSharpSyntaxTree.ParseText(sources[i], parsing, $"Source{i}.cs");
+            trees[i] = CSharpSyntaxTree.ParseText(sources[i], parsing, FileName(i));
 
         CSharpCompilationOptions options = new(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true, nullableContextOptions: NullableContextOptions.Enable);
         return CSharpCompilation.Create("KappaDuck.Khaos.Testing.Compilation", trees, references, options);

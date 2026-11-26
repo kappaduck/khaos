@@ -12,6 +12,9 @@
   </ItemGroup>
 
   <ItemGroup Label="The rule pages">
-    <None Include="$(KhaosRoot)docs/rules/khaos*.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="$(KhaosRoot)docs/rules/khaos*.md;$(KhaosRoot)docs/rules/khi*.md"
+          TargetPath="rules/%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
   </ItemGroup>
 </Project>
