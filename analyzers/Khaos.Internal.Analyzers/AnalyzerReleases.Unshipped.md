@@ -4,3 +4,4 @@ Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 KHI001 | Interop | Error | bool does not follow the marshalling convention of its interop area, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi001.md)
 KHI002 | Interop | Error | nint or IntPtr in an interop declaration, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi002.md)
+KHI003 | Interop | Error | LibraryImport without an explicit EntryPoint, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi003.md)
