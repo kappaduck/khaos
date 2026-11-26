@@ -1,0 +1,63 @@
+﻿[
+  {
+    Location: /*
+[KhaosEvent(SDL_EventType.KeyUp)]
+public record struct KeyReleased;
+                     ^^^^^^^^^^^
+*/
+ Source1.cs: (6,21)-(6,32),
+    Message: 'KeyReleased' is marked [KhaosEvent]; declare it as a public, non-generic, top-level readonly record struct,
+    Severity: Error,
+    Descriptor: {
+      Id: KHI013,
+      Title: event case is not a public readonly record struct,
+      Description: Every case is copied into Event and handed to OnEvent by in, so it has to be an immutable value the game can read and match: a public, non-generic, top-level readonly record struct.,
+      HelpLink: https://github.com/kappaduck/khaos/blob/main/docs/rules/khi013.md,
+      MessageFormat: '{0}' is marked [KhaosEvent]; declare it as a public, non-generic, top-level readonly record struct,
+      Category: Events,
+      DefaultSeverity: Error,
+      IsEnabledByDefault: true
+    }
+  },
+  {
+    Location: /*
+[KhaosEvent(SDL_EventType.KeyUp)]
+public readonly record struct Typed(List<int> Codes)
+                              ^^^^^
+{
+*/
+ Source2.cs: (6,30)-(6,35),
+    Message: 'Typed' holds 'Codes' of type System.Collections.Generic.List<int>; an event case holds only unmanaged values and strings,
+    Severity: Error,
+    Descriptor: {
+      Id: KHI014,
+      Title: event case holds a reference other than a string,
+      Description: Event overlaps its unmanaged cases in the same bytes, and the runtime refuses a reference that overlaps anything else. A string gets a field of its own; any other reference would also make a case that a game can keep alive by mistake.,
+      HelpLink: https://github.com/kappaduck/khaos/blob/main/docs/rules/khi014.md,
+      MessageFormat: '{0}' holds '{1}' of type {2}; an event case holds only unmanaged values and strings,
+      Category: Events,
+      DefaultSeverity: Error,
+      IsEnabledByDefault: true
+    }
+  },
+  {
+    Location: /*
+[KhaosEvent(SDL_EventType.KeyUp)]
+public readonly record struct Pressed(int Code);
+                              ^^^^^^^
+*/
+ Source3.cs: (6,30)-(6,37),
+    Message: 'Pressed' has a payload but no internal constructor that takes its native event,
+    Severity: Error,
+    Descriptor: {
+      Id: KHI015,
+      Title: event case has no valid native constructor,
+      Description: The generated converter builds a case from the native event SDL hands to the game. It finds the field of SDL_Event to read by the type of the constructor's first parameter, and passes the EventContext when the constructor asks for it. A case without that constructor cannot be built, so the generator leaves it out of Event.,
+      HelpLink: https://github.com/kappaduck/khaos/blob/main/docs/rules/khi015.md,
+      MessageFormat: '{0}' {1},
+      Category: Events,
+      DefaultSeverity: Error,
+      IsEnabledByDefault: true
+    }
+  }
+]
