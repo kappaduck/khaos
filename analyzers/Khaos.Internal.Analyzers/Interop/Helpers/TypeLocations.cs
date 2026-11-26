@@ -30,6 +30,20 @@ internal static class TypeLocations
         return location ?? property.Locations[0];
     }
 
+    internal static Location Of(IEventSymbol @event, CancellationToken cancellationToken)
+    {
+        SyntaxNode? declaration = @event.DeclaringSyntaxReferences is [SyntaxReference reference, ..] ? reference.GetSyntax(cancellationToken) : null;
+
+        Location? location = declaration switch
+        {
+            EventDeclarationSyntax accessors => accessors.Type.GetLocation(),
+            VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax field } => field.Type.GetLocation(),
+            _ => null
+        };
+
+        return location ?? @event.Locations[0];
+    }
+
     internal static Location Of(IFieldSymbol field, CancellationToken cancellationToken)
     {
         if (field.DeclaringSyntaxReferences is [SyntaxReference reference, ..] && reference.GetSyntax(cancellationToken).Parent is VariableDeclarationSyntax declaration)
@@ -48,6 +62,7 @@ internal static class TypeLocations
             OperatorDeclarationSyntax @operator => @operator.ReturnType.GetLocation(),
             ConversionOperatorDeclarationSyntax conversion => conversion.Type.GetLocation(),
             DelegateDeclarationSyntax @delegate => @delegate.ReturnType.GetLocation(),
+            LocalFunctionStatementSyntax local => local.ReturnType.GetLocation(),
             _ => null
         };
 
