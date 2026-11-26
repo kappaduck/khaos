@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup Label="Assembly">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+    <UseKhaosAnalyzers>true</UseKhaosAnalyzers>
+    <UseKhaosNativeSearchPaths>true</UseKhaosNativeSearchPaths>
+  </PropertyGroup>
+
+  <ItemGroup Label="Global usings">
+    <Using Include="System.Diagnostics.CodeAnalysis" />
+    <Using Include="System.Runtime.CompilerServices" />
+    <Using Include="System.Runtime.InteropServices" />
+    <Using Include="System.Runtime.InteropServices.Marshalling" />
+  </ItemGroup>
+
+  <PropertyGroup Label="Package">
+    <Title>Khaos</Title>
+    <Description>A .NET game framework in plain C#, on SDL3, for Windows, Linux and the browser. Make chaos. Khaos keeps the order.</Description>
+    <PackageTags>$(PackageTags);desktop;windows;linux;browser;wasm</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KappaDuck.Khaos.Native" />
+  </ItemGroup>
+
+  <ItemGroup Label="Branding">
+    <EmbeddedResource Include="Branding/*.png" LogicalName="KappaDuck.Khaos.Branding.%(Filename)%(Extension)" WithCulture="false" />
+  </ItemGroup>
+
+  <Target Name="PackAnalyzers" DependsOnTargets="ResolveReferences" BeforeTargets="_GetPackageFiles">
+    <ItemGroup>
+      <None Include="@(Analyzer)" Condition="'%(Filename)' == 'KappaDuck.Khaos.Analyzers'" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
+  </Target>
+</Project>
