@@ -133,6 +133,28 @@ internal sealed class EventUnionGeneratorTests
     }
 
     [Test]
+    [Arguments("SDL_EventType.KeyUp", "case global::KappaDuck.Khaos.Interop.SDL.Primitives.SDL_EventType.KeyUp:")]
+    [Arguments("(SDL_EventType)0xABCD", "case (global::KappaDuck.Khaos.Interop.SDL.Primitives.SDL_EventType)0xABCD:")]
+    [Arguments("SDL_EventType.Pressed", "case (global::KappaDuck.Khaos.Interop.SDL.Primitives.SDL_EventType)0x9000:")]
+    public async Task RunShouldLabelANativeTypeByItsOnlyNameOrElseByItsValue(string nativeType, string expected)
+    {
+        string framework = EventSources.Framework.Replace("Last = 0xFFFF", "Last = 0xFFFF, Pressed = 0x9000, Down = 0x9000", StringComparison.Ordinal);
+        string odd = $$"""
+            using KappaDuck.Khaos.Interop.SDL.Primitives;
+
+            namespace KappaDuck.Khaos.Events;
+
+            [KhaosEvent({{nativeType}})]
+            public readonly record struct Odd;
+            """;
+
+        GeneratorResult result = GeneratorRunner<EventUnionGenerator>.Run(framework, EventSources.Event, odd);
+
+        await result.CompilationErrors.Should().BeEmpty();
+        await result.Source(Converter).Should().Contain(expected);
+    }
+
+    [Test]
     public async Task RunShouldMatchARangeWithARelationalPattern()
     {
         const string expected = "case >= global::KappaDuck.Khaos.Interop.SDL.Primitives.SDL_EventType.User and <= global::KappaDuck.Khaos.Interop.SDL.Primitives.SDL_EventType.Last:";
@@ -188,11 +210,12 @@ internal sealed class EventUnionGeneratorTests
             namespace KappaDuck.Khaos.Events;
 
             [KhaosEvent(SDL_EventType.KeyUp)]
-            public sealed class KeyReleased;
+            public record struct KeyReleased;
             """;
 
         GeneratorResult result = GeneratorRunner<EventUnionGenerator>.Run(EventSources.Framework, EventSources.Event, EventSources.Cases, invalid);
 
+        await result.CompilationErrors.Should().BeEmpty();
         await result.Ids.Should().BeEmpty();
         await result.Source(Union).Should().NotContain("KeyReleased");
     }

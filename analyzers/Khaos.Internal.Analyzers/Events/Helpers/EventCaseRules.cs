@@ -17,7 +17,7 @@ internal static class EventCaseRules
 
     internal static EventCase? Check(INamedTypeSymbol type, AttributeData attribute, Compilation compilation, List<Diagnostic> problems, CancellationToken cancellationToken)
     {
-        Location location = type.Locations[0];
+        Location location = GetLocation(type, attribute, cancellationToken);
 
         if (!IsPublicReadOnlyRecordStruct(type))
         {
@@ -46,6 +46,9 @@ internal static class EventCaseRules
 
     internal static Diagnostic Duplicate(EventCase dropped, EventCase kept, Location location)
         => Diagnostic.Create(Descriptors.EventCaseDuplicate, location, dropped.Union.MemberName, kept.Union.MemberName);
+
+    internal static Location GetLocation(INamedTypeSymbol type, AttributeData attribute, CancellationToken cancellationToken)
+        => attribute.ApplicationSyntaxReference?.GetSyntax(cancellationToken).FirstAncestorOrSelf<TypeDeclarationSyntax>()?.Identifier.GetLocation() ?? type.Locations[0];
 
     internal static EventCase? Read(ISymbol symbol, AttributeData attribute, Compilation compilation, CancellationToken cancellationToken)
         => Check((INamedTypeSymbol)symbol, attribute, compilation, [], cancellationToken);
@@ -83,7 +86,7 @@ internal static class EventCaseRules
         IFieldSymbol[] fields = FieldsOfType(compilation, payload);
 
         if (fields.Length != 1)
-            return RejectConstructor(type, location, problems, $"takes {payload.Name}, which is not the type of exactly one SDL_Event field");
+            return RejectConstructor(type, location, problems, $"takes {payload.ToDisplayString()}, which is not the type of exactly one SDL_Event field");
 
         nativeField = fields[0].Name;
         return true;
@@ -92,7 +95,7 @@ internal static class EventCaseRules
             => constructor.DeclaringSyntaxReferences.Any(reference => reference.GetSyntax(cancellationToken) is TypeDeclarationSyntax);
 
         static bool HasInstanceFields(INamedTypeSymbol type)
-            => type.GetMembers().OfType<IFieldSymbol>().Any(static field => !field.IsStatic && !field.IsConst);
+            => type.GetMembers().OfType<IFieldSymbol>().Any(static field => !field.IsStatic);
     }
 
     private static bool CheckFields(INamedTypeSymbol type, Location location, List<Diagnostic> problems)

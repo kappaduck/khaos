@@ -55,7 +55,7 @@ public sealed class EventCaseAnalyzer : DiagnosticAnalyzer
             context.ReportDiagnostic(problem);
 
         if (@case is not null)
-            cases.Add((@case, type.Locations[0]));
+            cases.Add((@case, EventCaseRules.GetLocation(type, marker, context.CancellationToken)));
     }
 
     private static void ReportConflicts(CompilationAnalysisContext context, ConcurrentBag<(EventCase Case, Location Location)> cases)

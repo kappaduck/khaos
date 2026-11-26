@@ -14,7 +14,7 @@ internal static class UnionCaseRules
 
         foreach (IFieldSymbol field in type.GetMembers().OfType<IFieldSymbol>())
         {
-            if (field.IsStatic || field.IsConst)
+            if (field.IsStatic)
                 continue;
 
             if (field.Type.SpecialType != SpecialType.System_String && !field.Type.IsUnmanagedType)
