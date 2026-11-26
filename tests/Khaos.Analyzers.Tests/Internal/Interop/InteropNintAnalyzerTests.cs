@@ -444,12 +444,12 @@ internal sealed class InteropNintAnalyzerTests
     }
 
     [Test]
-    public async Task PositionalRecordWithNintShouldReportKHI002ForTheParameterAndTheProperty()
+    public async Task PositionalRecordWithNintShouldReportKHI002ForTheParameterAndThePropertyAtTheType()
     {
         Markup source = Markup.Parse("""
             namespace KappaDuck.Khaos.Interop.SDL.Primitives;
 
-            internal readonly record struct SDL_Rect({|KHI002:nint|} {|KHI002:Handle|}, int Count);
+            internal readonly record struct SDL_Rect({|KHI002:{|KHI002:nint|}|} Handle, int Count);
             """);
 
         AnalyzerResult result = await AnalyzerRunner<InteropNintAnalyzer>.RunAsync(source);

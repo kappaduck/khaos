@@ -18,10 +18,30 @@ internal static class TypeLocations
 
     internal static Location Of(IPropertySymbol property, CancellationToken cancellationToken)
     {
-        if (property.DeclaringSyntaxReferences is [SyntaxReference reference, ..] && reference.GetSyntax(cancellationToken) is BasePropertyDeclarationSyntax declaration)
-            return declaration.Type.GetLocation();
+        SyntaxNode? declaration = property.DeclaringSyntaxReferences is [SyntaxReference reference, ..] ? reference.GetSyntax(cancellationToken) : null;
 
-        return property.Locations[0];
+        Location? location = declaration switch
+        {
+            BasePropertyDeclarationSyntax ordinary => ordinary.Type.GetLocation(),
+            ParameterSyntax { Type: { } positional } => positional.GetLocation(),
+            _ => null
+        };
+
+        return location ?? property.Locations[0];
+    }
+
+    internal static Location Of(IEventSymbol @event, CancellationToken cancellationToken)
+    {
+        SyntaxNode? declaration = @event.DeclaringSyntaxReferences is [SyntaxReference reference, ..] ? reference.GetSyntax(cancellationToken) : null;
+
+        Location? location = declaration switch
+        {
+            EventDeclarationSyntax accessors => accessors.Type.GetLocation(),
+            VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax field } => field.Type.GetLocation(),
+            _ => null
+        };
+
+        return location ?? @event.Locations[0];
     }
 
     internal static Location Of(IFieldSymbol field, CancellationToken cancellationToken)
@@ -42,6 +62,7 @@ internal static class TypeLocations
             OperatorDeclarationSyntax @operator => @operator.ReturnType.GetLocation(),
             ConversionOperatorDeclarationSyntax conversion => conversion.Type.GetLocation(),
             DelegateDeclarationSyntax @delegate => @delegate.ReturnType.GetLocation(),
+            LocalFunctionStatementSyntax local => local.ReturnType.GetLocation(),
             _ => null
         };
 
