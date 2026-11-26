@@ -12,6 +12,8 @@ internal sealed record AnalyzerResult(ImmutableArray<Diagnostic> Diagnostics, Im
 
     internal string Ids => DiagnosticText.Ids(Diagnostics);
 
+    internal string Located => DiagnosticText.Located(Diagnostics);
+
     internal string Reported => DiagnosticText.Join(Diagnostics);
 
     private static bool IsUnexpectedError(Diagnostic diagnostic)
