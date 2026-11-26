@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Build">
-    <PackageVersion Include="PolySharp" Version="1.17.0" />
+    <PackageVersion Include="PolySharp" Version="1.17.1" />
   </ItemGroup>
 
   <ItemGroup Label="Benchmarks">
