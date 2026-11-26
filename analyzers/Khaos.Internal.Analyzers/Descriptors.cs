@@ -12,9 +12,10 @@ internal static class Descriptors
 
     private const string InteropBoolDescription = "A native bool is 1 byte in SDL and a 4-byte BOOL in Win32, and nothing fails when the wrong width is marshalled: the value is simply wrong, sometimes. The area of the binding decides the width, written as UnmanagedType.U1 or UnmanagedType.Bool.";
     private const string InteropBoolStorageDescription = "A bool makes its struct non-blittable: passed by value, the struct needs runtime marshalling disabled, and read through a pointer, its managed layout no longer matches a 4-byte Win32 BOOL. Store a native boolean as byte in SDL and int in Win32, and convert to bool in the public wrapper.";
-    private const string InteropNintDescription = "An nint compiles wherever any other handle or integer is expected, so passing the wrong one builds and fails later as a native crash. A typed pointer (SDL_Window*, or void* for untyped memory) or a struct that wraps a pointer-sized integer (LPARAM) turns the same mistake into a build error.";
     private const string InteropEntryPointDescription = "The managed name drops the library prefix, so nothing else in the declaration says which native symbol it binds. EntryPoint is that link, and it is written even when it matches the managed name: a rename would otherwise compile and break the binding.";
     private const string InteropLibraryDescription = "The other interop rules take their conventions from the area, so a binding in the wrong area is checked against the wrong ones. A library no area declares has not been decided on; add it to its area in InteropAreas first. Each SDL library prefixes its functions (SDL_, IMG_, TTF_, MIX_), and an entry point with another prefix builds but fails at its first call.";
+    private const string InteropNintDescription = "An nint compiles wherever any other handle or integer is expected, so passing the wrong one builds and fails later as a native crash. A typed pointer (SDL_Window*, or void* for untyped memory) or a struct that wraps a pointer-sized integer (LPARAM) turns the same mistake into a build error.";
+    private const string InteropNonCopyableDescription = "A [NonCopyable] value owns native memory and frees it when disposed. A second copy frees it a second time, a value no using owns is never freed, and a value disposed by hand is freed again by its using. Its using is the one owner: read it through its members, pass it by in, or return it to a caller who gives it its own using.";
     private const string InteropPublicPointerDescription = "A game should never hold a pointer or a native handle that Khaos owns: the lifetime is not theirs, and nothing stops them from using it after the object behind it is gone. Keep it in a private field and expose what the caller needs; a native handle that must be handed out goes through a type that represents it, such as WindowHandle.";
     private const string InteropSDLCharDescription = "A C char is 1 byte and SDL strings are UTF-8, while a C# char is a 2-byte UTF-16 code unit. A char field shifts every field after it, and a char* reads two bytes per character. Store SDL text as byte and decode it as UTF-8.";
     private const string InteropVoidPointerDescription = "void* is right when the native side is genuinely untyped, and wrong when the real type was simply not looked up; the two look identical in the source. [UntypedBecause] carries the sentence that tells them apart, on the method where the decision was made.";
@@ -268,4 +269,34 @@ internal static class Descriptors
         true,
         InteropSDLCharDescription,
         $"{Documentation}khi011.md");
+
+    internal static readonly DiagnosticDescriptor InteropNonCopyableOutsideUsing = new(
+        "KHI012",
+        "non-copyable value used outside its using",
+        "This '{0}' has no using to own it; declare it with using, or return it to the caller",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropNonCopyableDescription,
+        $"{Documentation}khi012.md");
+
+    internal static readonly DiagnosticDescriptor InteropNonCopyableCopied = new(
+        "KHI012",
+        "non-copyable value used outside its using",
+        "'{0}' is copied; read it through its members, or pass it by in",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropNonCopyableDescription,
+        $"{Documentation}khi012.md");
+
+    internal static readonly DiagnosticDescriptor InteropNonCopyableDisposedByHand = new(
+        "KHI012",
+        "non-copyable value used outside its using",
+        "'{0}' is disposed by hand; its using already disposes it",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropNonCopyableDescription,
+        $"{Documentation}khi012.md");
 }
