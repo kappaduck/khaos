@@ -11,3 +11,4 @@ KHI006 | Interop | Error | native library does not match its interop area, [docu
 KHI007 | Interop | Error | bool in an interop struct, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi007.md)
 KHI008 | Interop | Error | raw pointer on the public surface, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi008.md)
 KHI009 | Interop | Error | native import outside an interop area, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi009.md)
+KHI010 | Interop | Error | bool or char in a native callback, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi010.md)

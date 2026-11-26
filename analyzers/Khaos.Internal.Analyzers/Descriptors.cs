@@ -207,4 +207,14 @@ internal static class Descriptors
         true,
         "Every rule on native bindings takes its conventions from the area a binding lives in. A [LibraryImport] outside Interop/SDL and Interop/Win32 has no area, so none of them checks it.",
         $"{Documentation}khi009.md");
+
+    internal static readonly DiagnosticDescriptor InteropCallbackNotBlittable = new(
+        "KHI010",
+        "bool or char in a native callback",
+        "'{0}' has {1} in a native callback signature; it is not blittable and Native AOT stops the process on it, use {2}",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        "A native callback is called without marshalling, so its signature must be blittable. bool and char compile, but Native AOT fails fast when native code calls such a method, and their native width depends on the side that calls.",
+        $"{Documentation}khi010.md");
 }
