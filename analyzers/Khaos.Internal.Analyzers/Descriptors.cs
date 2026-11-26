@@ -11,6 +11,7 @@ internal static class Descriptors
     private const string Interop = "Interop";
 
     private const string InteropBoolDescription = "A native bool is 1 byte in SDL and a 4-byte BOOL in Win32, and nothing fails when the wrong width is marshalled: the value is simply wrong, sometimes. The area of the binding decides the width, written as UnmanagedType.U1 or UnmanagedType.Bool.";
+    private const string InteropBoolStorageDescription = "A bool makes its struct non-blittable: passed by value, the struct needs runtime marshalling disabled, and read through a pointer, its managed layout no longer matches a 4-byte Win32 BOOL. Store a native boolean as byte in SDL and int in Win32, and convert to bool in the public wrapper.";
     private const string InteropNintDescription = "An nint compiles wherever any other handle or integer is expected, so passing the wrong one builds and fails later as a native crash. A typed pointer (SDL_Window*, or void* for untyped memory) or a struct that wraps a pointer-sized integer (LPARAM) turns the same mistake into a build error.";
     private const string InteropEntryPointDescription = "The managed name drops the library prefix, so nothing else in the declaration says which native symbol it binds. EntryPoint is that link, and it is written even when it matches the managed name: a rename would otherwise compile and break the binding.";
     private const string InteropLibraryDescription = "The other interop rules take their conventions from the area, so a binding in the wrong area is checked against the wrong ones. A library no area declares has not been decided on; add it to its area in InteropAreas first. Each SDL library prefixes its functions (SDL_, IMG_, TTF_, MIX_), and an entry point with another prefix builds but fails at its first call.";
@@ -155,4 +156,24 @@ internal static class Descriptors
         true,
         InteropLibraryDescription,
         $"{Documentation}khi006.md");
+
+    internal static readonly DiagnosticDescriptor InteropBoolField = new(
+        "KHI007",
+        "bool in an interop struct",
+        "Field '{0}.{1}' is declared as bool; in {2} a native boolean is stored as {3}",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropBoolStorageDescription,
+        $"{Documentation}khi007.md");
+
+    internal static readonly DiagnosticDescriptor InteropBoolProperty = new(
+        "KHI007",
+        "bool in an interop struct",
+        "Property '{0}.{1}' is declared as bool; in {2} a native boolean is stored as {3}",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropBoolStorageDescription,
+        $"{Documentation}khi007.md");
 }

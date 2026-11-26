@@ -8,3 +8,4 @@ KHI003 | Interop | Error | LibraryImport without an explicit EntryPoint, [docume
 KHI004 | Interop | Error | void* without a stated reason, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi004.md)
 KHI005 | Interop | Error | type in Interop is not internal, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi005.md)
 KHI006 | Interop | Error | native library does not match its interop area, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi006.md)
+KHI007 | Interop | Error | bool in an interop struct, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi007.md)
