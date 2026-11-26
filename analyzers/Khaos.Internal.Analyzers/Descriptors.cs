@@ -197,4 +197,14 @@ internal static class Descriptors
         true,
         InteropPublicPointerDescription,
         $"{Documentation}khi008.md");
+
+    internal static readonly DiagnosticDescriptor InteropImportOutsideArea = new(
+        "KHI009",
+        "native import outside an interop area",
+        "'{0}' imports a native function outside Interop/SDL and Interop/Win32; move it to the area of its library",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        "Every rule on native bindings takes its conventions from the area a binding lives in. A [LibraryImport] outside Interop/SDL and Interop/Win32 has no area, so none of them checks it.",
+        $"{Documentation}khi009.md");
 }
