@@ -6,3 +6,4 @@ KHI001 | Interop | Error | bool does not follow the marshalling convention of it
 KHI002 | Interop | Error | nint or IntPtr in an interop declaration, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi002.md)
 KHI003 | Interop | Error | LibraryImport without an explicit EntryPoint, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi003.md)
 KHI004 | Interop | Error | void* without a stated reason, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi004.md)
+KHI005 | Interop | Error | type in Interop is not internal, [documentation](https://github.com/kappaduck/khaos/blob/main/docs/rules/khi005.md)

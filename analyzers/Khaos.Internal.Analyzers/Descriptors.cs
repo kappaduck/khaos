@@ -114,4 +114,14 @@ internal static class Descriptors
         true,
         InteropVoidPointerDescription,
         $"{Documentation}khi004.md");
+
+    internal static readonly DiagnosticDescriptor InteropVisibility = new(
+          "KHI005",
+          "type in Interop is not internal",
+          "'{0}' is visible outside the assembly; every type in Interop is internal",
+          Interop,
+          DiagnosticSeverity.Error,
+          true,
+          "Once every interop type is internal, the compiler refuses any public signature that mentions one, so the boundary holds without walking signatures. A type that has to be seen from outside does not belong in Interop.",
+          $"{Documentation}khi005.md");
 }

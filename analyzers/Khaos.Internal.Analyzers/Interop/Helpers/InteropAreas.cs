@@ -16,6 +16,21 @@ internal static class InteropAreas
         _ => throw new ArgumentOutOfRangeException(nameof(area), area, null)
     };
 
+    internal static bool IsInInterop(ISymbol symbol)
+    {
+        INamespaceSymbol current = symbol.ContainingNamespace;
+
+        while (current is { IsGlobalNamespace: false })
+        {
+            if (IsInteropRoot(current))
+                return true;
+
+            current = current.ContainingNamespace;
+        }
+
+        return false;
+    }
+
     internal static bool TryResolve(ISymbol symbol, [NotNullWhen(true)] out InteropArea area)
     {
         string? @namespace = null;
