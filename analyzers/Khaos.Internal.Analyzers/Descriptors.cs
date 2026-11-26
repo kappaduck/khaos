@@ -13,6 +13,7 @@ internal static class Descriptors
     private const string InteropBoolDescription = "A native bool is 1 byte in SDL and a 4-byte BOOL in Win32, and nothing fails when the wrong width is marshalled: the value is simply wrong, sometimes. The area of the binding decides the width, written as UnmanagedType.U1 or UnmanagedType.Bool.";
     private const string InteropNintDescription = "An nint compiles wherever any other handle or integer is expected, so passing the wrong one builds and fails later as a native crash. A typed pointer (SDL_Window*, or void* for untyped memory) or a struct that wraps a pointer-sized integer (LPARAM) turns the same mistake into a build error.";
     private const string InteropEntryPointDescription = "The managed name drops the library prefix, so nothing else in the declaration says which native symbol it binds. EntryPoint is that link, and it is written even when it matches the managed name: a rename would otherwise compile and break the binding.";
+    private const string InteropLibraryDescription = "The other interop rules take their conventions from the area, so a binding in the wrong area is checked against the wrong ones. A library no area declares has not been decided on; add it to its area in InteropAreas first. Each SDL library prefixes its functions (SDL_, IMG_, TTF_, MIX_), and an entry point with another prefix builds but fails at its first call.";
     private const string InteropVoidPointerDescription = "void* is right when the native side is genuinely untyped, and wrong when the real type was simply not looked up; the two look identical in the source. [UntypedBecause] carries the sentence that tells them apart, on the method where the decision was made.";
 
     internal static readonly DiagnosticDescriptor InteropBoolReturn = new(
@@ -124,4 +125,34 @@ internal static class Descriptors
           true,
           "Once every interop type is internal, the compiler refuses any public signature that mentions one, so the boundary holds without walking signatures. A type that has to be seen from outside does not belong in Interop.",
           $"{Documentation}khi005.md");
+
+    internal static readonly DiagnosticDescriptor InteropLibraryWrongArea = new(
+         "KHI006",
+         "native library does not match its interop area",
+         "'{0}' does not belong to {1}; it belongs to {2}",
+         Interop,
+         DiagnosticSeverity.Error,
+         true,
+         InteropLibraryDescription,
+         $"{Documentation}khi006.md");
+
+    internal static readonly DiagnosticDescriptor InteropLibraryUnknown = new(
+        "KHI006",
+        "native library does not match its interop area",
+        "'{0}' does not belong to {1}; no interop area declares it",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropLibraryDescription,
+        $"{Documentation}khi006.md");
+
+    internal static readonly DiagnosticDescriptor InteropLibraryWrongEntryPoint = new(
+        "KHI006",
+        "native library does not match its interop area",
+        "'{0}' is not a function of '{1}', whose functions start with {2}",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropLibraryDescription,
+        $"{Documentation}khi006.md");
 }
