@@ -72,7 +72,7 @@ public sealed class InteropBoolMarshallingAnalyzer : DiagnosticAnalyzer
     private static bool IsMarshalledAs(ImmutableArray<AttributeData> attributes, INamedTypeSymbol marshalAs, UnmanagedType expected)
     {
         AttributeData? marshalling = attributes.FirstOrDefault(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, marshalAs));
-        return marshalling is { ConstructorArguments: [{ Value: var value }] } && HasSameUnmanagedType(value, expected);
+        return marshalling is { ConstructorArguments: [{ Value: object value }] } && HasSameUnmanagedType(value, expected);
 
         static bool HasSameUnmanagedType(object? value, UnmanagedType expected)
         {

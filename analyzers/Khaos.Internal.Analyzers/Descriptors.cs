@@ -11,6 +11,7 @@ internal static class Descriptors
     private const string Interop = "Interop";
 
     private const string InteropBoolDescription = "A native bool is 1 byte in SDL and a 4-byte BOOL in Win32, and nothing fails when the wrong width is marshalled: the value is simply wrong, sometimes. The area of the binding decides the width, written as UnmanagedType.U1 or UnmanagedType.Bool.";
+    private const string InteropNintDescription = "An nint compiles wherever any other handle or integer is expected, so passing the wrong one builds and fails later as a native crash. A typed pointer (SDL_Window*, or void* for untyped memory) or a struct that wraps a pointer-sized integer (LPARAM) turns the same mistake into a build error.";
 
     internal static readonly DiagnosticDescriptor InteropBoolReturn = new(
         "KHI001",
@@ -31,4 +32,44 @@ internal static class Descriptors
         true,
         InteropBoolDescription,
         $"{Documentation}khi001.md");
+
+    internal static readonly DiagnosticDescriptor InteropNintReturn = new(
+        "KHI002",
+        "nint or IntPtr in an interop declaration",
+        "The return value of '{0}' uses nint; type it as the native pointer it carries, or wrap a pointer-sized integer in its own struct",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropNintDescription,
+        $"{Documentation}khi002.md");
+
+    internal static readonly DiagnosticDescriptor InteropNintParameter = new(
+        "KHI002",
+        "nint or IntPtr in an interop declaration",
+        "Parameter '{0}' of '{1}' uses nint; type it as the native pointer it carries, or wrap a pointer-sized integer in its own struct",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropNintDescription,
+        $"{Documentation}khi002.md");
+
+    internal static readonly DiagnosticDescriptor InteropNintField = new(
+        "KHI002",
+        "nint or IntPtr in an interop declaration",
+        "Field '{0}.{1}' uses nint; type it as the native pointer it carries, or wrap a pointer-sized integer in its own struct",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropNintDescription,
+        $"{Documentation}khi002.md");
+
+    internal static readonly DiagnosticDescriptor InteropNintProperty = new(
+        "KHI002",
+        "nint or IntPtr in an interop declaration",
+        "Property '{0}.{1}' uses nint; type it as the native pointer it carries, or wrap a pointer-sized integer in its own struct",
+        Interop,
+        DiagnosticSeverity.Error,
+        true,
+        InteropNintDescription,
+        $"{Documentation}khi002.md");
 }
