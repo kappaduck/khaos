@@ -24,10 +24,10 @@ internal static class UnionEmitter
         EmitTryGetValues(builder, cases);
     }
 
-    internal static void EmitStorage(CodeSourceBuilder builder, ReadOnlySpan<UnionCase> cases, bool safeField)
+    internal static void EmitStorage(CodeSourceBuilder builder, ReadOnlySpan<UnionCase> cases, bool memorySafety)
     {
         if (HasUnmanaged(cases))
-            EmitCases(builder, cases, safeField);
+            EmitCases(builder, cases, memorySafety);
     }
 
     internal static void EmitToString(CodeSourceBuilder builder, string unionName, ReadOnlySpan<UnionCase> cases)
@@ -47,9 +47,9 @@ internal static class UnionEmitter
         }
     }
 
-    private static void EmitCases(CodeSourceBuilder builder, ReadOnlySpan<UnionCase> cases, bool safeField)
+    private static void EmitCases(CodeSourceBuilder builder, ReadOnlySpan<UnionCase> cases, bool memorySafety)
     {
-        string modifier = safeField ? "safe " : string.Empty;
+        string modifier = memorySafety ? "safe " : string.Empty;
 
         builder.AppendLine()
                .AppendLine("[global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Explicit)]");
